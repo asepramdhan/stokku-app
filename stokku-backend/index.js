@@ -1,15 +1,28 @@
 require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const productRoutes = require("./routes/productRoutes");
-// const shoppingRoutes = require("./routes/shoppingRoutes"); // nanti tambah lagi
+const express = require("express"),
+	cors = require("cors"),
+	app = express(),
+	// Routes
+	dashboardRoutes = require("./routes/dashboardRoutes"),
+	shoppingRoutes = require("./routes/shoppingRoutes"),
+	productRoutes = require("./routes/productRoutes"),
+	storeRoutes = require("./routes/storeRoutes"),
+	salesRoutes = require("./routes/salesRoutes"),
+	marginRoutes = require("./routes/marginRoutes"),
+	// Port Server
+	PORT = process.env.PORT || 5001;
 
-const app = express();
+// Middleware Global
 app.use(cors());
 app.use(express.json());
 
 // Pakai Routes
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/shopping", shoppingRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/stores", storeRoutes);
+app.use("/api/sales", salesRoutes);
+app.use("/api/margin", marginRoutes);
 
-const PORT = process.env.PORT || 5001;
+// Listen Server
 app.listen(PORT, () => console.log(`🚀 Server on port ${PORT}`));
