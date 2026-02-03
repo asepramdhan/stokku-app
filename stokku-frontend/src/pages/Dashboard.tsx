@@ -7,6 +7,7 @@ import { TrendingUp, ShoppingBag, Landmark, Package, ArrowUpRight, ShoppingCart,
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const API_DASHBOARD = `${import.meta.env.VITE_API_URL}/dashboard/stats`,
   COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
@@ -22,6 +23,37 @@ export default function Dashboard() {
       .then(res => res.json())
       .then(data => { setStats(data); setIsLoading(false); });
   }, [range]); // Refresh data setiap filter berubah
+
+  const handleQuickAdd = async (productId: number, productName: string) => {
+    try {
+      // 1. Ambil harga terakhir dari API baru kita
+      const resPrice = await fetch(`${import.meta.env.VITE_API_URL}/shopping/last-price/${productId}`),
+        priceData = await resPrice.json(),
+        recommendedPrice = priceData.last_price;
+
+      toast.promise(
+        fetch(`${import.meta.env.VITE_API_URL}/shopping`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ product_id: productId, qty: 1, buy_price: recommendedPrice }),
+        }).then(async (res) => {
+          if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || "Gagal menambah");
+          }
+          return res.json();
+        }),
+        {
+          loading: `Menyiapkan rencana belanja ${productName}...`,
+          success: `${productName} masuk ke belanja (Harga: Rp ${recommendedPrice.toLocaleString()})`,
+          error: (err) => err.message,
+        }
+      );
+    }
+    catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -252,7 +284,11 @@ export default function Dashboard() {
                   const isCritical = item.quantity <= 2;
 
                   return (
-                    <div key={i} className="group cursor-default">
+                    <div
+                      key={i}
+                      onClick={() => handleQuickAdd(item.id, item.name)}
+                      className="group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-blue-50 transition-all active:scale-95"
+                    >
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex flex-col gap-0.5">
                           <span className="text-xs font-bold text-slate-700 group-hover:text-blue-600 transition-colors truncate w-32">

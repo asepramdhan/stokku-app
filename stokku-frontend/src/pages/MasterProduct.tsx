@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import {
@@ -11,12 +12,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { AlertTriangle, Box, Edit2, Filter, Layers, Package, Plus, Search, Trash2, X } from "lucide-react";
+import { AlertTriangle, ArrowDownLeft, ArrowUpRight, Box, Edit2, Filter, History, Layers, Package, Plus, Search, Trash2, X } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Card, CardContent } from "@/components/ui/card";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/products`;
 
@@ -31,13 +33,13 @@ type Product = {
 };
 
 export default function MasterProduct() {
-  // Fungsi Search
-  useEffect(() => { fetchProducts(); }, []);
-
   // Initial State
   const [products, setProducts] = useState<Product[]>([]),
     [search, setSearch] = useState(""),
     [filterCategory, setFilterCategory] = useState("All"),
+    [page, setPage] = useState(1), // State Halaman
+    [pagination, setPagination] = useState<any>({ totalPages: 1, totalData: 0 }),
+    [globalStats, setGlobalStats] = useState<any>({ totalItems: 0, totalStock: 0, lowStock: 0 }),
     [isAddOpen, setIsAddOpen] = useState(false),
     [newProduct, setNewProduct] = useState({ sku: "", name: "", category: "", quantity: 0, price: 0, avg_cost: 0 }),
     [isEditOpen, setIsEditOpen] = useState(false),
@@ -45,17 +47,20 @@ export default function MasterProduct() {
     [isLoading, setIsLoading] = useState(true),
     [errors, setErrors] = useState<{ [key: string]: string }>({}),
     [isDeleteOpen, setIsDeleteOpen] = useState(false),
+    [history, setHistory] = useState<any[]>([]),
+    [isHistoryOpen, setIsHistoryOpen] = useState(false),
+    [historyLoading, setHistoryLoading] = useState(false),
 
     // Timer
-    timer = 1000,
+    timer = 1000;
 
-    // --- LOGIKA STATISTIK ---
-    totalItems = products.length,
-    totalStockPcs = products.reduce((acc, curr) => acc + Number(curr.quantity), 0),
-    lowStockCount = products.filter(p => p.quantity < 10).length,
+  // Re-fetch data saat page, search, atau category berubah
+  useEffect(() => {
+    fetchProducts();
+  }, [page, search, filterCategory]);
 
-    // AMBIL DAFTAR KATEGORI UNIK DARI DATA
-    categories = ["All", ...new Set(products.map(p => p.category || "Umum"))],
+  // AMBIL DAFTAR KATEGORI UNIK DARI DATA
+  const categories = ["All", ...new Set(products.map(p => p.category || "Umum"))],
 
     // Fungsi Filter GANDA (Search + Category)
     filtered = products.filter((p: any) => {
@@ -73,17 +78,35 @@ export default function MasterProduct() {
       </span>
     ),
 
-    // Fungsi Ambil
+    // Fungsi Ambil Data
     fetchProducts = async () => {
-      setIsLoading(true); // Mulai loading
+      setIsLoading(true);
       try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-        setProducts(data);
+        // Kirim parameter ke backend
+        const res = await fetch(`${API_URL}?page=${page}&search=${search}&category=${filterCategory}&limit=10`),
+          result = await res.json();
+
+        setProducts(result.products);
+        setPagination(result.pagination);
+        setGlobalStats(result.stats);
       } catch (error) {
         console.error(error);
       } finally {
-        setIsLoading(false); // Selesai loading
+        setIsLoading(false);
+      }
+    },
+
+    // Fungsi Ambil Riwayat
+    fetchHistory = async (product: any) => {
+      setEditingProduct(product);
+      setIsHistoryOpen(true);
+      setHistoryLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/history/${product.id}`),
+          data = await res.json();
+        setHistory(data);
+      } finally {
+        setHistoryLoading(false);
       }
     },
 
@@ -240,7 +263,7 @@ export default function MasterProduct() {
             <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><Package size={20} /></div>
             <div>
               <p className="text-sm font-medium text-slate-500">Total Jenis Barang</p>
-              <h3 className="text-2xl font-bold">{isLoading ? "..." : totalItems} Item</h3>
+              <h3 className="text-2xl font-bold">{isLoading ? "..." : globalStats.totalItems} Item</h3>
             </div>
           </CardContent>
         </Card>
@@ -250,20 +273,20 @@ export default function MasterProduct() {
             <div className="p-2 bg-green-100 text-green-600 rounded-full"><Layers size={20} /></div>
             <div>
               <p className="text-sm font-medium text-slate-500">Total Stok (Gudang)</p>
-              <h3 className="text-2xl font-bold">{isLoading ? "..." : totalStockPcs.toLocaleString()} Pcs</h3>
+              <h3 className="text-2xl font-bold">{isLoading ? "..." : globalStats.totalStock} Pcs</h3>
             </div>
           </CardContent>
         </Card>
 
-        <Card className={`border-l-4 shadow-sm ${lowStockCount > 0 ? "border-l-red-500" : "border-l-slate-300"}`}>
+        <Card className={`border-l-4 shadow-sm ${globalStats.lowStock > 0 ? "border-l-red-500" : "border-l-slate-300"}`}>
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className={`p-2 rounded-full ${lowStockCount > 0 ? "bg-red-100 text-red-600" : "bg-slate-100 text-slate-400"}`}>
+            <div className={`p-2 rounded-full ${globalStats.lowStock > 0 ? "bg-red-100 text-red-600" : "bg-slate-100 text-slate-400"}`}>
               <AlertTriangle size={20} />
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500">Stok Menipis (&lt; 10)</p>
-              <h3 className={`text-2xl font-bold ${lowStockCount > 0 ? "text-red-600" : "text-slate-600"}`}>
-                {isLoading ? "..." : lowStockCount} Item
+              <h3 className={`text-2xl font-bold ${globalStats.lowStock > 0 ? "text-red-600" : "text-slate-600"}`}>
+                {isLoading ? "..." : globalStats.lowStock} Item
               </h3>
             </div>
           </CardContent>
@@ -277,7 +300,7 @@ export default function MasterProduct() {
             <InputGroupInput
               placeholder="Cari berdasarkan Nama atau SKU..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }} // Reset ke hal 1 saat cari
             />
             <InputGroupAddon>
               <Search />
@@ -302,7 +325,7 @@ export default function MasterProduct() {
           <select
             className="w-full text-sm font-bold bg-transparent outline-none min-w-[140px] cursor-pointer"
             value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
+            onChange={(e) => { setFilterCategory(e.target.value); setPage(1); }}
           >
             {categories.map((cat, i) => (
               <option key={i} value={cat}>{cat}</option>
@@ -317,11 +340,11 @@ export default function MasterProduct() {
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow>
-                <TableHead className="w-[100px]">SKU</TableHead>
-                <TableHead className="truncate w-[300px]">Nama Produk</TableHead>
-                <TableHead className="w-[200px]">Kategori</TableHead>
-                <TableHead className="truncate w-[200px]">Harga Jual</TableHead>
-                <TableHead className="truncate w-[100px] text-right">Stok Gudang</TableHead>
+                <TableHead className="w-[80px]">SKU</TableHead>
+                <TableHead className="truncate w-[250px]">Nama Produk</TableHead>
+                <TableHead className="w-[150px]">Kategori</TableHead>
+                <TableHead className="truncate w-[150px]">Harga Jual</TableHead>
+                <TableHead className="truncate w-[100px]">Stok Gudang</TableHead>
                 <TableHead className="text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
@@ -330,11 +353,11 @@ export default function MasterProduct() {
                 // Tampilkan 5 baris skeleton sebagai placeholder
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-full" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-12" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-[250px]" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
                     <TableCell className="text-right flex justify-end gap-2">
                       <Skeleton className="h-8 w-14" />
                       <Skeleton className="h-8 w-14" />
@@ -344,17 +367,32 @@ export default function MasterProduct() {
               ) : filtered.length > 0 ? (
                 filtered.map((product: any) => (
                   <TableRow key={product.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <TableCell className="font-mono text-xs text-slate-500">{product.sku || '-'}</TableCell>
+                    <TableCell className="font-mono text-xs text-slate-500 truncate">{product.sku || '-'}</TableCell>
                     <TableCell className="font-medium truncate max-w-[200px]">{product.name}</TableCell>
-                    <TableCell>{product.category || 'Umum'}</TableCell>
-                    <TableCell className="font-mono text-slate-500 truncate max-w-[100px]">{product.price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</TableCell>
-                    <TableCell className="text-center">
-                      <span className={`font-bold ${product.quantity < 10 ? 'text-red-500' : 'text-slate-700'}`}>
-                        {product.quantity}
-                      </span>
+                    <TableCell className="font-mono text-xs text-slate-500 truncate">{product.category || 'Umum'}</TableCell>
+                    <TableCell className="font-mono text-slate-500 truncate max-w-[100px]">
+                      Rp {Number(product.price).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="truncate">
+                      <div className="flex flex-col gap-1">
+                        <span className={`font-bold ${product.quantity < 10 ? 'text-red-500' : 'text-slate-700'}`}>
+                          {product.quantity}
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                          Habis dlm ±{product.daysLeft} hari
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                          onClick={() => fetchHistory(product)}
+                        >
+                          <History size={16} />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -405,6 +443,39 @@ export default function MasterProduct() {
               )}
             </TableBody>
           </Table>
+        </div>
+        {/* --- UI PAGINATION (TAMBAHKAN INI) --- */}
+        <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50">
+          <p className="text-xs text-slate-500 font-medium hidden md:block">
+            Menampilkan <span className="text-slate-900">{products.length}</span> dari <span className="text-slate-900">{pagination.totalData}</span> produk
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage(p => p - 1)}
+              className="h-8 px-3 text-xs"
+            >
+              Sebelumnya
+            </Button>
+            <div className="flex items-center gap-2 px-2">
+              <span className="text-xs font-bold text-blue-600 bg-blue-50 h-8 w-8 flex items-center justify-center rounded-lg border border-blue-100">
+                {page}
+              </span>
+              <span className="text-xs text-slate-400">/</span>
+              <span className="text-xs font-medium text-slate-600">{pagination.totalPages}</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === pagination.totalPages}
+              onClick={() => setPage(p => p + 1)}
+              className="h-8 px-3 text-xs"
+            >
+              Selanjutnya
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -548,6 +619,75 @@ export default function MasterProduct() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog History */}
+      <Sheet open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+        <SheetContent className="w-full sm:max-w-md p-0 border-l-0 shadow-2xl">
+          <SheetHeader className="p-6 border-b bg-slate-50/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-600 rounded-lg text-white shadow-lg shadow-blue-100">
+                <History size={20} />
+              </div>
+              <div>
+                <SheetTitle className="text-base font-bold text-slate-800 truncate max-w-[200px]">
+                  Riwayat {editingProduct?.name}
+                </SheetTitle>
+                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">SKU: {editingProduct?.sku}</p>
+              </div>
+            </div>
+          </SheetHeader>
+
+          <div className="p-6 overflow-y-auto h-[calc(100vh-100px)]">
+            {historyLoading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}
+              </div>
+            ) : history.length > 0 ? (
+              <div className="relative space-y-6 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+                {history.map((log, i) => (
+                  <div key={i} className="relative flex items-center justify-between group">
+                    <div className="flex items-center gap-4">
+                      {/* ICON STATUS */}
+                      <div className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-4 border-white shadow-sm transition-transform group-hover:scale-110 ${log.type === 'MASUK' ? 'bg-emerald-500 text-white' : 'bg-blue-600 text-white'
+                        }`}>
+                        {log.type === 'MASUK' ? <ArrowDownLeft size={18} /> : <ArrowUpRight size={18} />}
+                      </div>
+
+                      {/* INFO TEXT */}
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-slate-800">
+                          {log.type === 'MASUK' ? 'Stok Masuk' : 'Terjual'}
+                        </span>
+                        <span className="text-[10px] text-slate-400">{log.note}</span>
+                      </div>
+                    </div>
+
+                    {/* HARGA & QTY */}
+                    <div className="text-right">
+                      <p className={`text-sm font-black ${log.type === 'MASUK' ? 'text-emerald-600' : 'text-blue-600'}`}>
+                        {log.type === 'MASUK' ? '+' : '-'}{log.qty}
+                      </p>
+                      <p className="text-[9px] font-medium text-slate-400">
+                        @ Rp {Number(log.price).toLocaleString()}
+                      </p>
+                    </div>
+
+                    {/* TOOLTIP WAKTU (ABSOLUTE) */}
+                    <div className="absolute -top-4 left-14 text-[9px] font-bold text-slate-300 uppercase tracking-tighter">
+                      {new Date(log.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-64 text-slate-300 opacity-50">
+                <History size={48} className="mb-2" />
+                <p className="text-sm italic">Belum ada riwayat pergerakan stok.</p>
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Alert Dialog */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>

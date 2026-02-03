@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BadgeDollarSign, Box, Plus, Search, Store, ShoppingCart, X, Edit2, Trash2, Filter, Calendar } from "lucide-react";
+import { BadgeDollarSign, Box, Plus, Search, Store, ShoppingCart, X, Edit2, Trash2, Filter, Calendar, Layers } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
@@ -23,32 +23,51 @@ export default function Sales() {
     [stores, setStores] = useState<any[]>([]),
     [search, setSearch] = useState(""),
     [range, setRange] = useState("all"),
+    [page, setPage] = useState(1),
+    [pagination, setPagination] = useState<any>({ totalPages: 1, totalData: 0 }),
+    [globalStats, setGlobalStats] = useState({ totalRevenue: 0, totalQty: 0, transactionCount: 0 }),
     [filterStore, setFilterStore] = useState("All"),
     [isLoading, setIsLoading] = useState(true),
     [errors, setErrors] = useState<{ [key: string]: string }>({}),
     [isAddOpen, setIsAddOpen] = useState(false),
+    [isBulkOpen, setIsBulkOpen] = useState(false),
     [newSale, setNewSale] = useState({ product_id: "", store_id: "", qty: 1, selling_price: 0 }),
     [isEditOpen, setIsEditOpen] = useState(false),
     [editingSale, setEditingSale] = useState<any>(null),
     [isDeleteOpen, setIsDeleteOpen] = useState(false),
+    [bulkStoreId, setBulkStoreId] = useState(""),
+    [bulkItems, setBulkItems] = useState([{ product_id: "", qty: 1, selling_price: 0 }]),
     timer = 1000;
 
-  // Trigger fetch ulang setiap kali filter tanggal (range) berubah
-  useEffect(() => { fetchData(); }, [range]);
+  // Trigger fetch saat halaman, pencarian, atau filter berubah
+  useEffect(() => {
+    fetchData();
+  }, [page, range, search, filterStore]);
 
   // AMBIL DATA
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [resSales, resProd, resStore] = await Promise.all([
-        fetch(`${API_SALES}?range=${range}`), // Kirim range ke backend
-        fetch(API_PRODUCTS),
-        fetch(API_STORES)
-      ]);
-      setSales(await resSales.json());
-      setProducts(await resProd.json());
-      setStores(await resStore.json());
-    } finally { setIsLoading(false); }
+      const url = `${API_SALES}?page=${page}&range=${range}&search=${search}&store=${filterStore}&limit=10`,
+        [resSales, resProd, resStore] = await Promise.all([
+          fetch(url),
+          fetch(`${API_PRODUCTS}?limit=999`),
+          fetch(API_STORES)
+        ]),
+
+        dataSales = await resSales.json(),
+        dataProd = await resProd.json(),
+        dataStore = await resStore.json();
+
+      setSales(dataSales.sales || []);
+      setPagination(dataSales.pagination);
+      setGlobalStats(dataSales.stats);
+
+      setProducts(dataProd.products || (Array.isArray(dataProd) ? dataProd : []));
+      setStores(dataStore.stores || (Array.isArray(dataStore) ? dataStore : []));
+    } finally {
+      setIsLoading(false);
+    }
   },
 
     // FILTER GANDA (Search + Store)
@@ -58,11 +77,6 @@ export default function Sales() {
       const matchesStore = filterStore === "All" || s.store_name === filterStore;
       return matchesSearch && matchesStore;
     }),
-
-    // STATISTIK (Otomatis menyesuaikan hasil filter)
-    totalRevenue = filtered.reduce((acc, curr) => acc + Number(curr.total_price), 0),
-    totalQty = filtered.reduce((acc, curr) => acc + Number(curr.qty), 0),
-    transactionCount = filtered.length,
 
     // Fungsi untuk menampilkan teks error
     FieldError = ({ children }: { children: React.ReactNode }) => (
@@ -97,6 +111,52 @@ export default function Sales() {
           success: () => { fetchData(); return "Transaksi Berhasil & Stok Berkurang!"; },
           error: "Gagal",
         });
+      } catch (error: any) {
+        toast.error(error.message);
+      }
+    },
+
+    // Fungsi Menambah Baris Baru di Form
+    addBulkRow = () => {
+      setBulkItems([...bulkItems, { product_id: "", qty: 1, selling_price: 0 }]);
+    },
+
+    // Fungsi Menghapus Baris
+    removeBulkRow = (index: number) => {
+      setBulkItems(bulkItems.filter((_, i) => i !== index));
+    },
+
+    // Fungsi Update Baris Tertentu
+    updateBulkItem = (index: number, field: string, value: any) => {
+      const newItems: any = [...bulkItems];
+      newItems[index][field] = value;
+
+      // Jika ganti produk, otomatis tarik harga jual defaultnya
+      if (field === "product_id") {
+        const p = products.find(prod => prod.id === Number(value));
+        newItems[index].selling_price = p?.price || 0;
+      }
+
+      setBulkItems(newItems);
+    },
+
+    // Fungsi Simpan Massal
+    handleBulkSave = async () => {
+      if (!bulkStoreId) return toast.error("Pilih Toko dulu!");
+
+      try {
+        const res = await fetch(`${API_SALES}/bulk`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ store_id: bulkStoreId, sales: bulkItems }),
+        });
+
+        if (!res.ok) throw new Error("Gagal proses massal");
+
+        setIsBulkOpen(false);
+        setBulkItems([{ product_id: "", qty: 1, selling_price: 0 }]);
+        toast.success("Semua transaksi berhasil disimpan!");
+        fetchData();
       } catch (error: any) {
         toast.error(error.message);
       }
@@ -142,9 +202,14 @@ export default function Sales() {
           <h1 className="text-2xl font-bold tracking-tight">Transaksi Penjualan</h1>
           <p className="text-slate-500 text-sm font-medium">Catat penjualan online dan offline harian kamu.</p>
         </div>
-        <Button onClick={() => { setIsAddOpen(true); setErrors({}); }} className="gap-2 w-full md:w-auto shadow-md">
-          <Plus size={18} /> Input Penjualan
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => { setIsAddOpen(true); setErrors({}); }} className="gap-2 w-full md:w-auto shadow-md">
+            <Plus size={18} /> Input Penjualan
+          </Button>
+          <Button variant="outline" onClick={() => setIsBulkOpen(true)} className="gap-2 border-dashed border-blue-400 text-blue-600 hover:bg-blue-50">
+            <Layers size={18} /> Input Massal
+          </Button>
+        </div>
       </div>
 
       {/* STATS CARDS */}
@@ -154,7 +219,7 @@ export default function Sales() {
             <div className="p-2 bg-green-100 text-green-600 rounded-full"><BadgeDollarSign size={20} /></div>
             <div>
               <p className="text-sm font-medium text-slate-500">Total Omset</p>
-              <h3 className="text-xl font-bold">Rp {totalRevenue.toLocaleString()}</h3>
+              <h3 className="text-xl font-bold">Rp {Number(globalStats.totalRevenue).toLocaleString()}</h3>
             </div>
           </CardContent>
         </Card>
@@ -163,7 +228,7 @@ export default function Sales() {
             <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><ShoppingCart size={20} /></div>
             <div>
               <p className="text-sm font-medium text-slate-500">Barang Terjual</p>
-              <h3 className="text-xl font-bold">{totalQty} Pcs</h3>
+              <h3 className="text-xl font-bold">{globalStats.totalQty} Pcs</h3>
             </div>
           </CardContent>
         </Card>
@@ -172,7 +237,7 @@ export default function Sales() {
             <div className="p-2 bg-purple-100 text-purple-600 rounded-full"><Store size={20} /></div>
             <div>
               <p className="text-sm font-medium text-slate-500">Total Transaksi</p>
-              <h3 className="text-xl font-bold">{transactionCount} Pesanan</h3>
+              <h3 className="text-xl font-bold">{globalStats.transactionCount} Pesanan</h3>
             </div>
           </CardContent>
         </Card>
@@ -227,35 +292,35 @@ export default function Sales() {
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow>
-                <TableHead className="truncate">Tanggal & Waktu</TableHead>
-                <TableHead>Produk</TableHead>
-                <TableHead>Toko</TableHead>
-                <TableHead>Qty</TableHead>
-                <TableHead className="truncate">Total Harga</TableHead>
-                <TableHead className="text-right">Aksi</TableHead>
+                <TableHead className="truncate w-[150px]">Tanggal & Waktu</TableHead>
+                <TableHead className="w-[250px]">Produk</TableHead>
+                <TableHead className="w-[150px]">Toko</TableHead>
+                <TableHead className="w-[100px]">Qty</TableHead>
+                <TableHead className="truncate w-[150px]">Total Harga</TableHead>
+                <TableHead className="text-right w-[100px]">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-10" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-20 ml-auto" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-[150px]" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-[250px]" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-[150px]" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-[100px]" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-[150px]" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-[100px] ml-auto" /></TableCell>
                   </TableRow>
                 ))
-              ) : filtered.length > 0 ? (
-                filtered.map((sale: any) => (
+              ) : sales.length > 0 ? (
+                sales.map((sale: any) => (
                   <TableRow key={sale.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <TableCell className="text-slate-400 text-xs truncate">{new Date(sale.created_at).toLocaleString()}</TableCell>
-                    <TableCell className="font-medium truncate max-w-[250px]">{sale.product_name}</TableCell>
-                    <TableCell className="truncate"><Badge variant="outline">{sale.store_name}</Badge></TableCell>
-                    <TableCell className="truncate">{sale.qty} Pcs</TableCell>
-                    <TableCell className="font-bold text-green-600 truncate">Rp {Number(sale.total_price).toLocaleString()}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-slate-400 text-xs truncate w-[150px]">{new Date(sale.created_at).toLocaleString()}</TableCell>
+                    <TableCell className="font-medium truncate max-w-[200px]">{sale.product_name}</TableCell>
+                    <TableCell className="truncate w-[150px]"><Badge variant="outline">{sale.store_name}</Badge></TableCell>
+                    <TableCell className="truncate w-[100px]">{sale.qty} Pcs</TableCell>
+                    <TableCell className="font-bold text-green-600 truncate w-[150px]">Rp {Number(sale.total_price).toLocaleString()}</TableCell>
+                    <TableCell className="text-right w-[100px]">
                       <div className="flex justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600" onClick={() => { setEditingSale(sale); setIsEditOpen(true); }}>
                           <Edit2 size={16} />
@@ -279,6 +344,21 @@ export default function Sales() {
               )}
             </TableBody>
           </Table>
+        </div>
+        {/* --- UI PAGINATION (TAMBAHKAN DI BAWAH TABLE) --- */}
+        <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50">
+          <p className="text-xs text-slate-500 font-medium hidden md:block">
+            Menampilkan <span className="text-slate-900">{sales.length}</span> dari <span className="text-slate-900">{pagination.totalData}</span> transaksi
+          </p>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(p => p - 1)} className="h-8 px-3 text-xs font-bold">Sebelumnya</Button>
+            <div className="flex items-center gap-2 px-2">
+              <span className="text-xs font-bold text-blue-600 bg-blue-50 h-8 w-8 flex items-center justify-center rounded-lg border border-blue-100">{page}</span>
+              <span className="text-xs text-slate-400">/</span>
+              <span className="text-xs font-medium text-slate-600">{pagination.totalPages}</span>
+            </div>
+            <Button variant="outline" size="sm" disabled={page === pagination.totalPages} onClick={() => setPage(p => p + 1)} className="h-8 px-3 text-xs font-bold">Selanjutnya</Button>
+          </div>
         </div>
       </div>
 
@@ -328,6 +408,74 @@ export default function Sales() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddOpen(false)}>Batal</Button>
             <Button onClick={handleAdd}>Simpan Transaksi</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* DIALOG BULK INPUT */}
+      <Dialog open={isBulkOpen} onOpenChange={setIsBulkOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Input Penjualan Massal</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Pilih Toko Global untuk satu sesi input */}
+            <div className="bg-slate-50 p-3 rounded-lg flex items-center gap-4">
+              <p className="text-xs font-bold uppercase text-slate-500">Target Toko:</p>
+              <select className="flex-1 border p-1.5 rounded-md text-sm" value={bulkStoreId} onChange={e => setBulkStoreId(e.target.value)}>
+                <option value="">-- Pilih Toko --</option>
+                {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </div>
+
+            <div className="max-h-[400px] overflow-y-auto border rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Produk</TableHead>
+                    <TableHead className="w-24">Qty</TableHead>
+                    <TableHead>Harga Jual</TableHead>
+                    <TableHead className="w-10"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {bulkItems.map((item, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell>
+                        <select className="w-full border p-1.5 rounded text-sm" value={item.product_id} onChange={e => updateBulkItem(idx, "product_id", e.target.value)}>
+                          <option value="">-- Cari Produk --</option>
+                          {products.map(p => <option key={p.id} value={p.id}>{p.name} (Stok: {p.quantity})</option>)}
+                        </select>
+                      </TableCell>
+                      <TableCell>
+                        <Input type="number" value={item.qty} onChange={e => updateBulkItem(idx, "qty", Number(e.target.value))} />
+                      </TableCell>
+                      <TableCell>
+                        <Input type="number" value={item.selling_price} onChange={e => updateBulkItem(idx, "selling_price", Number(e.target.value))} />
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon" onClick={() => removeBulkRow(idx)} className="text-red-400"><Trash2 size={16} /></Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            <Button variant="ghost" onClick={addBulkRow} className="w-full border-2 border-dashed gap-2 text-slate-500 hover:text-blue-500">
+              <Plus size={16} /> Tambah Baris Transaksi
+            </Button>
+          </div>
+
+          <DialogFooter className="flex justify-between items-center">
+            <div className="text-left text-sm font-bold text-blue-600">
+              Total {bulkItems.length} Baris | Estimasi Omset: Rp {bulkItems.reduce((acc, curr) => acc + (curr.qty * curr.selling_price), 0).toLocaleString()}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setIsBulkOpen(false)}>Batal</Button>
+              <Button onClick={handleBulkSave}>Simpan Semua Transaksi</Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

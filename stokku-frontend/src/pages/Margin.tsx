@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 const API_MARGIN = `${import.meta.env.VITE_API_URL}/margin`,
   API_STORES = `${import.meta.env.VITE_API_URL}/stores`;
@@ -18,20 +19,29 @@ export default function Margin() {
     [search, setSearch] = useState(""),
     [range, setRange] = useState("all"),
     [filterStore, setFilterStore] = useState("All"),
+    [page, setPage] = useState(1),
+    [pagination, setPagination] = useState<any>({ totalPages: 1, totalData: 0 }),
+    [globalStats, setGlobalStats] = useState({ totalRevenue: 0, totalNetProfit: 0, avgMargin: 0 }),
     [isLoading, setIsLoading] = useState(true);
 
   // Re-fetch data jika range tanggal berubah
-  useEffect(() => { fetchMargin(); }, [range]);
+  useEffect(() => { fetchMargin(); }, [page, range, search, filterStore]);
 
   const fetchMargin = async () => {
     setIsLoading(true);
     try {
-      const [resMargin, resStore] = await Promise.all([
-        fetch(`${API_MARGIN}?range=${range}`),
-        fetch(API_STORES)
-      ]);
-      setData(await resMargin.json());
-      setStores(await resStore.json());
+      const url = `${API_MARGIN}?page=${page}&range=${range}&search=${search}&store=${filterStore}&limit=10`,
+        [resMargin, resStore] = await Promise.all([
+          fetch(url),
+          fetch(API_STORES)
+        ]),
+        resData = await resMargin.json(),
+        storeData = await resStore.json();
+
+      setData(resData.list || []);
+      setPagination(resData.pagination);
+      setGlobalStats(resData.stats);
+      setStores(storeData.stores || (Array.isArray(storeData) ? storeData : []));
     } finally {
       setIsLoading(false);
     }
@@ -49,18 +59,10 @@ export default function Margin() {
       return item.total_price - totalCapital - calculateFees(item);
     },
 
-    // LOGIKA FILTER GANDA (Search + Toko)
-    filtered = data.filter((s: any) => {
-      const matchesSearch = s.product_name.toLowerCase().includes(search.toLowerCase()) ||
-        s.store_name.toLowerCase().includes(search.toLowerCase()),
-        matchesStore = filterStore === "All" || s.store_name === filterStore;
-      return matchesSearch && matchesStore;
-    }),
-
-    // STATISTIK KESELURUHAN (Dihitung dari data yang sudah difilter)
-    totalRevenue = filtered.reduce((acc, curr) => acc + Number(curr.total_price), 0),
-    totalNetProfit = filtered.reduce((acc, curr) => acc + calculateProfit(curr), 0),
-    avgMargin = totalRevenue > 0 ? (totalNetProfit / totalRevenue) * 100 : 0;
+    // Fungsi Helper Penyelamat Filter
+    handleSearch = (val: string) => { setSearch(val); setPage(1); },
+    handleStoreFilter = (val: string) => { setFilterStore(val); setPage(1); },
+    handleRangeFilter = (val: string) => { setRange(val); setPage(1); };
 
   return (
     <div className="space-y-6">
@@ -79,7 +81,7 @@ export default function Margin() {
             <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><Receipt size={20} /></div>
             <div>
               <p className="text-sm font-medium text-slate-500">Omset (Bruto)</p>
-              <h3 className="text-xl font-bold">Rp {totalRevenue.toLocaleString()}</h3>
+              <h3 className="text-xl font-bold">Rp {Number(globalStats.totalRevenue).toLocaleString()}</h3>
             </div>
           </CardContent>
         </Card>
@@ -88,7 +90,7 @@ export default function Margin() {
             <div className="p-2 bg-green-100 text-green-600 rounded-full"><Wallet size={20} /></div>
             <div>
               <p className="text-sm font-medium text-slate-500">Profit Bersih (Netto)</p>
-              <h3 className="text-xl font-bold text-green-600">Rp {totalNetProfit.toLocaleString()}</h3>
+              <h3 className="text-xl font-bold text-green-600">Rp {Number(globalStats.totalNetProfit).toLocaleString()}</h3>
             </div>
           </CardContent>
         </Card>
@@ -97,7 +99,7 @@ export default function Margin() {
             <div className="p-2 bg-purple-100 text-purple-600 rounded-full"><TrendingUp size={20} /></div>
             <div>
               <p className="text-sm font-medium text-slate-500">Persentase Margin</p>
-              <h3 className="text-xl font-bold">{avgMargin.toFixed(1)}%</h3>
+              <h3 className="text-xl font-bold">{globalStats.avgMargin.toFixed(1)}%</h3>
             </div>
           </CardContent>
         </Card>
@@ -107,11 +109,11 @@ export default function Margin() {
       <div className="flex flex-col lg:flex-row gap-3">
         <div className="flex-1 bg-white border rounded-lg shadow-sm">
           <InputGroup>
-            <InputGroupInput placeholder="Cari transaksi..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            <InputGroupInput placeholder="Cari transaksi..." value={search} onChange={(e) => handleSearch(e.target.value)} />
             <InputGroupAddon><Search /></InputGroupAddon>
             <InputGroupAddon align="inline-end">
-              {search && <InputGroupButton variant="ghost" onClick={() => setSearch("")}><X size={16} /></InputGroupButton>}
-              {filtered.length} results
+              {search && <InputGroupButton variant="ghost" onClick={() => handleSearch("")}><X size={16} /></InputGroupButton>}
+              {data.length} results
             </InputGroupAddon>
           </InputGroup>
         </div>
@@ -119,7 +121,7 @@ export default function Margin() {
           {/* FILTER WAKTU */}
           <div className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg shadow-sm">
             <Calendar size={14} className="text-slate-400" />
-            <select className="w-full text-xs font-bold bg-transparent outline-none cursor-pointer" value={range} onChange={(e) => setRange(e.target.value)}>
+            <select className="w-full text-xs font-bold bg-transparent outline-none cursor-pointer" value={range} onChange={(e) => handleRangeFilter(e.target.value)}>
               <option value="all">Semua Waktu</option>
               <option value="today">Hari Ini</option>
               <option value="week">Minggu Ini</option>
@@ -130,7 +132,7 @@ export default function Margin() {
           {/* FILTER TOKO */}
           <div className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg shadow-sm">
             <Filter size={14} className="text-slate-400" />
-            <select className="w-full text-xs font-bold bg-transparent outline-none min-w-[100px] cursor-pointer" value={filterStore} onChange={(e) => setFilterStore(e.target.value)}>
+            <select className="w-full text-xs font-bold bg-transparent outline-none min-w-[100px] cursor-pointer" value={filterStore} onChange={(e) => handleStoreFilter(e.target.value)}>
               <option value="All">Semua Toko</option>
               {stores.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
             </select>
@@ -144,55 +146,55 @@ export default function Margin() {
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow>
-                <TableHead className="truncate">Produk & Toko</TableHead>
-                <TableHead className="truncate">Modal vs Jual</TableHead>
-                <TableHead className="truncate">Biaya Admin</TableHead>
-                <TableHead className="text-right truncate">Profit Bersih</TableHead>
+                <TableHead className="truncate w-[100px]">Produk & Toko</TableHead>
+                <TableHead className="truncate w-[100px]">Modal vs Jual</TableHead>
+                <TableHead className="truncate w-[100px]">Biaya Admin</TableHead>
+                <TableHead className="text-right truncate w-[100px]">Profit Bersih</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                Array.from({ length: 3 }).map((_, i) => (
+                Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell><Skeleton className="h-10 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-10 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-10 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-10 w-20 ml-auto" /></TableCell>
+                    <TableCell><Skeleton className="h-10 w-[150px]" /></TableCell>
+                    <TableCell><Skeleton className="h-10 w-[100px]" /></TableCell>
+                    <TableCell><Skeleton className="h-10 w-[100px]" /></TableCell>
+                    <TableCell><Skeleton className="h-10 w-[100px] ml-auto" /></TableCell>
                   </TableRow>
                 ))
-              ) : filtered.length > 0 ? (
-                filtered.map((item: any) => {
+              ) : data.length > 0 ? (
+                data.map((item: any) => {
                   const profit = calculateProfit(item), fees = calculateFees(item);
                   return (
                     <TableRow key={item.id} className="hover:bg-slate-50/50 transition-colors">
                       <TableCell>
                         <div className="flex flex-col">
                           <span className="font-bold text-slate-800 truncate max-w-[150px]">{item.product_name}</span>
-                          <span className="text-[10px] text-slate-400 truncate">{item.store_name} ({item.platform})</span>
+                          <span className="text-[10px] text-slate-400">{item.store_name} ({item.platform})</span>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="truncate w-[100px]">
                         <div className="text-xs">
-                          <p className="text-slate-400 italic text-[10px] truncate">C: Rp {(item.qty * item.capital).toLocaleString()}</p>
-                          <p className="font-semibold truncate">S: Rp {Number(item.total_price).toLocaleString()}</p>
+                          <p className="text-slate-400 italic text-[10px]">C: Rp {Number(item.qty * item.capital).toLocaleString()}</p>
+                          <p className="font-semibold">S: Rp {Number(item.total_price).toLocaleString()}</p>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1 text-red-500 font-medium text-xs truncate">
-                          -Rp {fees.toLocaleString()}
+                      <TableCell className="truncate w-[100px]">
+                        <div className="flex items-center gap-1 text-red-500 font-medium text-xs">
+                          -Rp {Number(fees).toLocaleString()}
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger><Info size={12} className="text-slate-300" /></TooltipTrigger>
                               <TooltipContent className="text-[10px]">
-                                Adm: {item.admin_fee}% | Ext: {item.extra_promo_fee}% | Proc: Rp {Number(item.handling_fee).toLocaleString()}
+                                Adm: {Number(item.admin_fee)}% | Ext: {Number(item.extra_promo_fee)}% | Proc: Rp {Number(item.handling_fee).toLocaleString()}
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right truncate">
+                      <TableCell className="text-right truncate w-[100px]">
                         <Badge className={profit > 0 ? "bg-green-500" : "bg-red-500"}>
-                          Rp {profit.toLocaleString()}
+                          Rp {Number(profit).toLocaleString()}
                         </Badge>
                       </TableCell>
                     </TableRow>
@@ -228,6 +230,14 @@ export default function Margin() {
               )}
             </TableBody>
           </Table>
+        </div>
+        {/* PAGINATION CONTROLS */}
+        <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50">
+          <p className="text-xs text-slate-500">Total {pagination.totalData} transaksi</p>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>Sebelumnya</Button>
+            <Button variant="outline" size="sm" disabled={page === pagination.totalPages} onClick={() => setPage(page + 1)}>Selanjutnya</Button>
+          </div>
         </div>
       </div>
     </div>

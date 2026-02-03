@@ -37,7 +37,7 @@ router.get("/stats", async (req, res) => {
     `),
 			// 4. Low Stock Alert (Barang yang stoknya < 10)
 			[lowStock] = await db.query(
-				"SELECT name, quantity FROM inventory WHERE quantity < 10 ORDER BY quantity ASC LIMIT 5",
+				"SELECT id, name, quantity FROM inventory WHERE quantity < 10 ORDER BY quantity ASC LIMIT 5",
 			),
 			// 5. Chart (Tetap 7 hari terakhir agar grafik ada isinya)
 			[chartData] = await db.query(`

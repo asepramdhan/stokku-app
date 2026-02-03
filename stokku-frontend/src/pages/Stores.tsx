@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -23,12 +24,13 @@ type Store = {
 };
 
 export default function Stores() {
-  // Fungsi Search
-  useEffect(() => { fetchStores(); }, []);
   // Initial State
   const [stores, setStores] = useState<Store[]>([]),
     [search, setSearch] = useState(""),
     [filterPlatform, setFilterPlatform] = useState("All"),
+    [page, setPage] = useState(1), // State Halaman
+    [pagination, setPagination] = useState<any>({ totalPages: 1, totalData: 0 }),
+    [globalStats, setGlobalStats] = useState<any>({ totalStores: 0, onlineStores: 0, offlineStores: 0 }),
     [isLoading, setIsLoading] = useState(true),
     [errors, setErrors] = useState<{ [key: string]: string }>({}),
     [isAddOpen, setIsAddOpen] = useState(false),
@@ -37,35 +39,39 @@ export default function Stores() {
     [editingStore, setEditingStore] = useState<any>(null),
     [isDeleteOpen, setIsDeleteOpen] = useState(false),
     // Timer
-    timer = 1000,
-    // LOGIKA STATISTIK
-    totalStores = stores.length,
-    onlineStores = stores.filter(s => s.platform !== 'Offline / Fisik' && s.platform !== '').length,
-    offlineStores = stores.filter(s => s.platform === 'Offline / Fisik').length,
-    // Fungsi FILTER GANDA (Search + Platform)
-    filtered = stores.filter((s: any) => {
-      const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase()) ||
-        s.platform.toLowerCase().includes(search.toLowerCase());
-      const matchesPlatform = filterPlatform === "All" || s.platform === filterPlatform;
+    timer = 1000;
 
-      return matchesSearch && matchesPlatform;
-    }),
-    // Fungsi untuk menampilkan teks error
-    FieldError = ({ children }: { children: React.ReactNode }) => (
-      <span className="text-[11px] font-medium text-pink-600 animate-in fade-in slide-in-from-top-1">
-        {children}
-      </span>
-    ),
+  // Re-fetch saat page, search, atau platform berubah
+  useEffect(() => {
+    fetchStores();
+  }, [page, search, filterPlatform]);
+
+  // Fungsi untuk menampilkan teks error
+  const FieldError = ({ children }: { children: React.ReactNode }) => (
+    <span className="text-[11px] font-medium text-pink-600 animate-in fade-in slide-in-from-top-1">
+      {children}
+    </span>
+  ),
+
     // Fungsi Ambil Stores
     fetchStores = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(API_URL);
-        setStores(await res.json());
+        const res = await fetch(`${API_URL}?page=${page}&search=${search}&platform=${filterPlatform}&limit=10`),
+          result = await res.json();
+
+        setStores(result.stores);
+        setPagination(result.pagination);
+        setGlobalStats(result.stats);
       } finally {
         setIsLoading(false);
       }
     },
+
+    // 💡 Reset ke halaman 1 saat filter diubah
+    handleSearchChange = (val: string) => { setSearch(val); setPage(1); },
+    handlePlatformChange = (val: string) => { setFilterPlatform(val); setPage(1); },
+
     // Fungsi Tambah 
     handleAdd = async () => {
       // Reset errors setiap kali tombol diklik
@@ -117,6 +123,7 @@ export default function Stores() {
         toast.error("Waduh, terjadi kesalahan: " + error.message);
       }
     },
+
     // Fungsi Edit
     handleUpdate = async () => {
       // Reset errors setiap kali tombol diklik
@@ -167,6 +174,7 @@ export default function Stores() {
         toast.error("Waduh, terjadi kesalahan: " + error.message);
       }
     },
+
     // Fungsi Hapus
     handleDelete = async (id: number) => {
       await fetch(`${API_URL}/${id}`, { method: "DELETE" });
@@ -218,7 +226,7 @@ export default function Stores() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500">Total Toko</p>
-              <h3 className="text-2xl font-bold">{isLoading ? "..." : totalStores}</h3>
+              <h3 className="text-2xl font-bold">{isLoading ? "..." : globalStats.totalStores}</h3>
             </div>
           </CardContent>
         </Card>
@@ -230,7 +238,7 @@ export default function Stores() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500">Toko Online</p>
-              <h3 className="text-2xl font-bold">{isLoading ? "..." : onlineStores}</h3>
+              <h3 className="text-2xl font-bold">{isLoading ? "..." : globalStats.onlineStores}</h3>
             </div>
           </CardContent>
         </Card>
@@ -242,7 +250,7 @@ export default function Stores() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500">Toko Offline</p>
-              <h3 className="text-2xl font-bold">{isLoading ? "..." : offlineStores}</h3>
+              <h3 className="text-2xl font-bold">{isLoading ? "..." : globalStats.offlineStores}</h3>
             </div>
           </CardContent>
         </Card>
@@ -256,7 +264,7 @@ export default function Stores() {
             <InputGroupInput
               placeholder="Cari toko..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
             />
             <InputGroupAddon>
               <Search />
@@ -266,12 +274,12 @@ export default function Stores() {
                 <InputGroupButton
                   variant="ghost"
                   className="h-6 w-6 p-0 hover:bg-transparent text-slate-400 hover:text-slate-600 transition-colors"
-                  onClick={() => setSearch("")}
+                  onClick={() => handleSearchChange("")}
                 >
                   <X size={16} />
                 </InputGroupButton>
               }
-              {filtered.length} results
+              {stores.length} results
             </InputGroupAddon>
           </InputGroup>
         </div>
@@ -281,7 +289,7 @@ export default function Stores() {
           <select
             className="w-full text-sm font-bold bg-transparent outline-none min-w-[120px] cursor-pointer"
             value={filterPlatform}
-            onChange={(e) => setFilterPlatform(e.target.value)}
+            onChange={(e) => handlePlatformChange(e.target.value)}
           >
             <option value="All">Semua Platform</option>
             <option value="Shopee">Shopee</option>
@@ -299,26 +307,26 @@ export default function Stores() {
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow>
-                <TableHead className="w-[180px] font-semibold">Platform</TableHead>
+                <TableHead className="w-[200px] font-semibold">Platform</TableHead>
                 <TableHead className="font-semibold">Nama Toko</TableHead>
-                <TableHead className="font-semibold truncate">Biaya (Admin/Extra/Proc)</TableHead>
+                <TableHead className="font-semibold truncate w-[200px]">Biaya (Admin/Extra/Proc)</TableHead>
                 <TableHead className="text-right font-semibold">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                Array.from({ length: 3 }).map((_, i) => (
+                Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-48" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-[100px] rounded-full" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-[100px]" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-[100px]" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-[100px] ml-auto" /></TableCell>
                   </TableRow>
                 ))
-              ) : filtered.length > 0 ? (
-                filtered.map((store: any) => (
+              ) : stores.length > 0 ? (
+                stores.map((store: any) => (
                   <TableRow key={store.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <TableCell>
+                    <TableCell className="truncate">
                       <Badge
                         variant="secondary"
                         className={`font-medium shadow-sm ${store.platform === 'Shopee' ? 'bg-orange-100 text-orange-700 border-orange-200' :
@@ -331,7 +339,7 @@ export default function Stores() {
                         {store.platform || 'General'}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="truncate">
                       <div className="flex flex-col">
                         <span className="font-bold text-slate-800">{store.name}</span>
                       </div>
@@ -339,10 +347,10 @@ export default function Stores() {
                     <TableCell className="truncate">
                       <div className="flex gap-2 text-[11px] font-medium">
                         <span className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100">
-                          Adm: {store.admin_fee}%
+                          Adm: {Number(store.admin_fee)}%
                         </span>
                         <span className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-100">
-                          Ext: {store.extra_promo_fee}%
+                          Ext: {Number(store.extra_promo_fee)}%
                         </span>
                         <span className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">
                           Fix: Rp {Number(store.handling_fee).toLocaleString()}
@@ -401,6 +409,39 @@ export default function Stores() {
               )}
             </TableBody>
           </Table>
+          {/* --- UI PAGINATION (TAMBAHKAN DI BAWAH TABLE) --- */}
+          <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50 font-sans">
+            <p className="text-xs text-slate-500 font-medium hidden md:block">
+              Menampilkan <span className="text-slate-900">{stores.length}</span> dari <span className="text-slate-900">{pagination.totalData}</span> toko
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => setPage(p => p - 1)}
+                className="h-8 px-3 text-xs font-bold"
+              >
+                Sebelumnya
+              </Button>
+              <div className="flex items-center gap-2 px-2">
+                <span className="text-xs font-bold text-blue-600 bg-blue-50 h-8 w-8 flex items-center justify-center rounded-lg border border-blue-100">
+                  {page}
+                </span>
+                <span className="text-xs text-slate-400">/</span>
+                <span className="text-xs font-medium text-slate-600">{pagination.totalPages}</span>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === pagination.totalPages}
+                onClick={() => setPage(p => p + 1)}
+                className="h-8 px-3 text-xs font-bold"
+              >
+                Selanjutnya
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 

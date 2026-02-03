@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, ShoppingCart, Box, Store,
-  ShoppingBag, BarChart3, Package2, LogOut, User
+  ShoppingBag, BarChart3, Package2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -76,26 +76,9 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
         ))}
       </nav>
 
-      {/* 3. FOOTER SECTION (Profile + Build Version) */}
-      <div className="mt-auto border-t bg-slate-50/50">
-        {/* User Profile */}
-        <div className="p-4 flex items-center gap-3">
-          <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center border border-blue-200">
-            <User size={18} className="text-blue-600" />
-          </div>
-          <div className="flex flex-col overflow-hidden flex-1">
-            <span className="text-xs font-bold text-slate-700 truncate">Owner Toko</span>
-            <span className="text-[10px] text-slate-400">Pro Plan</span>
-          </div>
-          <button className="text-slate-400 hover:text-red-500 transition-colors">
-            <LogOut size={16} />
-          </button>
-        </div>
-
-        {/* --- INI KODE YANG KAMU MAU --- */}
-        <div className="p-4 border-t text-xs text-slate-400 text-center">
-          v1.0.0 Stable Build
-        </div>
+      {/* --- INI KODE YANG KAMU MAU --- */}
+      <div className="p-4 border-t text-xs text-slate-400 text-center">
+        v1.0.0 Stable Build
       </div>
     </div>
   );

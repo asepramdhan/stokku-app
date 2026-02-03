@@ -2,11 +2,159 @@ const express = require("express"),
 	router = express.Router(),
 	db = require("../config/db");
 
-// Ambil semua produk
+// Ambil produk dengan Pagination & Search + Prediksi Stok
 router.get("/", async (req, res) => {
 	try {
-		const [rows] = await db.query("SELECT * FROM inventory ORDER BY name ASC");
+		const page = parseInt(req.query.page) || 1,
+			limit = parseInt(req.query.limit) || 10,
+			search = req.query.search || "",
+			category = req.query.category || "All",
+			offset = (page - 1) * limit;
+
+		// Build Query Filter
+		let whereClause = "WHERE (i.name LIKE ? OR i.sku LIKE ?)",
+			params = [`%${search}%`, `%${search}%`];
+
+		if (category !== "All") {
+			whereClause += " AND i.category = ?";
+			params.push(category);
+		}
+
+		// 1. Ambil Data Paginated + Hitung ADS (Average Daily Sales) 30 Hari Terakhir
+		const dataQuery = `
+      SELECT 
+        i.*, 
+        COALESCE(s.total_sales, 0) / 30 as ads
+      FROM inventory i
+      LEFT JOIN (
+        SELECT product_id, SUM(qty) as total_sales 
+        FROM sales 
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        GROUP BY product_id
+      ) s ON i.id = s.product_id
+      ${whereClause} 
+      ORDER BY i.name ASC 
+      LIMIT ? OFFSET ?`,
+			[rows] = await db.query(dataQuery, [...params, limit, offset]),
+			// Tambahkan kalkulasi daysLeft di level JavaScript
+			productsWithPrediction = rows.map((item) => {
+				const dailySpeed =
+						parseFloat(item.ads) > 0 ? parseFloat(item.ads) : 0.05, // Cadangan jika 0
+					daysLeft = Math.floor(item.quantity / dailySpeed);
+				return { ...item, daysLeft };
+			}),
+			// 2. Ambil Global Stats
+			[stats] = await db.query(`
+      SELECT 
+        COUNT(*) as total_items, 
+        SUM(quantity) as total_stock,
+        SUM(CASE WHEN quantity < 10 THEN 1 ELSE 0 END) as low_stock_count
+      FROM inventory
+    `),
+			// 3. Ambil total data yang terfilter
+			[countRows] = await db.query(
+				`SELECT COUNT(*) as total FROM inventory i ${whereClause}`,
+				params,
+			),
+			totalFiltered = countRows[0].total;
+
+		res.json({
+			products: productsWithPrediction, // Kirim data yang sudah ada daysLeft
+			stats: {
+				totalItems: stats[0].total_items || 0,
+				totalStock: stats[0].total_stock || 0,
+				lowStock: stats[0].low_stock_count || 0,
+			},
+			pagination: {
+				totalData: totalFiltered,
+				totalPages: Math.ceil(totalFiltered / limit),
+				currentPage: page,
+			},
+		});
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
+// Endpoint Pencarian Produk Ringan (untuk Auto-complete)
+router.get("/search-suggest", async (req, res) => {
+	const { q } = req.query; // q adalah kata kunci pencarian
+	try {
+		const query = `
+      SELECT id, name, sku, quantity, avg_cost 
+      FROM inventory 
+      WHERE name LIKE ? OR sku LIKE ? 
+      LIMIT 10`, // Batasi 10 saran saja agar cepat
+			[rows] = await db.query(query, [`%${q}%`, `%${q}%`]);
 		res.json(rows);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
+// Ambil History Produk
+router.get("/history/:id", async (req, res) => {
+	const productId = req.params.id;
+	try {
+		const query = `
+      (SELECT 
+        'MASUK' as type, 
+        qty, 
+        buy_price as price, 
+        created_at, 
+        'Kulakan / Restok' as note 
+       FROM shopping_list 
+       WHERE product_id = ? AND status = 'completed')
+      UNION ALL
+      (SELECT 
+        'KELUAR' as type, 
+        qty, 
+        selling_price as price, 
+        s.created_at, 
+        st.name as note 
+       FROM sales s
+       JOIN stores st ON s.store_id = st.id
+       WHERE s.product_id = ?)
+      ORDER BY created_at DESC 
+      LIMIT 50`,
+			[rows] = await db.query(query, [productId, productId]);
+		res.json(rows);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
+// Endpoint untuk ambil rekomendasi restok
+router.get("/restock-suggestions", async (req, res) => {
+	try {
+		const query = `
+			SELECT 
+				i.id, 
+				i.name, 
+				i.quantity as current_stock,
+				(SELECT COALESCE(SUM(qty), 0) FROM sales WHERE product_id = i.id AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)) / 30 as avg_daily_sales
+			FROM inventory i
+			WHERE i.quantity < 20 -- Hanya cek yang stoknya mulai menipis
+		`,
+			[rows] = await db.query(query),
+			suggestions = rows.map((item) => {
+				const ads = parseFloat(item.avg_daily_sales),
+					// Jika tidak ada penjualan sama sekali, asumsikan laku 0.1 per hari agar tidak pembagian nol
+					dailySpeed = ads > 0 ? ads : 0.01,
+					daysLeft = Math.floor(item.current_stock / dailySpeed),
+					// Hitung tanggal restok (Hari ini + Sisa Hari - 2 hari Lead Time/Pengiriman)
+					restockDate = new Date();
+				restockDate.setDate(restockDate.getDate() + (daysLeft - 2));
+
+				return {
+					...item,
+					daysLeft,
+					suggestedDate: restockDate,
+					isUrgent: daysLeft <= 3,
+				};
+			});
+
+		res.json(suggestions);
 	} catch (err) {
 		res.status(500).json({ error: err.message });
 	}
