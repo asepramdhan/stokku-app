@@ -40,6 +40,12 @@ export default function Shopping() {
     [pagination, setPagination] = useState<any>({ totalPages: 1, totalData: 0 }),
     [globalStats, setGlobalStats] = useState({ pendingCount: 0, estimatedSpending: 0, totalAll: 0, totalPending: 0, totalCompleted: 0 }),
 
+    getHeaders = () => ({
+      "Authorization": `Bearer ${localStorage.getItem("token")}`,
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    }),
+
     // Timer
     timer = 1000;
 
@@ -67,8 +73,15 @@ export default function Shopping() {
   const searchProducts = async (query: string) => {
     setIsSearching(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/products/search-suggest?q=${query}`),
-        data = await res.json();
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/products/search-suggest?q=${query}`, { headers: getHeaders() });
+      // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
+      if (res.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+        return;
+      }
+
+      const data = await res.json();
       setSuggestions(data);
     } finally {
       setIsSearching(false);
@@ -77,8 +90,15 @@ export default function Shopping() {
 
     // Fungsi saat saran dipilih
     selectProduct = async (p: any) => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/shopping/last-price/${p.id}`),
-        priceData = await res.json();
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/shopping/last-price/${p.id}`, { headers: getHeaders() });
+      // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
+      if (res.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+        return;
+      }
+
+      const priceData = await res.json();
 
       setIsSelected(true); // KUNCI: Tandai bahwa ini adalah hasil pilihan, bukan ngetik manual
       setNewOrder({ ...newOrder, product_id: p.id, buy_price: priceData.last_price });
@@ -94,8 +114,16 @@ export default function Shopping() {
       try {
         // 1. Ambil data belanja dengan params
         const shopUrl = `${API_SHOPPING}?page=${page}&search=${search}&status=${filterStatus}&category=${filterCategory}&limit=10`,
-          resShop = await fetch(shopUrl),
-          dataShop = await resShop.json();
+          resShop = await fetch(shopUrl, { headers: getHeaders() });
+
+        // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
+        if (resShop.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          return;
+        }
+
+        const dataShop = await resShop.json();
 
         setList(dataShop.list || []);
         setPagination(dataShop.pagination);
@@ -137,11 +165,19 @@ export default function Shopping() {
     handleAdd = async () => {
       if (!newOrder.product_id) return setErrors({ product: "Cari dan Pilih produk dulu!" });
       try {
-        await fetch(API_SHOPPING, {
+        const res = await fetch(API_SHOPPING, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getHeaders(),
           body: JSON.stringify(newOrder),
         });
+
+        // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
+        if (res.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          return;
+        }
+
         setIsAddOpen(false);
         setErrors({}); // Bersihkan error
         toast.promise<{ name: string }>(
@@ -168,9 +204,16 @@ export default function Shopping() {
       try {
         const res = await fetch(`${API_SHOPPING}/${editingOrder.id}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: getHeaders(),
           body: JSON.stringify(editingOrder),
         });
+
+        // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
+        if (res.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          return;
+        }
 
         if (!res.ok) throw new Error("Gagal update");
 
@@ -199,7 +242,18 @@ export default function Shopping() {
     // HANDLE DELETE
     handleDelete = async (id: number) => {
       try {
-        await fetch(`${API_SHOPPING}/${id}`, { method: "DELETE" });
+        const res = await fetch(`${API_SHOPPING}/${id}`, {
+          method: "DELETE",
+          headers: getHeaders()
+        });
+
+        // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
+        if (res.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          return;
+        }
+
         setIsDeleteOpen(false);
         setDeleteId(0);
         toast.promise<{ name: string }>(
@@ -226,7 +280,18 @@ export default function Shopping() {
     // HANDLE COMPLETE
     handleComplete = async (id: number) => {
       try {
-        await fetch(`${API_SHOPPING}/complete/${id}`, { method: "POST" });
+        const res = await fetch(`${API_SHOPPING}/complete/${id}`, {
+          method: "POST",
+          headers: getHeaders()
+        });
+
+        // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
+        if (res.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          return;
+        }
+
         toast.promise<{ name: string }>(
           () =>
             new Promise((resolve) =>
@@ -271,9 +336,16 @@ export default function Shopping() {
       toast.promise(
         fetch(`${API_SHOPPING}/complete-bulk`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getHeaders(),
           body: JSON.stringify({ ids: selectedIds }),
         }).then(async (res) => {
+          // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
+          if (res.status === 401) {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+            return;
+          }
+
           if (!res.ok) throw new Error("Gagal memproses bulk");
           return res.json();
         }),
@@ -291,8 +363,15 @@ export default function Shopping() {
 
     // Saat produk dipilih, cari saran tanggalnya
     handleProductChange = async (pId: string) => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/products/restock-suggestions`),
-        allSuggestions = await res.json(),
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/products/restock-suggestions`, { headers: getHeaders() });
+      // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
+      if (res.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+        return;
+      }
+
+      const allSuggestions = await res.json(),
         found = allSuggestions.find((s: any) => s.id === Number(pId));
       setSuggestion(found);
     };
@@ -553,8 +632,11 @@ export default function Shopping() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-40 text-center text-slate-400 italic">
-                    Belum ada rencana belanja...
+                  <TableCell colSpan={7} className="h-48 text-center py-10">
+                    <div className="flex flex-col items-center gap-2 text-slate-400">
+                      <ShoppingCart size={40} className="opacity-20" />
+                      <p>Belum ada rencana belanja.</p>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}

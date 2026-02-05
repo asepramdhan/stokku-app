@@ -57,8 +57,21 @@ export default function Stores() {
     fetchStores = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`${API_URL}?page=${page}&search=${search}&platform=${filterPlatform}&limit=10`),
-          result = await res.json();
+        const token = localStorage.getItem("token"),
+          headers = {
+            "Authorization": `Bearer ${token}`, // Tiket masuk
+            "Accept": "application/json",
+          },
+          res = await fetch(`${API_URL}?page=${page}&search=${search}&platform=${filterPlatform}&limit=10`, { headers });
+
+        // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
+        if (res.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          return;
+        }
+
+        const result = await res.json();
 
         setStores(result.stores);
         setPagination(result.pagination);

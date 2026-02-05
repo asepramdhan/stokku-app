@@ -30,12 +30,25 @@ export default function Margin() {
   const fetchMargin = async () => {
     setIsLoading(true);
     try {
-      const url = `${API_MARGIN}?page=${page}&range=${range}&search=${search}&store=${filterStore}&limit=10`,
+      const token = localStorage.getItem("token"),
+        headers = {
+          "Authorization": `Bearer ${token}`, // Tiket masuk
+          "Accept": "application/json",
+        },
+        url = `${API_MARGIN}?page=${page}&range=${range}&search=${search}&store=${filterStore}&limit=10`,
         [resMargin, resStore] = await Promise.all([
-          fetch(url),
-          fetch(API_STORES)
-        ]),
-        resData = await resMargin.json(),
+          fetch(url, { headers }),
+          fetch(API_STORES, { headers }),
+        ]);
+
+      // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
+      if (resMargin.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+        return;
+      }
+
+      const resData = await resMargin.json(),
         storeData = await resStore.json();
 
       setData(resData.list || []);

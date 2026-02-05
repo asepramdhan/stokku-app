@@ -6,20 +6,43 @@ import MasterProduct from "./pages/MasterProduct";
 import Stores from "./pages/Stores";
 import Sales from "./pages/Sales";
 import Margin from "./pages/Margin";
+import Login from "./pages/Login";
+import { Navigate } from "react-router-dom";
+import LandingPage from "./pages/LandingPage";
 
-// Placeholder Halaman (Nanti kita pecah ke file terpisah)
-// const Dashboard = () => <h1 className="text-2xl font-bold">Ringkasan Bisnis</h1>;
-// Shopping = () => <h1 className="text-2xl font-bold">Daftar Belanja & Re-stok</h1>;
-// MasterProduct = () => <h1 className="text-2xl font-bold">Manajemen Master Produk</h1>,
-// Stores = () => <h1 className="text-2xl font-bold">Pengaturan Toko</h1>,
-// Sales = () => <h1 className="text-2xl font-bold">Transaksi Penjualan Online</h1>,
-// Margin = () => <h1 className="text-2xl font-bold">Analisa Keuntungan (Margin)</h1>;
+// 💡 INI MIDDLEWARE-NYA (Private Route)
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const token = localStorage.getItem("token"); // Ambil token dari storage
+
+  if (!token) {
+    // Kalau nggak ada token, tendang ke halaman login
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+},
+
+  // 💡 ANTI-BALIK LOGIC: Kalau sudah ada token, dilarang masuk ke Login/Register
+  PublicRoute = ({ children }: { children: React.ReactNode }) => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      // Kalau sudah login, paksa pindah ke halaman utama (dashboard)
+      return <Navigate to="/dashboard" replace />;
+    }
+
+    return children;
+  };
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Layout />}>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        {/* <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} /> */}
+
+        <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="shopping" element={<Shopping />} />
           <Route path="master" element={<MasterProduct />} />

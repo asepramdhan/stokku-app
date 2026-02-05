@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,28 +14,68 @@ const API_DASHBOARD = `${import.meta.env.VITE_API_URL}/dashboard/stats`,
 export default function Dashboard() {
   const [stats, setStats] = useState<any>(null),
     [isLoading, setIsLoading] = useState(true),
-    [range, setRange] = useState("all"); // State untuk filter
+    [range, setRange] = useState("all"),
+    // 💡 Buat fungsi helper biar gak capek ngetik header terus
+    getHeaders = () => ({
+      "Authorization": `Bearer ${localStorage.getItem("token")}`,
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    });
 
   useEffect(() => {
-    setIsLoading(true);
-    fetch(`${API_DASHBOARD}?range=${range}`)
-      .then(res => res.json())
-      .then(data => { setStats(data); setIsLoading(false); });
-  }, [range]); // Refresh data setiap filter berubah
+    const fetchStats = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch(`${API_DASHBOARD}?range=${range}`, { headers: getHeaders() });
+
+        // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
+        if (res.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          return;
+        }
+
+        const data = await res.json();
+        setStats(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [range]);
 
   const handleQuickAdd = async (productId: number, productName: string) => {
     try {
       // 1. Ambil harga terakhir dari API baru kita
-      const resPrice = await fetch(`${import.meta.env.VITE_API_URL}/shopping/last-price/${productId}`),
-        priceData = await resPrice.json(),
+      const resPrice = await fetch(`${import.meta.env.VITE_API_URL}/shopping/last-price/${productId}`, { headers: getHeaders() });
+
+      // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
+      if (resPrice.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+        return;
+      }
+
+      const priceData = await resPrice.json(),
         recommendedPrice = priceData.last_price;
 
       toast.promise(
         fetch(`${import.meta.env.VITE_API_URL}/shopping`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getHeaders(),
           body: JSON.stringify({ product_id: productId, qty: 1, buy_price: recommendedPrice }),
         }).then(async (res) => {
+
+          // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
+          if (res.status === 401) {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+            return;
+          }
+
           if (!res.ok) {
             const err = await res.json();
             throw new Error(err.error || "Gagal menambah");

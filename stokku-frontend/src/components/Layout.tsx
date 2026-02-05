@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { Menu, Bell, AlertCircle, ChevronRight, ShoppingCart, Box, ShoppingBag, Plus, Search, X, Package2 } from "lucide-react";
+import { Menu, Bell, AlertCircle, ChevronRight, ShoppingCart, Box, ShoppingBag, Plus, Search, X, Package2, User, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -9,6 +9,7 @@ import Sidebar from "./Sidebar";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "./ui/skeleton";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 
 export default function Layout() {
   const location = useLocation(),
@@ -17,7 +18,13 @@ export default function Layout() {
     [isFabOpen, setIsFabOpen] = useState(false),
     [stats, setStats] = useState<any>(null),
     [isLoading, setIsLoading] = useState(true),
-    [notifSearch, setNotifSearch] = useState("");
+    [notifSearch, setNotifSearch] = useState(""),
+    // 1. Ambil data dari storage (kasih fallback kalau kosong)
+    userName = localStorage.getItem("user_name") || "User",
+    userEmail = localStorage.getItem("user_email") || "user@stokku.id",
+
+    // 2. Ambil inisial nama (Misal: "Budi" jadi "B")
+    userInitial = userName.charAt(0).toUpperCase();
 
   // Ambil data stok menipis dari backend
   useEffect(() => {
@@ -102,7 +109,13 @@ export default function Layout() {
     // LOGIKA FILTER BARANG KRITIS
     filteredLowStock = stats?.lowStock?.filter((item: any) =>
       item.name.toLowerCase().includes(notifSearch.toLowerCase())
-    ) || [];
+    ) || [],
+
+    // LOGIKA NOTIFIKASI
+    handleLogout = () => {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    };
 
   return (
     <div className="flex min-h-screen bg-slate-50/50 flex-col md:flex-row font-sans">
@@ -265,10 +278,48 @@ export default function Layout() {
 
             <div className="h-8 w-[1px] bg-slate-100 mx-1 hidden md:block" />
 
-            {/* AVATAR RINGKAS */}
-            <div className="h-9 w-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-blue-100 border-2 border-white cursor-pointer hover:scale-105 transition-transform">
-              S
-            </div>
+            {/* AVATAR DENGAN DROPDOWN LOGOUT */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="h-9 w-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-blue-100 border-2 border-white cursor-pointer hover:scale-105 transition-transform">
+                  {/* 💡 TAMPILKAN INISIAL */}
+                  {userInitial}
+                </div>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent className="w-56 mt-2 mr-4 rounded-2xl shadow-2xl border-slate-100 p-2" align="end">
+                <DropdownMenuLabel className="p-3">
+                  <div className="flex flex-col gap-1">
+                    {/* 💡 TAMPILKAN NAMA ASLI */}
+                    <p className="text-sm font-bold text-slate-800 capitalize">{userName}</p>
+                    <p className="text-[10px] text-slate-400 font-medium truncate">{userEmail}</p>
+                  </div>
+                </DropdownMenuLabel>
+
+                <DropdownMenuSeparator className="bg-slate-50" />
+
+                <DropdownMenuItem className="flex items-center gap-2 p-3 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
+                  <User size={16} className="text-slate-400" />
+                  <span className="text-xs font-medium text-slate-600">Profil Saya</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem className="flex items-center gap-2 p-3 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
+                  <Settings size={16} className="text-slate-400" />
+                  <span className="text-xs font-medium text-slate-600">Pengaturan Akun</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator className="bg-slate-50" />
+
+                {/* 🚀 TOMBOL LOGOUT */}
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 p-3 rounded-xl cursor-pointer bg-red-50 hover:bg-red-100 text-red-600 transition-colors focus:bg-red-100 focus:text-red-600"
+                >
+                  <LogOut size={16} />
+                  <span className="text-xs font-bold">Keluar Sekarang</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 

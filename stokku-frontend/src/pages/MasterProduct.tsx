@@ -50,6 +50,12 @@ export default function MasterProduct() {
     [history, setHistory] = useState<any[]>([]),
     [isHistoryOpen, setIsHistoryOpen] = useState(false),
     [historyLoading, setHistoryLoading] = useState(false),
+    // 💡 Buat fungsi helper biar gak capek ngetik header terus
+    getHeaders = () => ({
+      "Authorization": `Bearer ${localStorage.getItem("token")}`,
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    }),
 
     // Timer
     timer = 1000;
@@ -82,9 +88,17 @@ export default function MasterProduct() {
     fetchProducts = async () => {
       setIsLoading(true);
       try {
-        // Kirim parameter ke backend
-        const res = await fetch(`${API_URL}?page=${page}&search=${search}&category=${filterCategory}&limit=10`),
-          result = await res.json();
+        const res = await fetch(`${API_URL}?page=${page}&search=${search}&category=${filterCategory}&limit=10`,
+          { headers: getHeaders() });
+
+        // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
+        if (res.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          return;
+        }
+
+        const result = await res.json();
 
         setProducts(result.products);
         setPagination(result.pagination);
@@ -102,8 +116,16 @@ export default function MasterProduct() {
       setIsHistoryOpen(true);
       setHistoryLoading(true);
       try {
-        const res = await fetch(`${API_URL}/history/${product.id}`),
-          data = await res.json();
+        const res = await fetch(`${API_URL}/history/${product.id}`, { headers: getHeaders() });
+
+        // Cek jika token tidak valid/expired
+        if (res.status === 401) {
+          localStorage.clear();
+          window.location.href = "/login";
+          return;
+        }
+
+        const data = await res.json();
         setHistory(data);
       } finally {
         setHistoryLoading(false);
@@ -129,9 +151,16 @@ export default function MasterProduct() {
       try {
         const res = await fetch(API_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getHeaders(), // 💡 Pakai helper
           body: JSON.stringify(newProduct),
         });
+
+        // Cek jika token tidak valid/expired
+        if (res.status === 401) {
+          localStorage.clear();
+          window.location.href = "/login";
+          return;
+        }
 
         if (!res.ok) {
           const errorData = await res.json();
@@ -181,9 +210,16 @@ export default function MasterProduct() {
       try {
         const res = await fetch(`${API_URL}/${editingProduct.id}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: getHeaders(), // 💡 Pakai helper
           body: JSON.stringify(editingProduct),
         });
+
+        // Cek jika token tidak valid/expired
+        if (res.status === 401) {
+          localStorage.clear();
+          window.location.href = "/login";
+          return;
+        }
 
         if (!res.ok) {
           const errorData = await res.json();
@@ -216,24 +252,39 @@ export default function MasterProduct() {
 
     // Fungsi Hapus
     handleDelete = async (id: number) => {
-      await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-      setIsDeleteOpen(false);
-      toast.promise<{ name: string }>(
-        () =>
-          new Promise((resolve) =>
-            setTimeout(() => resolve({ name: editingProduct.name }), timer)
-          ),
-        {
-          loading: "Loading...",
-          success: (data) => {
-            return (
-              fetchProducts(),
-              `Produk ${data.name} berhasil dihapus!`
-            );
-          },
-          error: "Error",
+      try {
+        const res = await fetch(`${API_URL}/${id}`, {
+          method: "DELETE",
+          headers: getHeaders() // 💡 Kuncinya di sini!
+        });
+
+        // Cek jika token tidak valid/expired
+        if (res.status === 401) {
+          localStorage.clear();
+          window.location.href = "/login";
+          return;
         }
-      )
+
+        setIsDeleteOpen(false);
+
+        toast.promise<{ name: string }>(
+          () =>
+            new Promise((resolve) =>
+              setTimeout(() => resolve({ name: editingProduct.name }), timer)
+            ),
+          {
+            loading: "Menghapus produk...",
+            success: (data) => {
+              fetchProducts(); // Refresh data tabel
+              return `Produk ${data.name} berhasil dihapus!`;
+            },
+            error: "Gagal menghapus produk",
+          }
+        );
+      } catch (error) {
+        console.error(error);
+        toast.error("Terjadi kesalahan koneksi");
+      }
     };
 
   return (
