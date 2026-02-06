@@ -39,7 +39,7 @@ export default function Stores() {
     [editingStore, setEditingStore] = useState<any>(null),
     [isDeleteOpen, setIsDeleteOpen] = useState(false),
     // Timer
-    timer = 1000;
+    timer = 500;
 
   // Re-fetch saat page, search, atau platform berubah
   useEffect(() => {

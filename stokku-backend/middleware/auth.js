@@ -6,9 +6,11 @@ module.exports = (req, res, next) => {
 		return res.status(401).json({ message: "Akses ditolak, login dulu!" });
 
 	try {
-		const verified = jwt.verify(token, "RAHASIA_ALHADE_2026");
+		// 💡 Gunakan process.env.JWT_SECRET, kalau gak ada baru pakai fallback
+		const secret = process.env.JWT_SECRET || "RAHASIA_STOKKU_2026";
+		const verified = jwt.verify(token, secret);
 		req.user = verified;
-		next(); // Lanjut ke proses berikutnya
+		next();
 	} catch (err) {
 		res.status(400).json({ message: "Token tidak valid!" });
 	}

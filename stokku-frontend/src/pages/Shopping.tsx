@@ -47,7 +47,7 @@ export default function Shopping() {
     }),
 
     // Timer
-    timer = 1000;
+    timer = 500;
 
   // Trigger fetch saat filter atau halaman berubah
   useEffect(() => {

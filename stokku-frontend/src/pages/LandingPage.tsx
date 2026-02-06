@@ -10,10 +10,12 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white text-slate-900 selection:bg-blue-100">
       {/* NAVBAR */}
       <nav className="flex items-center justify-between px-6 py-6 md:px-12">
-        <div className="flex items-center gap-2">
-          <div className="bg-blue-600 p-1.5 rounded-lg text-white font-black text-xl">S</div>
-          <span className="text-xl font-bold tracking-tight text-slate-800">STOKKU.id</span>
-        </div>
+        <Link to="/">
+          <div className="flex items-center gap-2">
+            <div className="bg-blue-600 p-1.5 rounded-lg text-white font-black text-xl">S</div>
+            <span className="text-xl font-bold tracking-tight text-slate-800">STOKKU.id</span>
+          </div>
+        </Link>
         {isLoggedIn ? (
           <Link to="/dashboard">
             <Button className="font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100 rounded-xl">

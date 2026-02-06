@@ -1,7 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, ShoppingCart, Box, Store,
-  ShoppingBag, BarChart3, Package2
+  ShoppingBag, BarChart3, Package2,
+  BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,12 @@ const navigation = [
       { name: "Transaksi", icon: ShoppingBag, path: "/sales" },
       { name: "Analisa Margin", icon: BarChart3, path: "/margin" },
     ]
+  },
+  {
+    group: "Pencatatan",
+    items: [
+      { name: "Pencatatan Toko", icon: BookOpen, path: "/records" }
+    ]
   }
 ];
 
@@ -40,7 +47,9 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
           <Package2 className="text-white" size={20} />
         </div>
         <span className="text-xl font-black tracking-tighter text-slate-800">
-          STOKKU<span className="text-blue-600">.id</span>
+          <Link to="/">
+            STOKKU<span className="text-blue-600">.id</span>
+          </Link>
         </span>
       </div>
 

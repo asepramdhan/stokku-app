@@ -9,6 +9,7 @@ import Margin from "./pages/Margin";
 import Login from "./pages/Login";
 import { Navigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
+import StoreRecords from "./pages/StoreRecords";
 
 // 💡 INI MIDDLEWARE-NYA (Private Route)
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -49,6 +50,7 @@ export default function App() {
           <Route path="stores" element={<Stores />} />
           <Route path="sales" element={<Sales />} />
           <Route path="margin" element={<Margin />} />
+          <Route path="records" element={<StoreRecords />} />
         </Route>
       </Routes>
     </BrowserRouter>

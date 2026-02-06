@@ -58,7 +58,7 @@ export default function MasterProduct() {
     }),
 
     // Timer
-    timer = 1000;
+    timer = 500;
 
   // Re-fetch data saat page, search, atau category berubah
   useEffect(() => {

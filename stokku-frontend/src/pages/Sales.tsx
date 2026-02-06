@@ -45,7 +45,7 @@ export default function Sales() {
     [isSearchingBulk, setIsSearchingBulk] = useState(false),
     inputRefs = useRef<(HTMLInputElement | null)[]>([]),
     qtyRefs = useRef<(HTMLInputElement | null)[]>([]),
-    timer = 1000;
+    timer = 500;
 
   // Trigger fetch saat halaman, pencarian, atau filter berubah
   useEffect(() => {

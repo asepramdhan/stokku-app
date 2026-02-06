@@ -34,7 +34,10 @@ const express = require("express"),
 
 // LOGIN
 router.post("/login", async (req, res) => {
+	res.header("Access-Control-Allow-Origin", "http://localhost:5173");
+	// res.header("Access-Control-Allow-Origin", "https://stokku.portoku.id");
 	const { email, password } = req.body;
+
 	try {
 		const [rows] = await db.query("SELECT * FROM users WHERE email = ?", [
 			email,
@@ -44,24 +47,23 @@ router.post("/login", async (req, res) => {
 
 		const user = rows[0];
 
-		// Bandingkan password yang diketik dengan yang ada di DB (yg sudah di-hash)
+		// 1. Cek Bcrypt (Sekarang harusnya cepat karena cost sudah 10)
 		const isMatch = await bcrypt.compare(password, user.password);
 		if (!isMatch) return res.status(401).json({ message: "Password salah!" });
 
-		// Buat Token JWT
-		const token = jwt.sign(
-			{ id: user.id },
-			"RAHASIA_ALHADE_2026", // 💡 Pastikan ini SAMA dengan yang ada di middleware/auth.js
-			{ expiresIn: "1d" },
-		);
+		// 2. Buat Token JWT
+		// Pastikan JWT_SECRET di cPanel sama dengan "RAHASIA_STOKKU_2026"
+		const secretKey = process.env.JWT_SECRET || "RAHASIA_STOKKU_2026";
+		const token = jwt.sign({ id: user.id }, secretKey, { expiresIn: "1d" });
 
-		// Kirim token ke React
-		res.json({
+		return res.json({
 			token,
 			user: { id: user.id, name: user.name, email: user.email },
 		});
 	} catch (err) {
-		res.status(500).json({ error: err.message });
+		return res
+			.status(500)
+			.json({ message: "Server Error", error: err.message });
 	}
 });
 
