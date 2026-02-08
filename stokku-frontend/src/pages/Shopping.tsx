@@ -565,7 +565,9 @@ export default function Shopping() {
                         <span className="text-[10px] text-slate-400 uppercase font-mono">{item.category || 'Umum'}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="truncate">{item.qty} Pcs</TableCell>
+                    <TableCell className="text-sm font-black tracking-tight truncate w-[100px]">
+                      {item.qty} <span className="text-[10px] font-medium text-slate-400">Pcs</span>
+                    </TableCell>
                     <TableCell className="truncate">Rp {Number(item.buy_price).toLocaleString()}</TableCell>
 
                     {/* KOLOM WAKTU */}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
@@ -5,7 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, Wallet, Receipt, Search, X, Filter,
   Calendar, AlertCircle, CheckCircle2, ArrowUpRight,
-  Plus, Edit, Trash2
+  Plus, Edit, Trash2,
+  ShoppingBag
 } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -33,6 +35,12 @@ export default function StoreRecords() {
     [isPayModalOpen, setIsPayModalOpen] = useState(false),
     [selectedRecord, setSelectedRecord] = useState<any>(null),
     [payAmount, setPayAmount] = useState(""),
+    [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false),
+    [paymentHistory, setPaymentHistory] = useState<any[]>([]),
+    [historyLoading, setHistoryLoading] = useState(false),
+    [isSpendModalOpen, setIsSpendModalOpen] = useState(false),
+    [spendAmount, setSpendAmount] = useState(""),
+    [spendNote, setSpendNote] = useState(""),
     // State untuk form Tambah/Edit
     [formData, setFormData] = useState({
       toko_name: "",
@@ -46,6 +54,7 @@ export default function StoreRecords() {
 
   useEffect(() => { fetchRecords(); }, [page, search, filterStatus, filterType]);
 
+  // FUNGSI AMBIL DATA
   const fetchRecords = async () => {
     setIsLoading(true);
     try {
@@ -72,6 +81,21 @@ export default function StoreRecords() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // FUNGSI AMBIL RIWAYAT
+  const fetchHistory = async (record: any) => {
+    setSelectedRecord(record);
+    setIsHistoryModalOpen(true);
+    setHistoryLoading(true);
+    try {
+      const res = await fetch(`${API_RECORDS}/${record.id}/history`, {
+        headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+      });
+      const data = await res.json();
+      setPaymentHistory(data);
+    } catch (error) { toast.error("Gagal memuat riwayat"); }
+    finally { setHistoryLoading(false); }
   };
 
   // FUNGSI SIMPAN (TAMBAH & EDIT)
@@ -109,6 +133,34 @@ export default function StoreRecords() {
       }
     } catch (error) {
       console.error("Gagal menyimpan:", error);
+    }
+  };
+
+  // FUNGSI TAMBAH BELANJA
+  const handleAddSpending = async () => {
+    if (!selectedRecord || !spendAmount) return;
+    try {
+      const res = await fetch(`${API_RECORDS}/${selectedRecord.id}/add-spending`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({
+          amount: parseFloat(spendAmount),
+          notes: spendNote
+        })
+      });
+
+      if (res.ok) {
+        setIsSpendModalOpen(false);
+        setSpendAmount("");
+        setSpendNote("");
+        fetchRecords(); // Refresh data tabel
+        toast.success("Tagihan belanja berhasil ditambah!");
+      }
+    } catch (error) {
+      toast.error("Gagal menambah belanja.");
     }
   };
 
@@ -183,6 +235,17 @@ export default function StoreRecords() {
       notes: item.notes
     });
     setIsAddModalOpen(true);
+  };
+
+  // Helper cek tanggal
+  const isOverdue = (dateString: string, status: string) => {
+    if (!dateString || status === 'paid') return false;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset waktu ke jam 00:00
+
+    const dueDate = new Date(dateString);
+    return dueDate < today; // True jika sudah lewat dari hari ini
   };
 
   return (
@@ -328,14 +391,28 @@ export default function StoreRecords() {
                           <Badge className="bg-red-100 text-red-700 hover:bg-red-100 border-none shadow-none"><AlertCircle className="w-3 h-3 mr-1" /> Pending</Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-[11px] font-medium text-slate-500">
-                        {item.due_date ? new Date(item.due_date).toLocaleDateString("id-ID", { weekday: 'short', day: 'numeric', month: 'short' }) : "-"}
+                      <TableCell className={`text-[11px] font-medium ${isOverdue(item.due_date, item.status) ? "text-red-600 font-bold" : "text-slate-500"}`}>
+                        <div className="flex items-center gap-1">
+                          {isOverdue(item.due_date, item.status) && <AlertCircle size={12} className="text-red-600 animate-pulse" />}
+                          {item.due_date ? new Date(item.due_date).toLocaleDateString("id-ID", { weekday: 'short', day: 'numeric', month: 'short' }) : "-"}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
+                          <Button variant="outline" size="icon" className="h-8 w-8 text-amber-600" onClick={() => fetchHistory(item)}>
+                            <BookOpen size={14} /> {/* Icon buku untuk riwayat */}
+                          </Button>
                           <Button variant="outline" size="icon" className="h-8 w-8 text-blue-600" onClick={() => openEdit(item)}><Edit size={14} /></Button>
                           <Button variant="outline" size="icon" className="h-8 w-8 text-red-600" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></Button>
-                          <Button variant="outline" size="sm" disabled={item.status === 'paid'} onClick={() => { setSelectedRecord(item); setIsPayModalOpen(true); }} className="h-8 text-xs">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 text-orange-600 border-orange-200 hover:bg-orange-50"
+                            onClick={() => { setSelectedRecord(item); setIsSpendModalOpen(true); }}
+                          >
+                            <ShoppingBag size={14} />
+                          </Button>
+                          <Button variant="outline" size="sm" disabled={item.status === 'paid'} onClick={() => { setSelectedRecord(item); setIsPayModalOpen(true); }} className="h-8 text-xs font-bold bg-green-50 text-green-700 border-green-200 hover:bg-green-100">
                             <Wallet className="w-3 h-3 mr-1" /> Bayar
                           </Button>
                         </div>
@@ -403,6 +480,31 @@ export default function StoreRecords() {
         </DialogContent>
       </Dialog>
 
+      {/* MODAL BELANJA */}
+      <Dialog open={isSpendModalOpen} onOpenChange={setIsSpendModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tambah Belanja: {selectedRecord?.toko_name}</DialogTitle>
+            <DialogDescription className="text-xs">
+              Input nominal belanja hari ini untuk menambah total tagihan toko.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Nominal Belanja (Rp)</Label>
+              <Input type="number" placeholder="Contoh: 50000" value={spendAmount} onChange={e => setSpendAmount(e.target.value)} autoFocus />
+            </div>
+            <div className="space-y-2">
+              <Label>Catatan Barang (Opsional)</Label>
+              <Input placeholder="Misal: Beli pakan burung 2 dus" value={spendNote} onChange={e => setSpendNote(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleAddSpending} className="w-full bg-orange-600 hover:bg-orange-700">Simpan Belanja</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* MODAL BAYAR */}
       <Dialog open={isPayModalOpen} onOpenChange={setIsPayModalOpen}>
         <DialogContent>
@@ -421,6 +523,100 @@ export default function StoreRecords() {
             </div>
           </div>
           <DialogFooter><Button onClick={handlePayment} className="w-full bg-green-600 hover:bg-green-700">Konfirmasi Bayar</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL RIWAYAT GABUNGAN + SUMMARY */}
+      <Dialog open={isHistoryModalOpen} onOpenChange={setIsHistoryModalOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BookOpen className="text-blue-600" size={20} />
+              Riwayat Mutasi: {selectedRecord?.toko_name}
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Data transaksi kronologis belanja dan pembayaran.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* SEKSI SUMMARY CARD */}
+          {!historyLoading && paymentHistory.length > 0 && (
+            <div className="grid grid-cols-2 gap-3 mb-2">
+              <div className="bg-orange-50 border border-orange-100 p-3 rounded-xl">
+                <p className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">Belanja Bulan Ini</p>
+                <p className="text-sm font-bold text-orange-700">
+                  {toRp(paymentHistory
+                    .filter(h => h.type === 'spending' && new Date(h.date).getMonth() === new Date().getMonth())
+                    .reduce((acc, curr) => acc + parseFloat(curr.amount), 0)
+                  )}
+                </p>
+              </div>
+              <div className="bg-green-50 border border-green-100 p-3 rounded-xl">
+                <p className="text-[10px] font-bold text-green-600 uppercase tracking-wider">Cicilan Bulan Ini</p>
+                <p className="text-sm font-bold text-green-700">
+                  {toRp(paymentHistory
+                    .filter(h => h.type === 'payment' && new Date(h.date).getMonth() === new Date().getMonth())
+                    .reduce((acc, curr) => acc + parseFloat(curr.amount), 0)
+                  )}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* TABEL RIWAYAT */}
+          <div className="space-y-4 py-2">
+            {historyLoading ? (
+              <div className="space-y-2"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div>
+            ) : paymentHistory.length > 0 ? (
+              <div className="border rounded-lg overflow-hidden max-h-[350px] overflow-y-auto shadow-inner">
+                <Table>
+                  <TableHeader className="bg-slate-50 sticky top-0 z-10">
+                    <TableRow>
+                      <TableHead className="text-xs">Keterangan</TableHead>
+                      <TableHead className="text-right text-xs">Nominal</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paymentHistory.map((h, idx) => (
+                      <TableRow key={idx} className="hover:bg-slate-50/50">
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="text-[10px] text-slate-400 font-medium">
+                              {new Date(h.date).toLocaleString("id-ID", { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                            <span className="text-xs font-semibold text-slate-700">{h.notes || "Tanpa catatan"}</span>
+                            <div className="mt-1">
+                              <Badge variant="outline" className={`text-[9px] px-1.5 py-0 h-4 border-none ${h.type === 'spending' ? "text-orange-600 bg-orange-100" : "text-green-600 bg-green-100"
+                                }`}>
+                                {h.type === 'spending' ? "Belanja Stok" : "Cicilan Masuk"}
+                              </Badge>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right align-top">
+                          <span className={`text-sm font-bold ${h.type === 'spending' ? "text-red-600" : "text-green-600"}`}>
+                            {h.type === 'spending' ? "+" : "-"}{toRp(h.amount)}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center py-10 border-2 border-dashed rounded-lg text-slate-400 text-sm italic">
+                Belum ada aktivitas transaksi.
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="flex-row items-center justify-between gap-2 border-t pt-4">
+            <div className="text-[10px] text-slate-400 leading-tight">
+              Sisa Hutang Saat Ini:<br />
+              <span className="text-sm font-bold text-slate-900">{toRp(selectedRecord?.total_price - selectedRecord?.paid_amount)}</span>
+            </div>
+            <Button variant="outline" onClick={() => setIsHistoryModalOpen(false)}>Tutup</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

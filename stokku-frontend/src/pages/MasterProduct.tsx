@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
@@ -12,15 +13,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { AlertTriangle, ArrowDownLeft, ArrowUpRight, Box, Edit2, Filter, History, Layers, Package, Plus, Search, Trash2, X } from "lucide-react";
+import { AlertTriangle, ArrowDownLeft, ArrowUpRight, Box, CheckCircle2, Clock, Edit2, Filter, History, Layers, Package, Plus, Search, Trash2, X } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Label } from "@/components/ui/label";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/products`;
+const API_URL = `${import.meta.env.VITE_API_URL}/products`,
+  API_SHOPPING = `${import.meta.env.VITE_API_URL}/shopping`; // Pastikan ini ada
 
 type Product = {
   id?: number;
@@ -50,6 +53,8 @@ export default function MasterProduct() {
     [history, setHistory] = useState<any[]>([]),
     [isHistoryOpen, setIsHistoryOpen] = useState(false),
     [historyLoading, setHistoryLoading] = useState(false),
+    [isAddToShoppingOpen, setIsAddToShoppingOpen] = useState(false),
+    [shoppingFormData, setShoppingFormData] = useState({ product_id: 0, name: "", qty: 1, buy_price: 0 }),
     // 💡 Buat fungsi helper biar gak capek ngetik header terus
     getHeaders = () => ({
       "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -191,6 +196,27 @@ export default function MasterProduct() {
       }
     },
 
+    // Fungsi Tambah ke Rencana Belanja
+    openAddToShopping = async (product: any) => {
+      try {
+        // Ambil harga beli terakhir dari API Shopping yang sudah kamu punya
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/shopping/last-price/${product.id}`, {
+          headers: getHeaders()
+        });
+        const data = await res.json();
+
+        setShoppingFormData({
+          product_id: product.id,
+          name: product.name,
+          qty: 1,
+          buy_price: data.last_price || product.avg_cost || 0 // Default ke harga terakhir atau modal awal
+        });
+        setIsAddToShoppingOpen(true);
+      } catch (error) {
+        toast.error("Gagal mengambil data harga produk.");
+      }
+    },
+
     // Fungsi Update
     handleUpdate = async () => {
       // Reset errors setiap kali tombol diklik
@@ -285,6 +311,39 @@ export default function MasterProduct() {
         console.error(error);
         toast.error("Terjadi kesalahan koneksi");
       }
+    },
+
+    // Fungsi Tambah ke Rencana Belanja
+    handleConfirmAddToShopping = async () => {
+      try {
+        const res = await fetch(API_SHOPPING, {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({
+            product_id: shoppingFormData.product_id,
+            qty: shoppingFormData.qty,
+            buy_price: shoppingFormData.buy_price
+          }),
+        });
+
+        if (res.ok) {
+          setIsAddToShoppingOpen(false);
+          toast.success(`${shoppingFormData.name} berhasil masuk daftar belanja!`);
+        } else {
+          const err = await res.json();
+          toast.error(err.error || "Gagal menambahkan ke daftar belanja.");
+        }
+      } catch (error) {
+        toast.error("Terjadi kesalahan koneksi.");
+      }
+    },
+
+    // Fungsi Hitung Status Stok
+    getStockStatus = (days: number) => {
+      if (days > 30) return { label: "Aman", color: "text-emerald-600 bg-emerald-50 border-emerald-100", icon: <CheckCircle2 size={12} /> };
+      if (days > 7) return { label: "Cukup", color: "text-blue-600 bg-blue-50 border-blue-100", icon: <Package size={12} /> };
+      if (days > 3) return { label: "Menipis", color: "text-orange-600 bg-orange-50 border-orange-100", icon: <Clock size={12} /> };
+      return { label: "Kritis", color: "text-red-600 bg-red-50 border-red-100", icon: <AlertTriangle size={12} /> };
     };
 
   return (
@@ -425,17 +484,37 @@ export default function MasterProduct() {
                       Rp {Number(product.price).toLocaleString()}
                     </TableCell>
                     <TableCell className="truncate">
-                      <div className="flex flex-col gap-1">
-                        <span className={`font-bold ${product.quantity < 10 ? 'text-red-500' : 'text-slate-700'}`}>
-                          {product.quantity}
-                        </span>
-                        <span className="text-[10px] text-slate-400">
-                          Habis dlm ±{product.daysLeft} hari
-                        </span>
+                      <div className="flex flex-col gap-1.5">
+                        {/* Angka Stok Utama */}
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm font-black tracking-tight ${product.quantity < 10 ? 'text-red-600' : 'text-slate-900'}`}>
+                            {product.quantity.toLocaleString()} <span className="text-[10px] font-medium text-slate-400">Pcs</span>
+                          </span>
+                        </div>
+
+                        {/* Indikator Prediksi */}
+                        {product.daysLeft !== undefined && (
+                          <div className={`flex items-center w-fit gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wider shadow-sm ${getStockStatus(product.daysLeft).color}`}>
+                            {getStockStatus(product.daysLeft).icon}
+                            <span>
+                              {product.daysLeft > 90 ? "> 3 Bulan" : `± ${product.daysLeft} Hari`}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                        {/* TOMBOL BARU: ADD TO SHOPPING */}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                          onClick={() => openAddToShopping(product)}
+                          title="Tambah ke Daftar Belanja"
+                        >
+                          <Plus size={16} />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -591,6 +670,56 @@ export default function MasterProduct() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddOpen(false)}>Batal</Button>
             <Button onClick={handleAdd}>Simpan Produk</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* DIALOG TAMBAH KE BELANJA */}
+      <Dialog open={isAddToShoppingOpen} onOpenChange={setIsAddToShoppingOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="text-orange-500" size={20} />
+              Masuk Daftar Belanja
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+              <p className="text-[10px] font-bold text-slate-400 uppercase">Nama Produk</p>
+              <p className="text-sm font-bold text-slate-700">{shoppingFormData.name}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label className="text-xs font-bold uppercase text-slate-500">Jumlah Beli</Label>
+                <Input
+                  type="number"
+                  value={shoppingFormData.qty}
+                  onChange={e => setShoppingFormData({ ...shoppingFormData, qty: Number(e.target.value) })}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs font-bold uppercase text-slate-500">Estimasi Harga Beli</Label>
+                <Input
+                  type="number"
+                  value={shoppingFormData.buy_price}
+                  onChange={e => setShoppingFormData({ ...shoppingFormData, buy_price: Number(e.target.value) })}
+                />
+              </div>
+            </div>
+            <div className="pt-2 border-t border-dashed">
+              <div className="flex justify-between items-center text-orange-700">
+                <span className="text-[10px] font-bold uppercase">Total Estimasi</span>
+                <span className="text-lg font-black">
+                  Rp {(shoppingFormData.qty * shoppingFormData.buy_price).toLocaleString()}
+                </span>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddToShoppingOpen(false)}>Batal</Button>
+            <Button onClick={handleConfirmAddToShopping} className="bg-orange-600 hover:bg-orange-700">
+              Tambah ke List Belanja
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

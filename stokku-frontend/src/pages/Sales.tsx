@@ -419,7 +419,9 @@ export default function Sales() {
                     <TableCell className="text-slate-400 text-xs truncate w-[150px]">{new Date(sale.created_at).toLocaleString()}</TableCell>
                     <TableCell className="font-medium truncate max-w-[200px]">{sale.product_name}</TableCell>
                     <TableCell className="truncate w-[150px]"><Badge variant="outline">{sale.store_name}</Badge></TableCell>
-                    <TableCell className="truncate w-[100px]">{sale.qty} Pcs</TableCell>
+                    <TableCell className="text-sm font-black tracking-tight truncate w-[100px]">
+                      {sale.qty} <span className="text-[10px] font-medium text-slate-400">Pcs</span>
+                    </TableCell>
                     <TableCell className="font-bold text-green-600 truncate w-[150px]">Rp {Number(sale.total_price).toLocaleString()}</TableCell>
                     <TableCell className="text-right w-[100px]">
                       <div className="flex justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">

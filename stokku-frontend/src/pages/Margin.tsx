@@ -182,7 +182,7 @@ export default function Margin() {
                     <TableRow key={item.id} className="hover:bg-slate-50/50 transition-colors">
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="font-bold text-slate-800 truncate max-w-[150px]">{item.product_name}</span>
+                          <span className="font-bold text-slate-800 truncate">{item.product_name}</span>
                           <span className="text-[10px] text-slate-400">{item.store_name} ({item.platform})</span>
                         </div>
                       </TableCell>

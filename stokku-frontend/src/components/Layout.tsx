@@ -223,7 +223,9 @@ export default function Layout() {
                                 <span className="text-xs font-bold text-slate-700 group-hover:text-blue-600 truncate w-40">
                                   {item.name}
                                 </span>
-                                <span className="text-[10px] text-slate-400">Sisa {item.quantity} Pcs</span>
+                                <span className="text-[10px] font-black tracking-tight text-slate-400">
+                                  <span className="text-[10px] font-medium">Sisa:</span> {item.quantity} <span className="text-[10px] font-medium">Pcs</span>
+                                </span>
                               </div>
                               <div className={cn(
                                 "text-[8px] font-black px-1.5 py-0.5 rounded uppercase",

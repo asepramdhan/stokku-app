@@ -333,8 +333,8 @@ export default function Dashboard() {
                           <span className="text-xs font-bold text-slate-700 group-hover:text-blue-600 transition-colors truncate w-32">
                             {item.name}
                           </span>
-                          <span className="text-[10px] font-medium text-slate-400">
-                            Sisa {item.quantity} Pcs
+                          <span className="text-[10px] font-black tracking-tight text-slate-400">
+                            <span className="text-[10px] font-medium">Sisa:</span> {item.quantity} <span className="text-[10px] font-medium">Pcs</span>
                           </span>
                         </div>
                         <div className={cn(

@@ -34,8 +34,8 @@ const express = require("express"),
 
 // LOGIN
 router.post("/login", async (req, res) => {
-	res.header("Access-Control-Allow-Origin", "http://localhost:5173");
-	// res.header("Access-Control-Allow-Origin", "https://stokku.portoku.id");
+	// res.header("Access-Control-Allow-Origin", "http://localhost:5173");
+	res.header("Access-Control-Allow-Origin", "https://stokku.portoku.id");
 	const { email, password } = req.body;
 
 	try {

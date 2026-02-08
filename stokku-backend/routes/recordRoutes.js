@@ -68,7 +68,7 @@ router.get("/", async (req, res) => {
 	}
 });
 
-// 2. CREATE NEW RECORD (FIXED)
+// 2. CREATE NEW RECORD (Update: Catat DP ke History)
 router.post("/", async (req, res) => {
 	const {
 		toko_name,
@@ -77,32 +77,35 @@ router.post("/", async (req, res) => {
 		paid_amount,
 		payment_type,
 		due_date,
-		notes, // Ini yang sering undefined
+		notes,
 	} = req.body;
-
-	// Logic status
 	let status = "pending";
 	if (parseFloat(paid_amount) >= parseFloat(total_price)) status = "paid";
 	else if (parseFloat(paid_amount) > 0) status = "partial";
-
-	// PROTEKSI: Paksa undefined menjadi null agar MySQL tidak error
-	const finalDueDate = due_date === "" || !due_date ? null : due_date;
-	const finalNotes = notes === undefined || notes === "" ? null : notes;
 
 	try {
 		const [result] = await db.execute(
 			"INSERT INTO shop_records (toko_name, customer_name, total_price, paid_amount, payment_type, status, due_date, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
 			[
-				toko_name || null,
-				customer_name || null,
-				total_price || 0,
+				toko_name,
+				customer_name,
+				total_price,
 				paid_amount || 0,
-				payment_type || "weekly",
+				payment_type,
 				status,
-				finalDueDate,
-				finalNotes,
+				due_date || null,
+				notes || null,
 			],
 		);
+
+		// JIKA ADA DP, MASUKKAN KE HISTORY
+		if (parseFloat(paid_amount) > 0) {
+			await db.execute(
+				"INSERT INTO shop_payment_history (record_id, amount) VALUES (?, ?)",
+				[result.insertId, paid_amount],
+			);
+		}
+
 		res
 			.status(201)
 			.json({ id: result.insertId, message: "Record created successfully" });
@@ -111,48 +114,38 @@ router.post("/", async (req, res) => {
 	}
 });
 
-// 3. UPDATE PAYMENT (Sistem Cicilan)
+// 3. UPDATE PAYMENT (Update: Catat Cicilan ke History)
 router.patch("/:id/pay", async (req, res) => {
 	const { amount } = req.body;
 	const { id } = req.params;
 
 	try {
-		// 1. Ambil data lama
 		const [rows] = await db.query(
 			"SELECT total_price, paid_amount FROM shop_records WHERE id = ?",
 			[id],
 		);
-
 		if (rows.length === 0)
 			return res.status(404).json({ message: "Data tidak ditemukan" });
 
-		// 2. Pastikan tidak ada nilai NULL agar matematika tidak error
-		const currentPaid = parseFloat(rows[0].paid_amount || 0);
-		const totalPrice = parseFloat(rows[0].total_price || 0);
-		const additionalPaid = parseFloat(amount || 0);
+		const newPaidAmount =
+			parseFloat(rows[0].paid_amount || 0) + parseFloat(amount || 0);
+		let newStatus =
+			newPaidAmount >= parseFloat(rows[0].total_price) ? "paid" : "partial";
 
-		const newPaidAmount = currentPaid + additionalPaid;
-
-		// 3. Tentukan status baru
-		let newStatus = "partial";
-		if (newPaidAmount >= totalPrice) {
-			newStatus = "paid";
-		}
-
-		// 4. Update ke Database
+		// Update record utama
 		await db.execute(
 			"UPDATE shop_records SET paid_amount = ?, status = ? WHERE id = ?",
 			[newPaidAmount, newStatus, id],
 		);
 
-		res.json({
-			success: true,
-			message: "Pembayaran berhasil diperbarui",
-			newPaidAmount,
-			status: newStatus,
-		});
+		// MASUKKAN KE HISTORY
+		await db.execute(
+			"INSERT INTO shop_payment_history (record_id, amount) VALUES (?, ?)",
+			[id, amount],
+		);
+
+		res.json({ success: true, message: "Pembayaran berhasil dicatat" });
 	} catch (err) {
-		console.error(err);
 		res.status(500).json({ error: err.message });
 	}
 });
@@ -202,6 +195,67 @@ router.put("/:id", async (req, res) => {
 			],
 		);
 		res.json({ message: "Record updated successfully" });
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
+// 6. GET UNIFIED HISTORY (BELANJA & BAYAR)
+router.get("/:id/history", async (req, res) => {
+	const { id } = req.params;
+	try {
+		const query = `
+      (SELECT id, 'payment' as type, amount, payment_date as date, 'Cicilan/Bayar' as notes 
+       FROM shop_payment_history WHERE record_id = ?)
+      UNION ALL
+      (SELECT id, 'spending' as type, amount, spending_date as date, notes 
+       FROM shop_spending_history WHERE record_id = ?)
+      ORDER BY date DESC
+    `;
+		const [rows] = await db.query(query, [id, id]);
+		res.json(rows);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
+// 7. TAMBAH BELANJA HARIAN (TOP-UP TAGIHAN)
+router.patch("/:id/add-spending", async (req, res) => {
+	const { amount, notes } = req.body;
+	const { id } = req.params;
+
+	try {
+		// 1. Ambil data lama untuk kalkulasi
+		const [rows] = await db.query(
+			"SELECT total_price, paid_amount FROM shop_records WHERE id = ?",
+			[id],
+		);
+		if (rows.length === 0)
+			return res.status(404).json({ message: "Data tidak ditemukan" });
+
+		const newTotalPrice =
+			parseFloat(rows[0].total_price || 0) + parseFloat(amount || 0);
+
+		// Hitung ulang status (kalau hutang nambah, status jadi partial lagi kecuali sudah terbayar semua)
+		let newStatus = "partial";
+		if (parseFloat(rows[0].paid_amount) >= newTotalPrice) newStatus = "paid";
+
+		// 2. Update Tabel Utama
+		await db.execute(
+			"UPDATE shop_records SET total_price = ?, status = ? WHERE id = ?",
+			[newTotalPrice, newStatus, id],
+		);
+
+		// 3. Catat ke Riwayat Belanja
+		await db.execute(
+			"INSERT INTO shop_spending_history (record_id, amount, notes) VALUES (?, ?, ?)",
+			[id, amount, notes || "Belanja Stok"],
+		);
+
+		res.json({
+			success: true,
+			message: "Tagihan belanja berhasil ditambahkan",
+		});
 	} catch (err) {
 		res.status(500).json({ error: err.message });
 	}
