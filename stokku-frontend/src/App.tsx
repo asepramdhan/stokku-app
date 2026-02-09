@@ -10,6 +10,8 @@ import Login from "./pages/Login";
 import { Navigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import StoreRecords from "./pages/StoreRecords";
+import PinGuard from "./components/PinGuard";
+import Settings from "./pages/Settings";
 
 // 💡 INI MIDDLEWARE-NYA (Private Route)
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -38,21 +40,24 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-        {/* <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} /> */}
+      <PinGuard>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          {/* <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} /> */}
 
-        <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="shopping" element={<Shopping />} />
-          <Route path="master" element={<MasterProduct />} />
-          <Route path="stores" element={<Stores />} />
-          <Route path="sales" element={<Sales />} />
-          <Route path="margin" element={<Margin />} />
-          <Route path="records" element={<StoreRecords />} />
-        </Route>
-      </Routes>
+          <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="shopping" element={<Shopping />} />
+            <Route path="master" element={<MasterProduct />} />
+            <Route path="stores" element={<Stores />} />
+            <Route path="sales" element={<Sales />} />
+            <Route path="margin" element={<Margin />} />
+            <Route path="records" element={<StoreRecords />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+        </Routes>
+      </PinGuard>
     </BrowserRouter>
   );
 }

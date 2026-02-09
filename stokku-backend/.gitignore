@@ -3,6 +3,7 @@ node_modules/
 
 # Rahasia (SANGAT PENTING)
 .env
+.htaccess
 
 # Logs
 npm-debug.log*

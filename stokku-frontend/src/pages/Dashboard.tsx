@@ -100,11 +100,11 @@ export default function Dashboard() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Ringkasan Bisnis</h1>
-          <p className="text-slate-500 text-sm">Update terakhir: {isLoading ? "..." : new Date().toLocaleString('id-ID')}</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Update terakhir: {isLoading ? "..." : new Date().toLocaleString('id-ID')}</p>
         </div>
         {/* DROPDOWN FILTER */}
-        <div className="flex items-center gap-2 bg-white border p-1.5 rounded-lg shadow-sm w-full md:w-auto">
-          <Calendar size={16} className="text-slate-400 ml-2" />
+        <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border p-1.5 rounded-lg shadow-sm w-full md:w-auto">
+          <Calendar size={16} className="text-slate-400 dark:text-slate-500 ml-2" />
           <select
             value={range}
             onChange={(e) => setRange(e.target.value)}
@@ -120,7 +120,7 @@ export default function Dashboard() {
 
       {/* STATS CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-blue-600 text-white border-none shadow-blue-200 shadow-lg">
+        <Card className="bg-blue-600 dark:bg-blue-800 text-white border-none shadow-blue-200 shadow-lg dark:shadow-none">
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-sm font-medium opacity-80">Total Omset</CardTitle>
             <Landmark size={18} className="opacity-80" />
@@ -133,34 +133,34 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium text-slate-500">Total Pesanan</CardTitle>
-            <ShoppingBag size={18} className="text-slate-400" />
+            <CardTitle className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Pesanan</CardTitle>
+            <ShoppingBag size={18} className="text-slate-400 dark:text-slate-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{isLoading ? "..." : stats?.orders}</div>
-            <p className="text-xs text-green-600 mt-1 flex items-center gap-1"><ArrowUpRight size={12} /> 5 hari ini</p>
+            <p className="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center gap-1"><ArrowUpRight size={12} /> 5 hari ini</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium text-slate-500">Aset Stok</CardTitle>
-            <Package size={18} className="text-slate-400" />
+            <CardTitle className="text-sm font-medium text-slate-500 dark:text-slate-400">Aset Stok</CardTitle>
+            <Package size={18} className="text-slate-400 dark:text-slate-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">Rp {isLoading ? "..." : Number(stats?.stockValue || 0).toLocaleString()}</div>
-            <p className="text-xs text-slate-400 mt-1">Nilai barang di gudang</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Nilai barang di gudang</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium text-slate-500">Efisiensi</CardTitle>
-            <TrendingUp size={18} className="text-slate-400" />
+            <CardTitle className="text-sm font-medium text-slate-500 dark:text-slate-400">Efisiensi</CardTitle>
+            <TrendingUp size={18} className="text-slate-400 dark:text-slate-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{isLoading ? "..." : (stats?.turnover || 0)}%</div>
-            <p className="text-xs text-slate-400 mt-1">Perputaran stok</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Perputaran stok</p>
           </CardContent>
         </Card>
       </div>
@@ -226,17 +226,17 @@ export default function Dashboard() {
 
                     <div className="grid grid-cols-2 gap-2 mt-2 w-full">
                       {stats.platforms.map((p: any, i: number) => (
-                        <div key={i} className="flex items-center gap-2 text-[10px] font-medium text-slate-600">
+                        <div key={i} className="flex items-center gap-2 text-[10px] font-medium text-slate-600 dark:text-slate-400">
                           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
                           <span className="truncate w-20">{p.name}</span>
-                          <span className="text-slate-400">({((p.value / stats.revenue) * 100).toFixed(0)}%)</span>
+                          <span className="text-slate-400 dark:text-slate-500">({((p.value / stats.revenue) * 100).toFixed(0)}%)</span>
                         </div>
                       ))}
                     </div>
                   </>
                 ) : (
                   // Tampilan kalau data kosong
-                  <div className="flex flex-col items-center gap-2 text-slate-300">
+                  <div className="flex flex-col items-center gap-2 text-slate-300 dark:text-slate-600">
                     <ShoppingCart size={40} className="opacity-20" />
                     <p className="text-xs italic">Belum ada data penjualan</p>
                   </div>
@@ -253,7 +253,7 @@ export default function Dashboard() {
         <Card className="shadow-sm lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-lg font-bold">Top 5 Produk</CardTitle>
-            <TrendingUp size={18} className="text-green-500" />
+            <TrendingUp size={18} className="text-green-500 dark:text-green-400" />
           </CardHeader>
           <CardContent>
             <div className="space-y-5">
@@ -264,27 +264,27 @@ export default function Dashboard() {
                       <div key={index} className="flex flex-col gap-1">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <span className="text-xs font-bold text-slate-400">{index + 1}.</span>
+                            <span className="text-xs font-bold text-slate-400 dark:text-slate-500">{index + 1}.</span>
                             <div className="flex flex-col">
-                              <span className="text-[11px] font-bold text-slate-800 truncate w-[130px]">{product.name}</span>
-                              <span className="text-[9px] text-slate-400 uppercase">{product.sku}</span>
+                              <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate w-[200px]">{product.name}</span>
+                              <span className="text-[9px] text-slate-400 dark:text-slate-500 uppercase">{product.sku}</span>
                             </div>
                           </div>
                           <div className="text-right">
-                            <span className="text-[11px] font-bold text-blue-600">{product.total_qty} <span className="text-[9px] font-normal">Pcs</span></span>
+                            <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400">{product.total_qty} <span className="text-[9px] font-normal">Pcs</span></span>
                           </div>
                         </div>
                         {/* Progress Bar Visual */}
-                        <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
+                        <div className="h-1 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                           <div
-                            className="h-full bg-blue-500 transition-all duration-500"
+                            className="h-full bg-blue-500 dark:bg-blue-400 transition-all duration-500"
                             style={{ width: `${(product.total_qty / stats.topProducts[0].total_qty) * 100}%` }}
                           />
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-10 text-slate-300">
+                    <div className="flex flex-col items-center justify-center py-10 text-slate-300 dark:text-slate-600">
                       <Box size={40} className="opacity-20 mb-2" />
                       <p className="text-[11px] italic">Belum ada data penjualan</p>
                     </div>
@@ -296,17 +296,17 @@ export default function Dashboard() {
         </Card>
 
         {/* STATUS STOK (WIDGET IMPROVED) */}
-        <Card className="border-t-4 border-t-red-500 shadow-md flex flex-col h-full">
+        <Card className="border-t-4 border-t-red-500 dark:border-t-red-400 shadow-md flex flex-col h-full">
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
             <div className="space-y-1">
-              <CardTitle className="text-sm font-bold uppercase text-slate-500 tracking-wider">Perlu Re-Stok</CardTitle>
+              <CardTitle className="text-sm font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">Perlu Re-Stok</CardTitle>
               {!isLoading && stats?.lowStock?.length > 0 && (
-                <p className="text-[10px] text-red-500 font-medium animate-pulse">
+                <p className="text-[10px] text-red-500 dark:text-red-400 font-medium animate-pulse">
                   Ada {stats.lowStock.length} barang hampir habis!
                 </p>
               )}
             </div>
-            <AlertCircle size={18} className="text-red-500" />
+            <AlertCircle size={18} className="text-red-500 dark:text-red-400" />
           </CardHeader>
 
           <CardContent className="flex-1">
@@ -326,31 +326,31 @@ export default function Dashboard() {
                     <div
                       key={i}
                       onClick={() => handleQuickAdd(item.id, item.name)}
-                      className="group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-blue-50 transition-all active:scale-95"
+                      className="group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-800 transition-all active:scale-95"
                     >
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-xs font-bold text-slate-700 group-hover:text-blue-600 transition-colors truncate w-32">
+                          <span className="text-xs font-bold text-slate-700 group-hover:text-blue-600 dark:text-slate-200 dark:group-hover:text-blue-400 transition-colors truncate w-32">
                             {item.name}
                           </span>
-                          <span className="text-[10px] font-black tracking-tight text-slate-400">
+                          <span className="text-[10px] font-black tracking-tight text-slate-400 dark:text-slate-500">
                             <span className="text-[10px] font-medium">Sisa:</span> {item.quantity} <span className="text-[10px] font-medium">Pcs</span>
                           </span>
                         </div>
                         <div className={cn(
                           "text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-tighter",
-                          isCritical ? "bg-red-500 text-white shadow-sm" : "bg-orange-100 text-orange-600"
+                          isCritical ? "bg-red-500 text-white shadow-sm dark:bg-red-400 dark:shadow-none" : "bg-orange-100 text-orange-600 dark:bg-orange-800 dark:text-orange-400"
                         )}>
                           {isCritical ? 'Kritis' : 'Menipis'}
                         </div>
                       </div>
 
                       {/* MINI PROGRESS BAR */}
-                      <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                      <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                         <div
                           className={cn(
                             "h-full transition-all duration-1000 ease-out",
-                            isCritical ? "bg-red-500" : "bg-orange-400"
+                            isCritical ? "bg-red-500 dark:bg-red-400" : "bg-orange-400 dark:bg-orange-500"
                           )}
                           style={{ width: `${percentage}%` }}
                         />
@@ -360,11 +360,11 @@ export default function Dashboard() {
                 })
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <div className="h-12 w-12 rounded-full bg-green-50 flex items-center justify-center mb-2">
-                    <CheckCircle2 size={24} className="text-green-500" />
+                  <div className="h-12 w-12 rounded-full bg-green-50 dark:bg-slate-800 flex items-center justify-center mb-2">
+                    <CheckCircle2 size={24} className="text-green-500 dark:text-green-400" />
                   </div>
-                  <p className="text-xs font-bold text-slate-600">Gudang Aman!</p>
-                  <p className="text-[10px] text-slate-400">Semua stok di atas ambang batas.</p>
+                  <p className="text-xs font-bold text-slate-600 dark:text-slate-200">Gudang Aman!</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500">Semua stok di atas ambang batas.</p>
                 </div>
               )}
             </div>
@@ -374,7 +374,7 @@ export default function Dashboard() {
           <div className="p-4 pt-0">
             <Link
               to="/shopping"
-              className="flex items-center justify-center gap-2 w-full py-2 bg-slate-50 hover:bg-blue-50 text-blue-600 rounded-lg text-[11px] font-bold transition-all border border-dashed border-slate-200 hover:border-blue-200"
+              className="flex items-center justify-center gap-2 w-full py-2 bg-slate-50 hover:bg-blue-50 text-blue-600 rounded-lg text-[11px] font-bold transition-all border border-dashed border-slate-200 hover:border-blue-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:border-slate-700 dark:hover:border-slate-600"
             >
               <ShoppingCart size={14} />
               Buka Daftar Belanja

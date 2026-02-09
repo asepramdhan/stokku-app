@@ -7,6 +7,6 @@ import { Toaster } from './components/ui/sonner.tsx'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
-    <Toaster position="top-center" />
+    <Toaster position="top-center" className="bg-background" />
   </StrictMode>,
 )

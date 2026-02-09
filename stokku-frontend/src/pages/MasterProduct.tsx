@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { AlertTriangle, ArrowDownLeft, ArrowUpRight, Box, CheckCircle2, Clock, Edit2, Filter, History, Layers, Package, Plus, Search, Trash2, X } from "lucide-react";
+import { AlertTriangle, ArrowDownLeft, ArrowUpRight, Box, Edit2, Filter, History, Layers, Package, Plus, Search, Trash2, X } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -338,12 +338,15 @@ export default function MasterProduct() {
       }
     },
 
-    // Fungsi Hitung Status Stok
-    getStockStatus = (days: number) => {
-      if (days > 30) return { label: "Aman", color: "text-emerald-600 bg-emerald-50 border-emerald-100", icon: <CheckCircle2 size={12} /> };
-      if (days > 7) return { label: "Cukup", color: "text-blue-600 bg-blue-50 border-blue-100", icon: <Package size={12} /> };
-      if (days > 3) return { label: "Menipis", color: "text-orange-600 bg-orange-50 border-orange-100", icon: <Clock size={12} /> };
-      return { label: "Kritis", color: "text-red-600 bg-red-50 border-red-100", icon: <AlertTriangle size={12} /> };
+    // Fungsi Hitung Progress Stok
+    getStockProgress = (days: number) => {
+      // Kita anggap 30 hari adalah stok 100% aman
+      const percentage = Math.min((days / 30) * 100, 100);
+
+      if (days > 14) return { width: percentage, color: "bg-emerald-500", label: "Aman" };
+      if (days > 7) return { width: percentage, color: "bg-blue-500", label: "Cukup" };
+      if (days > 3) return { width: percentage, color: "bg-orange-500", label: "Menipis" };
+      return { width: Math.max(percentage, 10), color: "bg-red-500", label: "Kritis" };
     };
 
   return (
@@ -483,24 +486,39 @@ export default function MasterProduct() {
                     <TableCell className="font-mono text-slate-500 truncate max-w-[100px]">
                       Rp {Number(product.price).toLocaleString()}
                     </TableCell>
-                    <TableCell className="truncate">
-                      <div className="flex flex-col gap-1.5">
-                        {/* Angka Stok Utama */}
-                        <div className="flex items-center gap-2">
-                          <span className={`text-sm font-black tracking-tight ${product.quantity < 10 ? 'text-red-600' : 'text-slate-900'}`}>
-                            {product.quantity.toLocaleString()} <span className="text-[10px] font-medium text-slate-400">Pcs</span>
+                    <TableCell className="w-[180px]">
+                      <div className="flex flex-col gap-2 py-1">
+                        {/* Info Angka & Label */}
+                        <div className="flex justify-between items-end">
+                          <div className="flex items-baseline gap-1">
+                            <span className={`text-base font-black ${product.quantity < 10 ? 'text-red-600' : 'text-slate-800'}`}>
+                              {product.quantity}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase">Pcs</span>
+                          </div>
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${product.daysLeft > 14 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                            product.daysLeft > 7 ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                              'bg-red-50 text-red-600 border-red-100'
+                            }`}>
+                            {product.daysLeft > 90 ? "STOK AMAN" : `±${product.daysLeft} HARI`}
                           </span>
                         </div>
 
-                        {/* Indikator Prediksi */}
-                        {product.daysLeft !== undefined && (
-                          <div className={`flex items-center w-fit gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wider shadow-sm ${getStockStatus(product.daysLeft).color}`}>
-                            {getStockStatus(product.daysLeft).icon}
-                            <span>
-                              {product.daysLeft > 90 ? "> 3 Bulan" : `± ${product.daysLeft} Hari`}
-                            </span>
-                          </div>
-                        )}
+                        {/* Progress Bar Custom */}
+                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
+                          <div
+                            className={`h-full transition-all duration-500 ease-in-out ${getStockProgress(product.daysLeft).color}`}
+                            style={{ width: `${getStockProgress(product.daysLeft).width}%` }}
+                          />
+                        </div>
+
+                        {/* Keterangan Tambahan Kecil */}
+                        <p className="text-[9px] text-slate-400 font-medium italic">
+                          {product.daysLeft > 90
+                            ? "Tersedia untuk > 3 bulan ke depan"
+                            : `Estimasi habis pada ${new Date(Date.now() + product.daysLeft * 24 * 60 * 60 * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}`
+                          }
+                        </p>
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
