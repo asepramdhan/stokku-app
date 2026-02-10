@@ -343,10 +343,10 @@ export default function MasterProduct() {
       // Kita anggap 30 hari adalah stok 100% aman
       const percentage = Math.min((days / 30) * 100, 100);
 
-      if (days > 14) return { width: percentage, color: "bg-emerald-500", label: "Aman" };
-      if (days > 7) return { width: percentage, color: "bg-blue-500", label: "Cukup" };
-      if (days > 3) return { width: percentage, color: "bg-orange-500", label: "Menipis" };
-      return { width: Math.max(percentage, 10), color: "bg-red-500", label: "Kritis" };
+      if (days > 14) return { width: percentage, color: "bg-emerald-500 dark:bg-emerald-400", label: "Aman" };
+      if (days > 7) return { width: percentage, color: "bg-blue-500 dark:bg-blue-400", label: "Cukup" };
+      if (days > 3) return { width: percentage, color: "bg-orange-500 dark:bg-orange-400", label: "Menipis" };
+      return { width: Math.max(percentage, 10), color: "bg-red-500 dark:bg-red-400", label: "Kritis" };
     };
 
   return (
@@ -355,7 +355,7 @@ export default function MasterProduct() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Pengaturan Master Produk</h1>
-          <p className="text-slate-500 text-sm font-medium">
+          <p className="text-slate-500 text-sm font-medium dark:text-slate-400">
             Kelola daftar master produk di Stokku
           </p>
         </div>
@@ -363,7 +363,7 @@ export default function MasterProduct() {
         {/* Button jadi full width di mobile, balik ke auto di desktop */}
         <Button
           onClick={() => { setIsAddOpen(true); setErrors({}) }}
-          className="gap-2 w-full md:w-auto shadow-md"
+          className="gap-2 w-full md:w-auto shadow-md dark:shadow-none dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100"
         >
           <Plus size={18} /> Tambah Produk
         </Button>
@@ -371,34 +371,34 @@ export default function MasterProduct() {
 
       {/* STATS CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-blue-500 shadow-sm">
+        <Card className="border-l-4 border-l-blue-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><Package size={20} /></div>
+            <div className="p-2 bg-blue-100 text-blue-600 rounded-full dark:bg-slate-700"><Package size={20} /></div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Total Jenis Barang</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Jenis Barang</p>
               <h3 className="text-2xl font-bold">{isLoading ? "..." : globalStats.totalItems} Item</h3>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-green-500 shadow-sm">
+        <Card className="border-l-4 border-l-green-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-green-100 text-green-600 rounded-full"><Layers size={20} /></div>
+            <div className="p-2 bg-green-100 text-green-600 rounded-full dark:bg-slate-700"><Layers size={20} /></div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Total Stok (Gudang)</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Stok (Gudang)</p>
               <h3 className="text-2xl font-bold">{isLoading ? "..." : globalStats.totalStock} Pcs</h3>
             </div>
           </CardContent>
         </Card>
 
-        <Card className={`border-l-4 shadow-sm ${globalStats.lowStock > 0 ? "border-l-red-500" : "border-l-slate-300"}`}>
+        <Card className={`border-l-4 shadow-sm ${globalStats.lowStock > 0 ? "border-l-red-500 dark:border-l-red-400" : "border-l-slate-300 dark:border-l-slate-600"} dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0`}>
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className={`p-2 rounded-full ${globalStats.lowStock > 0 ? "bg-red-100 text-red-600" : "bg-slate-100 text-slate-400"}`}>
+            <div className={`p-2 rounded-full ${globalStats.lowStock > 0 ? "bg-red-100 text-red-600 dark:bg-red-400 dark:text-red-100" : "bg-slate-100 text-slate-400 dark:bg-slate-700"}`}>
               <AlertTriangle size={20} />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Stok Menipis (&lt; 10)</p>
-              <h3 className={`text-2xl font-bold ${globalStats.lowStock > 0 ? "text-red-600" : "text-slate-600"}`}>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Stok Menipis (&lt; 10)</p>
+              <h3 className={`text-2xl font-bold ${globalStats.lowStock > 0 ? "text-red-600 dark:text-red-400" : "text-slate-600 dark:text-slate-400"}`}>
                 {isLoading ? "..." : globalStats.lowStock} Item
               </h3>
             </div>
@@ -408,12 +408,13 @@ export default function MasterProduct() {
 
       {/* SEARCH & FILTER BAR */}
       <div className="flex flex-col md:flex-row gap-3">
-        <div className="flex-1 bg-white border rounded-lg shadow-sm">
+        <div className="flex-1 bg-white border rounded-lg shadow-sm dark:bg-slate-800 dark:border-none">
           <InputGroup>
             <InputGroupInput
               placeholder="Cari berdasarkan Nama atau SKU..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }} // Reset ke hal 1 saat cari
+              className="dark:bg-slate-800 dark:text-slate-100"
             />
             <InputGroupAddon>
               <Search />
@@ -422,7 +423,7 @@ export default function MasterProduct() {
               {search &&
                 <InputGroupButton
                   variant="ghost"
-                  className="h-6 w-6 p-0 hover:bg-transparent text-slate-400 hover:text-slate-600 transition-colors"
+                  className="h-6 w-6 p-0 hover:bg-transparent text-slate-400 hover:text-slate-600 transition-colors dark:text-slate-500 dark:hover:text-slate-400"
                   onClick={() => setSearch("")}
                 >
                   <X size={16} />
@@ -433,10 +434,10 @@ export default function MasterProduct() {
           </InputGroup>
         </div>
         {/* DROPDOWN FILTER KATEGORI */}
-        <div className="flex items-center gap-2 bg-white border px-3 py-1 rounded-lg shadow-sm">
-          <Filter size={14} className="text-slate-400" />
+        <div className="flex items-center gap-2 bg-white border px-3 py-1 rounded-lg shadow-sm dark:bg-slate-800 dark:border-none">
+          <Filter size={14} className="text-slate-400 dark:text-slate-500" />
           <select
-            className="w-full text-sm font-bold bg-transparent outline-none min-w-[140px] cursor-pointer"
+            className="w-full text-sm font-bold bg-transparent outline-none min-w-[140px] cursor-pointer dark:text-slate-100 dark:bg-slate-800"
             value={filterCategory}
             onChange={(e) => { setFilterCategory(e.target.value); setPage(1); }}
           >
@@ -448,10 +449,10 @@ export default function MasterProduct() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-white border rounded-lg shadow-sm overflow-hidden dark:bg-slate-800 dark:border-none">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-slate-50/50">
+            <TableHeader className="bg-slate-50/50 dark:bg-slate-800 dark:text-slate-100">
               <TableRow>
                 <TableHead className="w-[80px]">SKU</TableHead>
                 <TableHead className="truncate w-[250px]">Nama Produk</TableHead>
@@ -479,33 +480,33 @@ export default function MasterProduct() {
                 ))
               ) : filtered.length > 0 ? (
                 filtered.map((product: any) => (
-                  <TableRow key={product.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <TableCell className="font-mono text-xs text-slate-500 truncate">{product.sku || '-'}</TableCell>
+                  <TableRow key={product.id} className="hover:bg-slate-50/50 transition-colors group dark:hover:bg-slate-700">
+                    <TableCell className="font-mono text-xs text-slate-500 truncate dark:text-slate-400">{product.sku || '-'}</TableCell>
                     <TableCell className="font-medium truncate max-w-[200px]">{product.name}</TableCell>
-                    <TableCell className="font-mono text-xs text-slate-500 truncate">{product.category || 'Umum'}</TableCell>
-                    <TableCell className="font-mono text-slate-500 truncate max-w-[100px]">
+                    <TableCell className="font-mono text-xs text-slate-500 truncate dark:text-slate-400">{product.category || 'Umum'}</TableCell>
+                    <TableCell className="font-mono text-slate-500 truncate max-w-[100px] dark:text-slate-400">
                       Rp {Number(product.price).toLocaleString()}
                     </TableCell>
-                    <TableCell className="w-[180px]">
+                    <TableCell className="w-[180px] truncate">
                       <div className="flex flex-col gap-2 py-1">
                         {/* Info Angka & Label */}
                         <div className="flex justify-between items-end">
                           <div className="flex items-baseline gap-1">
-                            <span className={`text-base font-black ${product.quantity < 10 ? 'text-red-600' : 'text-slate-800'}`}>
+                            <span className={`text-base font-black ${product.quantity < 10 ? 'text-red-600 dark:text-red-400' : 'text-slate-800 dark:text-white'}`}>
                               {product.quantity}
                             </span>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase">Pcs</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase dark:text-slate-500">Pcs</span>
                           </div>
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${product.daysLeft > 14 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                            product.daysLeft > 7 ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                              'bg-red-50 text-red-600 border-red-100'
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${product.daysLeft > 14 ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900 dark:text-emerald-400 dark:border-emerald-800' :
+                            product.daysLeft > 7 ? 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900 dark:text-blue-400 dark:border-blue-800' :
+                              'bg-red-50 text-red-600 border-red-100 dark:bg-red-900 dark:text-red-400 dark:border-red-800'
                             }`}>
                             {product.daysLeft > 90 ? "STOK AMAN" : `±${product.daysLeft} HARI`}
                           </span>
                         </div>
 
                         {/* Progress Bar Custom */}
-                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
+                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/50 dark:bg-slate-600 dark:border-none">
                           <div
                             className={`h-full transition-all duration-500 ease-in-out ${getStockProgress(product.daysLeft).color}`}
                             style={{ width: `${getStockProgress(product.daysLeft).width}%` }}
@@ -513,7 +514,7 @@ export default function MasterProduct() {
                         </div>
 
                         {/* Keterangan Tambahan Kecil */}
-                        <p className="text-[9px] text-slate-400 font-medium italic">
+                        <p className="text-[9px] text-slate-400 font-medium italic dark:text-slate-500">
                           {product.daysLeft > 90
                             ? "Tersedia untuk > 3 bulan ke depan"
                             : `Estimasi habis pada ${new Date(Date.now() + product.daysLeft * 24 * 60 * 60 * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}`
@@ -527,7 +528,7 @@ export default function MasterProduct() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                          className="h-8 w-8 text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:text-orange-400 dark:hover:text-orange-300 dark:hover:bg-orange-900"
                           onClick={() => openAddToShopping(product)}
                           title="Tambah ke Daftar Belanja"
                         >
@@ -536,7 +537,7 @@ export default function MasterProduct() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                          className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-900"
                           onClick={() => fetchHistory(product)}
                         >
                           <History size={16} />
@@ -544,7 +545,7 @@ export default function MasterProduct() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900"
                           onClick={() => { setEditingProduct(product); setIsEditOpen(true); setErrors({}) }}
                         >
                           <Edit2 size={16} />
@@ -552,7 +553,7 @@ export default function MasterProduct() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900"
                           onClick={() => { setEditingProduct(product); setIsDeleteOpen(true); }}
                         >
                           <Trash2 size={16} />
@@ -565,7 +566,7 @@ export default function MasterProduct() {
                 <TableRow>
                   <TableCell colSpan={6} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="p-3 bg-slate-50 rounded-full text-slate-300">
+                      <div className="p-3 bg-slate-50 rounded-full text-slate-300 dark:bg-slate-800">
                         {!search ?
                           <Box size={32} />
                           :
@@ -575,13 +576,13 @@ export default function MasterProduct() {
                       <div className="space-y-1">
                         {!search ?
                           <>
-                            <p className="font-medium text-slate-900">Daftar Master Produk Kosong</p>
-                            <p className="text-sm text-slate-500">Coba daftarkan produk terlebih dahulu.</p>
+                            <p className="font-medium text-slate-900 dark:text-white">Daftar Master Produk Kosong</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Coba daftarkan produk terlebih dahulu.</p>
                           </>
                           :
                           <>
-                            <p className="font-medium text-slate-900">Hasil pencarian tidak ditemukan</p>
-                            <p className="text-sm text-slate-500">Coba gunakan kata kunci pencarian lain.</p>
+                            <p className="font-medium text-slate-900 dark:text-white">Hasil pencarian tidak ditemukan</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Coba gunakan kata kunci pencarian lain.</p>
                           </>
                         }
                       </div>
@@ -593,33 +594,33 @@ export default function MasterProduct() {
           </Table>
         </div>
         {/* --- UI PAGINATION (TAMBAHKAN INI) --- */}
-        <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50">
-          <p className="text-xs text-slate-500 font-medium hidden md:block">
-            Menampilkan <span className="text-slate-900">{products.length}</span> dari <span className="text-slate-900">{pagination.totalData}</span> produk
+        <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50 dark:bg-slate-900/50">
+          <p className="text-xs text-slate-500 font-medium hidden md:block dark:text-slate-400">
+            Menampilkan <span className="text-slate-900 dark:text-white">{products.length}</span> dari <span className="text-slate-900">{pagination.totalData}</span> produk
           </p>
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               disabled={page === 1}
               onClick={() => setPage(p => p - 1)}
-              className="h-8 px-3 text-xs"
+              className="h-8 px-3 text-xs dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-700 dark:border-slate-600"
             >
               Sebelumnya
             </Button>
             <div className="flex items-center gap-2 px-2">
-              <span className="text-xs font-bold text-blue-600 bg-blue-50 h-8 w-8 flex items-center justify-center rounded-lg border border-blue-100">
+              <span className="text-xs font-bold text-blue-600 bg-blue-50 h-8 w-8 flex items-center justify-center rounded-lg border border-blue-100 dark:bg-slate-800 dark:border-none dark:text-slate-400">
                 {page}
               </span>
-              <span className="text-xs text-slate-400">/</span>
-              <span className="text-xs font-medium text-slate-600">{pagination.totalPages}</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">/</span>
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{pagination.totalPages}</span>
             </div>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               disabled={page === pagination.totalPages}
               onClick={() => setPage(p => p + 1)}
-              className="h-8 px-3 text-xs"
+              className="h-8 px-3 text-xs dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-700 dark:border-slate-600"
             >
               Selanjutnya
             </Button>
@@ -629,16 +630,16 @@ export default function MasterProduct() {
 
       {/* Dialog Add */}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] dark:bg-slate-800">
           <DialogHeader>
             <DialogTitle>Tambah Produk Baru</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-1">
-              <p className="text-xs font-bold text-slate-500 uppercase">SKU / Kode Barang</p>
+              <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">SKU / Kode Barang</p>
               <Input
                 value={newProduct.sku}
-                className={`${errors.sku ? 'border-pink-500' : ''} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500`}
+                className={`${errors.sku ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800`}
                 onChange={e => {
                   setNewProduct({ ...newProduct, sku: e.target.value });
                   if (errors.sku) setErrors({ ...errors, sku: "" });
@@ -649,10 +650,10 @@ export default function MasterProduct() {
               {errors.sku && <FieldError>{errors.sku}</FieldError>}
             </div>
             <div className="space-y-1">
-              <p className="text-xs font-bold text-slate-500 uppercase">Nama Produk</p>
+              <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">Nama Produk</p>
               <Input
                 value={newProduct.name}
-                className={`${errors.name ? 'border-pink-500' : ''} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500`}
+                className={`${errors.name ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800`}
                 onChange={e => {
                   setNewProduct({ ...newProduct, name: e.target.value });
                   if (errors.name) setErrors({ ...errors, name: "" });
@@ -662,10 +663,10 @@ export default function MasterProduct() {
               {errors.name && <FieldError>{errors.name}</FieldError>}
             </div>
             <div className="space-y-1">
-              <p className="text-xs font-bold text-slate-500 uppercase">Kategori</p>
+              <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">Kategori</p>
               <Input
                 value={newProduct.category}
-                className={`${errors.category ? 'border-pink-500' : ''} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500`}
+                className={`${errors.category ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800`}
                 onChange={e => {
                   setNewProduct({ ...newProduct, category: e.target.value });
                   if (errors.category) setErrors({ ...errors, category: "" });
@@ -676,17 +677,33 @@ export default function MasterProduct() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <p className="text-xs font-bold text-slate-500 uppercase">Harga Jual</p>
-                <Input type="number" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: Number(e.target.value) })} />
+                <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">Harga Jual</p>
+                <Input
+                  type="number"
+                  value={newProduct.price}
+                  onChange={e => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
+                  className="dark:bg-slate-800 dark:border-slate-600"
+                />
               </div>
               <div className="space-y-1">
-                <p className="text-xs font-bold text-slate-500 uppercase">Stok Awal</p>
-                <Input type="number" value={newProduct.quantity} onChange={e => setNewProduct({ ...newProduct, quantity: Number(e.target.value) })} />
+                <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">Stok Awal</p>
+                <Input
+                  type="number"
+                  value={newProduct.quantity}
+                  onChange={e => setNewProduct({ ...newProduct, quantity: Number(e.target.value) })}
+                  className="dark:bg-slate-800 dark:border-slate-600"
+                />
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddOpen(false)}>Batal</Button>
+            <Button
+              variant="ghost"
+              onClick={() => setIsAddOpen(false)}
+              className="dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-700"
+            >
+              Batal
+            </Button>
             <Button onClick={handleAdd}>Simpan Produk</Button>
           </DialogFooter>
         </DialogContent>
@@ -694,38 +711,40 @@ export default function MasterProduct() {
 
       {/* DIALOG TAMBAH KE BELANJA */}
       <Dialog open={isAddToShoppingOpen} onOpenChange={setIsAddToShoppingOpen}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-[400px] dark:bg-slate-800">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Package className="text-orange-500" size={20} />
+              <Package className="text-orange-500 dark:text-orange-400" size={20} />
               Masuk Daftar Belanja
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-              <p className="text-[10px] font-bold text-slate-400 uppercase">Nama Produk</p>
-              <p className="text-sm font-bold text-slate-700">{shoppingFormData.name}</p>
+            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 dark:bg-slate-700">
+              <p className="text-[10px] font-bold text-slate-400 uppercase dark:text-slate-500">Nama Produk</p>
+              <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{shoppingFormData.name}</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <Label className="text-xs font-bold uppercase text-slate-500">Jumlah Beli</Label>
+                <Label className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Jumlah Beli</Label>
                 <Input
                   type="number"
                   value={shoppingFormData.qty}
                   onChange={e => setShoppingFormData({ ...shoppingFormData, qty: Number(e.target.value) })}
+                  className="dark:bg-slate-800 dark:border-slate-600"
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs font-bold uppercase text-slate-500">Estimasi Harga Beli</Label>
+                <Label className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Estimasi Harga Beli</Label>
                 <Input
                   type="number"
                   value={shoppingFormData.buy_price}
                   onChange={e => setShoppingFormData({ ...shoppingFormData, buy_price: Number(e.target.value) })}
+                  className="dark:bg-slate-800 dark:border-slate-600"
                 />
               </div>
             </div>
             <div className="pt-2 border-t border-dashed">
-              <div className="flex justify-between items-center text-orange-700">
+              <div className="flex justify-between items-center text-orange-700 dark:text-orange-500">
                 <span className="text-[10px] font-bold uppercase">Total Estimasi</span>
                 <span className="text-lg font-black">
                   Rp {(shoppingFormData.qty * shoppingFormData.buy_price).toLocaleString()}
@@ -734,8 +753,8 @@ export default function MasterProduct() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddToShoppingOpen(false)}>Batal</Button>
-            <Button onClick={handleConfirmAddToShopping} className="bg-orange-600 hover:bg-orange-700">
+            <Button variant="ghost" onClick={() => setIsAddToShoppingOpen(false)} className="dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-700">Batal</Button>
+            <Button onClick={handleConfirmAddToShopping} className="bg-orange-600 hover:bg-orange-700 dark:hover:bg-orange-500">
               Tambah ke List Belanja
             </Button>
           </DialogFooter>
@@ -744,7 +763,7 @@ export default function MasterProduct() {
 
       {/* Dialog Edit */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] dark:bg-slate-800">
           <DialogHeader>
             <DialogTitle>Edit Produk</DialogTitle>
           </DialogHeader>
@@ -752,10 +771,10 @@ export default function MasterProduct() {
           {editingProduct && (
             <div className="grid gap-4 py-4">
               <div className="space-y-1">
-                <p className="text-xs font-bold text-slate-500 uppercase">SKU / Kode Barang</p>
+                <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">SKU / Kode Barang</p>
                 <Input
                   value={editingProduct.sku}
-                  className={`${errors.sku ? 'border-pink-500' : ''} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500`}
+                  className={`${errors.sku ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800`}
                   onChange={e => {
                     setEditingProduct({ ...editingProduct, sku: e.target.value });
                     if (errors.sku) setErrors({ ...errors, sku: "" })
@@ -766,10 +785,10 @@ export default function MasterProduct() {
                 {errors.sku && <FieldError>{errors.sku}</FieldError>}
               </div>
               <div className="space-y-1">
-                <p className="text-xs font-bold text-slate-500 uppercase">Nama Produk</p>
+                <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">Nama Produk</p>
                 <Input
                   value={editingProduct.name}
-                  className={`${errors.name ? 'border-pink-500' : ''} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500`}
+                  className={`${errors.name ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800`}
                   onChange={e => {
                     setEditingProduct({ ...editingProduct, name: e.target.value });
                     if (errors.name) setErrors({ ...errors, name: "" })
@@ -779,10 +798,10 @@ export default function MasterProduct() {
                 {errors.name && <FieldError>{errors.name}</FieldError>}
               </div>
               <div className="space-y-1">
-                <p className="text-xs font-bold text-slate-500 uppercase">Kategori</p>
+                <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">Kategori</p>
                 <Input
                   value={editingProduct.category}
-                  className={`${errors.category ? 'border-pink-500' : ''} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500`}
+                  className={`${errors.category ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800`}
                   onChange={e => {
                     setEditingProduct({ ...editingProduct, category: e.target.value });
                     if (errors.category) setErrors({ ...errors, category: "" })
@@ -792,19 +811,21 @@ export default function MasterProduct() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <p className="text-xs font-bold text-slate-500 uppercase">Harga Jual</p>
+                  <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">Harga Jual</p>
                   <Input
                     type="number"
                     value={editingProduct.price}
                     onChange={e => setEditingProduct({ ...editingProduct, price: Number(e.target.value) })}
+                    className="dark:border-slate-600"
                   />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs font-bold text-slate-500 uppercase">Stok</p>
+                  <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">Stok</p>
                   <Input
                     type="number"
                     value={editingProduct.quantity}
                     onChange={e => setEditingProduct({ ...editingProduct, quantity: Number(e.target.value) })}
+                    className="dark:border-slate-600"
                   />
                 </div>
               </div>
@@ -812,7 +833,7 @@ export default function MasterProduct() {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditOpen(false)}>Batal</Button>
+            <Button variant="ghost" onClick={() => setIsEditOpen(false)} className="dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-700">Batal</Button>
             <Button onClick={handleUpdate}>Simpan Perubahan</Button>
           </DialogFooter>
         </DialogContent>
@@ -820,17 +841,17 @@ export default function MasterProduct() {
 
       {/* Dialog History */}
       <Sheet open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
-        <SheetContent className="w-full sm:max-w-md p-0 border-l-0 shadow-2xl">
-          <SheetHeader className="p-6 border-b bg-slate-50/50">
+        <SheetContent className="w-full sm:max-w-md p-0 border-l-0 shadow-2xl dark:bg-slate-800">
+          <SheetHeader className="p-6 border-b bg-slate-50/50 dark:bg-slate-800 dark:border-slate-700">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-600 rounded-lg text-white shadow-lg shadow-blue-100">
+              <div className="p-2 bg-blue-600 rounded-lg text-white shadow-lg shadow-blue-100 dark:shadow-none">
                 <History size={20} />
               </div>
               <div>
-                <SheetTitle className="text-base font-bold text-slate-800 truncate max-w-[200px]">
+                <SheetTitle className="text-base font-bold text-slate-800 truncate max-w-[200px] dark:text-white">
                   Riwayat {editingProduct?.name}
                 </SheetTitle>
-                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">SKU: {editingProduct?.sku}</p>
+                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider dark:text-slate-500">SKU: {editingProduct?.sku}</p>
               </div>
             </div>
           </SheetHeader>
@@ -841,44 +862,44 @@ export default function MasterProduct() {
                 {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}
               </div>
             ) : history.length > 0 ? (
-              <div className="relative space-y-6 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+              <div className="relative space-y-6 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent dark:before:bg-gradient-to-b dark:before:from-transparent dark:before:via-slate-700 dark:before:to-transparent">
                 {history.map((log, i) => (
                   <div key={i} className="relative flex items-center justify-between group">
                     <div className="flex items-center gap-4">
                       {/* ICON STATUS */}
-                      <div className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-4 border-white shadow-sm transition-transform group-hover:scale-110 ${log.type === 'MASUK' ? 'bg-emerald-500 text-white' : 'bg-blue-600 text-white'
+                      <div className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-4 border-white shadow-sm transition-transform group-hover:scale-110 dark:border-slate-800 ${log.type === 'MASUK' ? 'bg-emerald-500 text-white dark:bg-emerald-400' : 'bg-blue-600 text-white dark:bg-blue-500 dark:text-white'
                         }`}>
                         {log.type === 'MASUK' ? <ArrowDownLeft size={18} /> : <ArrowUpRight size={18} />}
                       </div>
 
                       {/* INFO TEXT */}
                       <div className="flex flex-col">
-                        <span className="text-xs font-bold text-slate-800">
+                        <span className="text-xs font-bold text-slate-800 dark:text-white">
                           {log.type === 'MASUK' ? 'Stok Masuk' : 'Terjual'}
                         </span>
-                        <span className="text-[10px] text-slate-400">{log.note}</span>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-300">{log.note}</span>
                       </div>
                     </div>
 
                     {/* HARGA & QTY */}
                     <div className="text-right">
-                      <p className={`text-sm font-black ${log.type === 'MASUK' ? 'text-emerald-600' : 'text-blue-600'}`}>
+                      <p className={`text-sm font-black ${log.type === 'MASUK' ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}`}>
                         {log.type === 'MASUK' ? '+' : '-'}{log.qty}
                       </p>
-                      <p className="text-[9px] font-medium text-slate-400">
+                      <p className="text-[9px] font-medium text-slate-400 dark:text-slate-300">
                         @ Rp {Number(log.price).toLocaleString()}
                       </p>
                     </div>
 
                     {/* TOOLTIP WAKTU (ABSOLUTE) */}
-                    <div className="absolute -top-4 left-14 text-[9px] font-bold text-slate-300 uppercase tracking-tighter">
+                    <div className="absolute -top-4 left-14 text-[9px] font-bold text-slate-300 uppercase tracking-tighter dark:text-slate-400">
                       {new Date(log.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-64 text-slate-300 opacity-50">
+              <div className="flex flex-col items-center justify-center h-64 text-slate-300 opacity-50 dark:text-slate-400">
                 <History size={48} className="mb-2" />
                 <p className="text-sm italic">Belum ada riwayat pergerakan stok.</p>
               </div>
@@ -889,7 +910,7 @@ export default function MasterProduct() {
 
       {/* Alert Dialog */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent className="max-w-sm">
+        <AlertDialogContent className="max-w-sm dark:text-white dark:bg-slate-800">
           <AlertDialogHeader>
             <AlertDialogTitle>Apakah kamu yakin?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -897,8 +918,8 @@ export default function MasterProduct() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleDelete(editingProduct?.id)}>Ya</AlertDialogAction>
+            <AlertDialogCancel className="dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-700 dark:bg-slate-800">Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={() => handleDelete(editingProduct?.id)} className="dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-700 dark:bg-red-800">Ya</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

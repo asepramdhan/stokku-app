@@ -131,7 +131,7 @@ export default function Layout() {
     };
 
   return (
-    <div className="flex min-h-screen bg-slate-50/50 dark:bg-slate-900 flex-col md:flex-row font-sans">
+    <div className="flex min-h-screen bg-slate-50/50 flex-col md:flex-row font-sans dark:bg-slate-900">
 
       {/* SIDEBAR DESKTOP (Tetap bersih tanpa lonceng) */}
       <aside className="hidden md:flex w-64 border-r bg-white fixed h-full flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)] dark:bg-slate-800">
@@ -142,7 +142,7 @@ export default function Layout() {
       <main className="flex-1 md:ml-64 flex flex-col transition-all duration-300">
 
         {/* --- TOP NAVBAR (LOKASI BARU LONCENG) --- */}
-        <header className="h-16 border-b bg-white/80 backdrop-blur-md dark:bg-slate-800/80 sticky top-0 z-40 px-4 md:px-8 flex items-center justify-between shadow-sm">
+        <header className="h-16 border-b bg-white/80 backdrop-blur-md sticky top-0 z-40 px-4 md:px-8 flex items-center justify-between shadow-sm dark:bg-slate-800">
 
           {/* Bagian Kiri: Breadcrumb / Title Halaman */}
           <div className="flex items-center gap-4">
@@ -152,8 +152,8 @@ export default function Layout() {
                 <SheetContent side="left" className="p-0 w-72 border-none"><Sidebar onClose={() => setOpen(false)} /></SheetContent>
               </Sheet>
             </div>
-            <h2 className="hidden md:block text-sm font-bold text-slate-400 dark:text-slate-500 capitalize">
-              Pages <span className="mx-2 text-slate-300 dark:text-slate-600">/</span> <span className="text-slate-800 dark:text-white">{location.pathname.replace("/", "") || "Dashboard"}</span>
+            <h2 className="hidden md:block text-sm font-bold text-slate-400 capitalize">
+              Pages <span className="mx-2 text-slate-300 dark:text-slate-600">/</span> <span className="text-slate-800 dark:text-slate-200">{location.pathname.replace("/", "") || "Dashboard"}</span>
             </h2>
           </div>
 
@@ -169,24 +169,24 @@ export default function Layout() {
             {/* LONCENG NOTIFIKASI (Tampilan Premium) */}
             <Popover onOpenChange={() => setNotifSearch("")}> {/* Reset pencarian saat popover ditutup */}
               <PopoverTrigger asChild>
-                <button className="relative p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                  <Bell size={20} className={cn(lowStockCount > 0 ? "text-red-500 dark:text-red-400 animate-ring" : "text-slate-400 dark:text-slate-500")} />
+                <button className="relative p-2 rounded-xl hover:bg-slate-100 transition-colors dark:hover:bg-slate-800">
+                  <Bell size={20} className={cn(lowStockCount > 0 ? "text-red-500 animate-ring dark:text-red-400" : "text-slate-400 dark:text-slate-600")} />
                   {lowStockCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 h-4 w-4 bg-red-600 text-white dark:bg-red-500 text-[9px] font-black flex items-center justify-center rounded-full">
+                    <span className="absolute top-1.5 right-1.5 h-4 w-4 bg-red-600 text-white text-[9px] font-black flex items-center justify-center rounded-full dark:bg-red-400">
                       {lowStockCount}
                     </span>
                   )}
                 </button>
               </PopoverTrigger>
 
-              <PopoverContent className="w-80 p-0 mr-4 mt-2 rounded-2xl shadow-2xl dark:bg-slate-800 border-slate-100 dark:border-slate-700 overflow-hidden">
+              <PopoverContent className="w-80 p-0 mr-4 mt-2 rounded-2xl shadow-2xl border-slate-100 overflow-hidden dark:border-slate-800 dark:bg-slate-900">
                 {/* HEADER POPOVER */}
-                <div className="bg-slate-900 dark:bg-slate-800 p-4 flex justify-between items-center">
-                  <h3 className="text-white text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                    <AlertCircle size={14} className="text-red-400" /> Perlu Re-stok
+                <div className="bg-slate-900 p-4 flex justify-between items-center dark:bg-slate-800">
+                  <h3 className="text-white text-xs font-bold uppercase tracking-widest flex items-center gap-2 dark:text-slate-200">
+                    <AlertCircle size={14} className="text-red-400 dark:text-red-500" /> Perlu Re-stok
                   </h3>
                   {lowStockCount > 0 && (
-                    <span className="bg-red-500/20 text-red-400 text-[10px] px-2 py-0.5 rounded-full font-bold">
+                    <span className="bg-red-500/20 text-red-400 text-[10px] px-2 py-0.5 rounded-full font-bold dark:bg-red-400/20">
                       {lowStockCount} Item
                     </span>
                   )}
@@ -194,18 +194,18 @@ export default function Layout() {
 
                 {/* 3. INPUT SEARCH DI DALAM POPOVER */}
                 <div className="my-2 px-4 relative group">
-                  <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+                  <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-600" />
                   <input
                     type="text"
                     placeholder="Cari barang kritis..."
                     value={notifSearch}
                     onChange={(e) => setNotifSearch(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full py-2 pl-10 pr-4 text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:border-slate-200 dark:focus:border-slate-700 focus:ring-0 outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-full py-2 pl-10 pr-4 text-sm placeholder:text-slate-400 focus:bg-white focus:border-slate-200 focus:ring-0 outline-none dark:bg-slate-800 dark:border-slate-600 dark:placeholder:text-slate-600"
                   />
                   {notifSearch && (
                     <button
                       onClick={() => setNotifSearch("")}
-                      className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400 transition-colors"
+                      className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors dark:text-slate-600 dark:hover:text-slate-400"
                     >
                       <X size={14} />
                     </button>
@@ -213,7 +213,7 @@ export default function Layout() {
                 </div>
 
                 {/* BODY POPOVER (LIST BARANG) */}
-                <div className="max-h-[350px] overflow-y-auto bg-white dark:bg-slate-800 p-2">
+                <div className="max-h-[350px] overflow-y-auto bg-white p-2 dark:bg-slate-800">
                   {isLoading ? (
                     <div className="p-4 space-y-3">
                       <Skeleton className="h-10 w-full" />
@@ -229,11 +229,11 @@ export default function Layout() {
                           <div
                             key={i}
                             onClick={() => handleQuickAdd(item.id, item.name)}
-                            className="group cursor-pointer p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all active:scale-[0.98]"
+                            className="group cursor-pointer p-3 rounded-xl hover:bg-slate-50 transition-all active:scale-[0.98] dark:hover:bg-slate-700"
                           >
                             <div className="flex justify-between items-start mb-2">
                               <div className="flex flex-col">
-                                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate w-40">
+                                <span className="text-xs font-bold text-slate-700 group-hover:text-blue-600 truncate w-40 dark:text-slate-200">
                                   {item.name}
                                 </span>
                                 <span className="text-[10px] font-black tracking-tight text-slate-400 dark:text-slate-500">
@@ -242,13 +242,13 @@ export default function Layout() {
                               </div>
                               <div className={cn(
                                 "text-[8px] font-black px-1.5 py-0.5 rounded uppercase",
-                                isCritical ? "bg-red-100 dark:bg-red-800 text-red-600 dark:text-red-400" : "bg-orange-100 dark:bg-orange-800 text-orange-600 dark:text-orange-400"
+                                isCritical ? "bg-red-100 text-red-600 dark:bg-red-50 dark:text-red-600" : "bg-orange-100 text-orange-600 dark:bg-orange-50 dark:text-orange-600"
                               )}>
                                 {isCritical ? 'Kritis' : 'Menipis'}
                               </div>
                             </div>
                             {/* PROGRESS BAR KECIL */}
-                            <div className="h-1 w-full rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                            <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden dark:bg-slate-700">
                               <div
                                 className={cn("h-full transition-all duration-1000", isCritical ? "bg-red-500 dark:bg-red-600" : "bg-orange-400 dark:bg-orange-500")}
                                 style={{ width: `${percentage}%` }}
@@ -260,7 +260,7 @@ export default function Layout() {
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-10 text-center">
-                      {notifSearch ? <Search size={24} className="text-slate-200 dark:text-slate-400 mb-2" /> : <Package2 size={24} className="text-slate-200 dark:text-slate-400 mb-2" />}
+                      {notifSearch ? <Search size={24} className="text-slate-200 mb-2 dark:text-slate-400" /> : <Package2 size={24} className="text-slate-200 mb-2 dark:text-slate-400" />}
                       <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
                         {notifSearch ? `"${notifSearch}" tidak ditemukan` : "Gudang aman!"}
                       </p>
@@ -269,12 +269,12 @@ export default function Layout() {
                 </div>
 
                 {/* FOOTER POPOVER */}
-                <div className="p-3 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="p-3 bg-slate-50 border-t border-slate-200 space-y-2 dark:bg-slate-800 dark:border-slate-700">
                   {/* TOMBOL BULK ADD */}
                   {filteredLowStock.length > 0 && (
                     <button
                       onClick={handleBulkQuickAdd}
-                      className="flex items-center justify-center gap-2 w-full py-2 bg-white dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-slate-600 text-blue-600 dark:text-blue-400 rounded-lg text-[11px] font-bold transition-all border border-slate-200 dark:border-slate-600 hover:border-blue-200 dark:hover:border-blue-600 shadow-sm dark:shadow-none"
+                      className="flex items-center justify-center gap-2 w-full py-2 bg-white hover:bg-blue-50 text-blue-600 rounded-lg text-[11px] font-bold transition-all border border-slate-200 hover:border-blue-200 shadow-sm dark:text-slate-200 dark:hover:text-slate-100 dark:hover:bg-slate-700 dark:hover:border-slate-600 dark:bg-slate-800"
                     >
                       TAMBAH SEMUA ({filteredLowStock.length})
                     </button>
@@ -282,7 +282,7 @@ export default function Layout() {
                   {/* TOMBOL MANAJEMEN BELANJA */}
                   <Link
                     to="/shopping"
-                    className="flex items-center justify-center gap-2 w-full py-2 bg-white dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-slate-600 text-blue-600 dark:text-blue-400 rounded-lg text-[11px] font-bold transition-all border border-slate-200 dark:border-slate-600 hover:border-blue-200 dark:hover:border-blue-600 shadow-sm dark:shadow-none"
+                    className="flex items-center justify-center gap-2 w-full py-2 bg-white hover:bg-blue-50 text-blue-600 rounded-lg text-[11px] font-bold transition-all border border-slate-200 hover:border-blue-200 shadow-sm dark:text-slate-200 dark:hover:text-slate-100 dark:hover:bg-slate-700 dark:hover:border-slate-600 dark:bg-slate-800"
                   >
                     <ShoppingCart size={14} />
                     Manajemen Belanja <ChevronRight size={14} />
@@ -294,7 +294,7 @@ export default function Layout() {
             {/* TOMBOL LOCK */}
             <button
               onClick={handleManualLock}
-              className="flex items-center justify-center h-9 w-9 text-slate-600 hover:bg-amber-50 hover:text-amber-700 dark:text-slate-300 dark:hover:bg-slate-700 rounded-lg transition-colors group"
+              className="flex items-center justify-center h-9 w-9 text-slate-600 hover:bg-amber-50 hover:text-amber-700 rounded-lg transition-colors group dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-100"
             >
               <Lock size={18} className="group-hover:animate-pulse" />
             </button>
@@ -302,7 +302,7 @@ export default function Layout() {
             {/* TOMBOL DARKMODE */}
             <button
               onClick={toggle}
-              className="flex items-center justify-center h-9 w-9 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all"
+              className="flex items-center justify-center h-9 w-9 text-slate-600 hover:bg-slate-100 rounded-lg transition-all dark:text-slate-200 dark:hover:bg-slate-700"
             >
               {isDark ? (
                 <>
@@ -315,46 +315,46 @@ export default function Layout() {
               )}
             </button>
 
-            <div className="h-8 w-[1px] bg-slate-200 dark:bg-slate-600 mx-1 hidden md:block" />
+            <div className="h-8 w-[1px] bg-slate-200 mx-1 hidden md:block dark:bg-slate-700" />
 
             {/* AVATAR DENGAN DROPDOWN LOGOUT */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="h-9 w-9 rounded-xl bg-blue-600 dark:bg-blue-800 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-blue-100 dark:shadow-none border-2 border-white dark:border-slate-800 cursor-pointer hover:scale-105 transition-transform">
+                <div className="h-9 w-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-blue-100 border-2 border-white cursor-pointer hover:scale-105 transition-transform dark:border-none dark:shadow-none">
                   {/* 💡 TAMPILKAN INISIAL */}
                   {userInitial}
                 </div>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent className="w-56 mt-2 mr-4 rounded-2xl shadow-2xl border-slate-100 dark:border-slate-700 p-2" align="end">
+              <DropdownMenuContent className="w-56 mt-2 mr-4 rounded-2xl shadow-2xl border-slate-100 p-2 dark:bg-slate-800 dark:border-slate-700" align="end">
                 <DropdownMenuLabel className="p-3">
                   <div className="flex flex-col gap-1">
                     {/* 💡 TAMPILKAN NAMA ASLI */}
-                    <p className="text-sm font-bold text-slate-800 dark:text-white capitalize">{userName}</p>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium truncate">{userEmail}</p>
+                    <p className="text-sm font-bold text-slate-800 capitalize dark:text-slate-100">{userName}</p>
+                    <p className="text-[10px] text-slate-400 font-medium truncate dark:text-slate-500">{userEmail}</p>
                   </div>
                 </DropdownMenuLabel>
 
-                <DropdownMenuSeparator className="bg-slate-50 dark:bg-slate-800" />
+                <DropdownMenuSeparator className="bg-slate-50 dark:bg-slate-700" />
 
-                <DropdownMenuItem className="flex items-center gap-2 p-3 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                <DropdownMenuItem className="flex items-center gap-2 p-3 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors dark:hover:bg-slate-700">
                   <User size={16} className="text-slate-400 dark:text-slate-500" />
-                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Profil Saya</span>
+                  <span className="text-xs font-medium text-slate-600 dark:text-slate-200">Profil Saya</span>
                 </DropdownMenuItem>
 
                 <Link to="/settings">
-                  <DropdownMenuItem className="flex items-center gap-2 p-3 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                  <DropdownMenuItem className="flex items-center gap-2 p-3 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors dark:hover:bg-slate-700">
                     <Settings size={16} className="text-slate-400 dark:text-slate-500" />
-                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Pengaturan Akun</span>
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-200">Pengaturan Akun</span>
                   </DropdownMenuItem>
                 </Link>
 
-                <DropdownMenuSeparator className="bg-slate-50 dark:bg-slate-800 mb-2" />
+                <DropdownMenuSeparator className="bg-slate-50 mb-2 dark:bg-slate-700" />
 
                 {/* 🚀 TOMBOL LOGOUT */}
                 <DropdownMenuItem
                   onClick={handleLogout}
-                  className="flex items-center gap-2 p-3 rounded-xl cursor-pointer bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 text-red-600 dark:text-red-400 transition-colors focus:bg-red-100 dark:focus:bg-red-800 focus:text-red-600 dark:focus:text-red-400"
+                  className="flex items-center gap-2 p-3 rounded-xl cursor-pointer bg-red-50 hover:bg-red-100 text-red-600 transition-colors focus:bg-red-100 focus:text-red-600 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-100 dark:focus:bg-slate-600 dark:focus:text-slate-100"
                 >
                   <LogOut size={16} />
                   <span className="text-xs font-bold">Keluar</span>
@@ -377,7 +377,7 @@ export default function Layout() {
           {/* Tombol Utama */}
           <button
             onClick={() => setIsFabOpen(!isFabOpen)}
-            className={`h-14 w-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 transform ${isFabOpen ? "bg-slate-800 dark:bg-slate-600 rotate-45 scale-90" : "bg-blue-600 dark:bg-blue-800 hover:bg-blue-700 dark:hover:bg-blue-900 hover:scale-110"
+            className={`h-14 w-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 transform ${isFabOpen ? "bg-slate-800 rotate-45 scale-90 dark:bg-slate-700" : "bg-blue-600 hover:bg-blue-700 hover:scale-110 dark:bg-blue-600 dark:hover:bg-blue-700 dark:hover:scale-110"
               }`}
           >
             <Plus size={28} className="text-white" />
@@ -389,30 +389,30 @@ export default function Layout() {
 
               {/* Tambah Penjualan */}
               <Link to="/sales" onClick={() => setIsFabOpen(false)} className="group flex items-center gap-3">
-                <span className="bg-white dark:bg-slate-800 px-3 py-1.5 rounded-lg border shadow-sm text-[11px] font-bold text-slate-600 dark:text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="bg-white px-3 py-1.5 rounded-lg border shadow-sm text-[11px] font-bold text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity dark:text-slate-200 dark:bg-slate-800">
                   Input Penjualan
                 </span>
-                <div className="h-11 w-11 rounded-full bg-emerald-500 dark:bg-emerald-600 text-white dark:text-slate-800 flex items-center justify-center shadow-lg hover:bg-emerald-600 dark:hover:bg-emerald-700 transition-colors">
+                <div className="h-11 w-11 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg hover:bg-emerald-600 transition-colors dark:bg-emerald-400 dark:hover:bg-emerald-500">
                   <ShoppingBag size={20} />
                 </div>
               </Link>
 
               {/* Tambah Produk */}
               <Link to="/master" onClick={() => setIsFabOpen(false)} className="group flex items-center gap-3">
-                <span className="bg-white dark:bg-slate-800 px-3 py-1.5 rounded-lg border shadow-sm text-[11px] font-bold text-slate-600 dark:text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="bg-white px-3 py-1.5 rounded-lg border shadow-sm text-[11px] font-bold text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity dark:text-slate-200 dark:bg-slate-800">
                   Master Produk
                 </span>
-                <div className="h-11 w-11 rounded-full bg-blue-600 dark:bg-blue-800 text-white dark:text-slate-800 flex items-center justify-center shadow-lg hover:bg-blue-700 dark:hover:bg-blue-900 transition-colors">
+                <div className="h-11 w-11 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg hover:bg-blue-700 transition-colors dark:bg-blue-500 dark:hover:bg-blue-600">
                   <Box size={20} />
                 </div>
               </Link>
 
               {/* Buat Rencana Belanja */}
               <Link to="/shopping" onClick={() => setIsFabOpen(false)} className="group flex items-center gap-3">
-                <span className="bg-white dark:bg-slate-800 px-3 py-1.5 rounded-lg border shadow-sm text-[11px] font-bold text-slate-600 dark:text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="bg-white px-3 py-1.5 rounded-lg border shadow-sm text-[11px] font-bold text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity dark:text-slate-200 dark:bg-slate-800">
                   Rencana Belanja
                 </span>
-                <div className="h-11 w-11 rounded-full bg-orange-500 dark:bg-orange-600 text-white dark:text-slate-800 flex items-center justify-center shadow-lg hover:bg-orange-600 dark:hover:bg-orange-700 transition-colors">
+                <div className="h-11 w-11 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg hover:bg-orange-600 transition-colors dark:bg-orange-400 dark:hover:bg-orange-500">
                   <ShoppingCart size={20} />
                 </div>
               </Link>

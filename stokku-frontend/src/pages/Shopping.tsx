@@ -382,29 +382,29 @@ export default function Shopping() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Daftar Belanja</h1>
-          <p className="text-slate-500 text-sm font-medium">Rencanakan kulakan barang dan update stok otomatis.</p>
+          <p className="text-slate-500 text-sm font-medium dark:text-slate-400">Rencanakan kulakan barang dan update stok otomatis.</p>
         </div>
-        <Button onClick={() => setIsAddOpen(true)} className="gap-2 w-full md:w-auto shadow-md">
+        <Button onClick={() => setIsAddOpen(true)} className="gap-2 w-full md:w-auto shadow-md dark:shadow-none dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white">
           <Plus size={18} /> Buat Rencana Belanja
         </Button>
       </div>
 
       {/* STATS CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="border-l-4 border-l-orange-500 shadow-sm">
+        <Card className="border-l-4 border-l-orange-500 shadow-sm dark:bg-slate-800 dark:border-l-orange-600 dark:border-t-0 dark:border-b-0 dark:border-r-0">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-orange-100 text-orange-600 rounded-full"><Clock size={20} /></div>
+            <div className="p-2 bg-orange-100 text-orange-600 rounded-full dark:bg-slate-700 dark:text-orange-500"><Clock size={20} /></div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Rencana Menunggu</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Rencana Menunggu</p>
               <h3 className="text-xl font-bold">{globalStats.pendingCount} Transaksi</h3>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-blue-500 shadow-sm">
+        <Card className="border-l-4 border-l-blue-500 shadow-sm dark:bg-slate-800 dark:border-l-blue-600 dark:border-t-0 dark:border-b-0 dark:border-r-0">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><ShoppingCart size={20} /></div>
+            <div className="p-2 bg-blue-100 text-blue-600 rounded-full dark:bg-slate-700 dark:text-blue-500"><ShoppingCart size={20} /></div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Estimasi Biaya Belanja</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Estimasi Biaya Belanja</p>
               <h3 className="text-xl font-bold">Rp {Number(globalStats.estimatedSpending).toLocaleString()}</h3>
             </div>
           </CardContent>
@@ -413,15 +413,15 @@ export default function Shopping() {
 
       {/* SEARCH & FILTER BAR */}
       <div className="flex flex-col lg:flex-row gap-4 items-end lg:items-center">
-        <div className="flex-1 w-full bg-white border rounded-xl shadow-sm overflow-hidden">
+        <div className="flex-1 w-full bg-white border rounded-xl shadow-sm overflow-hidden dark:bg-slate-800 dark:border-slate-700">
           <InputGroup>
             <InputGroupInput
               placeholder="Cari barang belanjaan..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="border-none focus-visible:ring-0"
+              className="border-none focus-visible:ring-0 dark:bg-slate-800 dark:text-white"
             />
-            <InputGroupAddon><Search size={18} className="text-slate-400" /></InputGroupAddon>
+            <InputGroupAddon><Search size={18} className="text-slate-400 dark:text-slate-500" /></InputGroupAddon>
             <InputGroupAddon align="inline-end">
               {search && <InputGroupButton variant="ghost" onClick={() => setSearch("")}><X size={16} /></InputGroupButton>}
               {filtered.length} results
@@ -430,24 +430,24 @@ export default function Shopping() {
         </div>
 
         {/* --- SMART STATUS FILTER (SINKRON DENGAN BACKEND) --- */}
-        <div className="flex p-1 bg-slate-100 rounded-xl border border-slate-200 w-full lg:w-auto">
+        <div className="flex p-1 bg-slate-100 rounded-xl border border-slate-200 w-full lg:w-auto dark:bg-slate-800 dark:border-slate-700">
           {[
             {
               id: "All",
               label: "Semua",
-              color: "bg-slate-500 text-white shadow-md",
+              color: "bg-slate-500 text-white shadow-md dark:bg-slate-600 dark:text-slate-100",
               count: globalStats.totalAll // ✅ Ambil total dari seluruh DB
             },
             {
               id: "pending",
               label: "Pending",
-              color: "bg-orange-500 text-white shadow-md",
+              color: "bg-orange-500 text-white shadow-md dark:bg-orange-600 dark:text-orange-100",
               count: globalStats.totalPending // ✅ Ambil total pending dari seluruh DB
             },
             {
               id: "completed",
               label: "Selesai",
-              color: "bg-green-600 text-white shadow-md",
+              color: "bg-green-600 text-white shadow-md dark:bg-green-700 dark:text-green-100",
               count: globalStats.totalCompleted // ✅ Ambil total selesai dari seluruh DB
             },
           ].map((tab) => {
@@ -459,11 +459,11 @@ export default function Shopping() {
                   setFilterStatus(tab.id);
                   setPage(1); // 💡 PENTING: Reset ke halaman 1 setiap ganti filter!
                 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 flex-1 lg:flex-none justify-center ${isActive ? tab.color : "text-slate-500 hover:text-slate-700"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 flex-1 lg:flex-none justify-center ${isActive ? tab.color : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
                   }`}
               >
                 {tab.label}
-                <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${isActive ? "bg-white/20 text-white" : "bg-slate-200 text-slate-500"
+                <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${isActive ? "bg-white/20 text-white dark:bg-slate-800" : "bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400"
                   }`}>
                   {tab.count}
                 </span>
@@ -473,10 +473,10 @@ export default function Shopping() {
         </div>
 
         {/* FILTER KATEGORI (Tetap Dropdown atau bisa disesuaikan) */}
-        <div className="flex items-center gap-2 bg-white border px-3 py-2 rounded-xl shadow-sm w-full lg:w-auto">
-          <Filter size={14} className="text-slate-400" />
+        <div className="flex items-center gap-2 bg-white border px-3 py-2 rounded-xl shadow-sm w-full lg:w-auto dark:bg-slate-800 dark:border-slate-700">
+          <Filter size={14} className="text-slate-400 dark:text-slate-500" />
           <select
-            className="w-full text-xs font-bold bg-transparent outline-none min-w-[100px] cursor-pointer"
+            className="w-full text-xs font-bold bg-transparent outline-none min-w-[100px] cursor-pointer dark:text-white dark:bg-slate-800"
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
           >
@@ -489,12 +489,12 @@ export default function Shopping() {
 
       {/* --- ACTION BAR (Muncul saat ada yang dicentang) --- */}
       {selectedIds.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-bottom-4">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-bottom-4 dark:bg-slate-800 dark:text-slate-100 dark:border dark:border-slate-600">
           <span className="text-sm font-bold">{selectedIds.length} barang dipilih</span>
-          <div className="h-4 w-[1px] bg-white/20" />
+          <div className="h-4 w-[1px] bg-white/20 dark:bg-slate-600" />
           <Button
             size="sm"
-            className="bg-green-500 hover:bg-green-600 h-8 font-bold"
+            className="bg-green-500 hover:bg-green-600 h-8 font-bold dark:bg-green-600 dark:hover:bg-green-700"
             onClick={handleBulkComplete}
           >
             Terima Semua
@@ -502,7 +502,7 @@ export default function Shopping() {
           <Button
             variant="ghost"
             size="sm"
-            className="text-white hover:bg-white/10 h-8"
+            className="text-white hover:bg-white/10 h-8 dark:hover:bg-slate-700"
             onClick={() => setSelectedIds([])}
           >
             Batal
@@ -511,15 +511,15 @@ export default function Shopping() {
       )}
 
       {/* TABLE */}
-      <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-white border rounded-lg shadow-sm overflow-hidden dark:bg-slate-800 dark:border-slate-700">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-slate-50/50">
+            <TableHeader className="bg-slate-50/50 dark:bg-slate-900">
               <TableRow>
                 <TableHead className="w-10">
                   <input
                     type="checkbox"
-                    className="rounded border-slate-300"
+                    className="rounded border-slate-300 dark:bg-slate-800 dark:border-slate-600"
                     checked={selectedIds.length > 0 && selectedIds.length === filtered.filter(i => i.status === 'pending').length}
                     onChange={toggleSelectAll}
                   />
@@ -548,30 +548,30 @@ export default function Shopping() {
               ) : list.length > 0 ? (
                 list.map((item: any) => (
                   // "hover:bg-slate-50/50 transition-colors group"
-                  <TableRow key={item.id} className={selectedIds.includes(item.id) ? "bg-blue-50/50" : ""}>
+                  <TableRow key={item.id} className={selectedIds.includes(item.id) ? "bg-blue-50/50 dark:bg-slate-700" : ""}>
                     <TableCell>
                       {item.status === 'pending' && (
                         <input
                           type="checkbox"
                           checked={selectedIds.includes(item.id)}
                           onChange={() => toggleSelect(item.id)}
-                          className="rounded border-slate-300"
+                          className="rounded border-slate-300 dark:bg-slate-800 dark:border-slate-600"
                         />
                       )}
                     </TableCell>
                     <TableCell className="truncate max-w-[200px]">
                       <div className="flex flex-col">
                         <span className="font-medium">{item.product_name}</span>
-                        <span className="text-[10px] text-slate-400 uppercase font-mono">{item.category || 'Umum'}</span>
+                        <span className="text-[10px] text-slate-400 uppercase font-mono dark:text-slate-500">{item.category || 'Umum'}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-sm font-black tracking-tight truncate w-[100px]">
-                      {item.qty} <span className="text-[10px] font-medium text-slate-400">Pcs</span>
+                      {item.qty} <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">Pcs</span>
                     </TableCell>
                     <TableCell className="truncate">Rp {Number(item.buy_price).toLocaleString()}</TableCell>
 
                     {/* KOLOM WAKTU */}
-                    <TableCell className="text-xs text-slate-500 truncate">
+                    <TableCell className="text-xs text-slate-500 truncate dark:text-slate-400">
                       {new Date(item.created_at).toLocaleString('id-ID', {
                         day: '2-digit',
                         month: 'short',
@@ -583,11 +583,11 @@ export default function Shopping() {
 
                     <TableCell className="truncate">
                       {item.status === 'pending' ? (
-                        <Badge variant="outline" className="text-orange-500 bg-orange-50 border-orange-200 gap-1 font-medium">
+                        <Badge variant="outline" className="text-orange-500 bg-orange-50 border-orange-200 gap-1 font-medium dark:text-orange-400">
                           <Clock size={12} /> Pending
                         </Badge>
                       ) : (
-                        <Badge className="bg-green-500 gap-1 font-medium shadow-sm">
+                        <Badge className="bg-green-500 gap-1 font-medium shadow-sm dark:bg-green-600">
                           <CheckCircle2 size={12} /> Selesai
                         </Badge>
                       )}
@@ -599,7 +599,7 @@ export default function Shopping() {
                           <>
                             <Button
                               size="sm"
-                              className="bg-blue-600 hover:bg-blue-700 h-8 px-3"
+                              className="bg-blue-600 hover:bg-blue-700 h-8 px-3 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
                               onClick={() => handleComplete(item.id)}
                             >
                               Terima
@@ -607,7 +607,7 @@ export default function Shopping() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-slate-500 hover:text-blue-600"
+                              className="h-8 w-8 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-500"
                               onClick={() => {
                                 setEditingOrder(item);
                                 setIsEditOpen(true);
@@ -618,7 +618,7 @@ export default function Shopping() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-red-500 hover:text-red-600"
+                              className="h-8 w-8 text-red-500 hover:text-red-600 dark:text-red-500 dark:hover:text-red-600"
                               onClick={() => {
                                 setIsDeleteOpen(true);
                                 setDeleteId(item.id);
@@ -635,7 +635,7 @@ export default function Shopping() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={7} className="h-48 text-center py-10">
-                    <div className="flex flex-col items-center gap-2 text-slate-400">
+                    <div className="flex flex-col items-center gap-2 text-slate-400 dark:text-slate-500">
                       <ShoppingCart size={40} className="opacity-20" />
                       <p>Belum ada rencana belanja.</p>
                     </div>
@@ -646,33 +646,33 @@ export default function Shopping() {
           </Table>
         </div>
         {/* UI PAGINATION */}
-        <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50">
-          <p className="text-xs text-slate-500 font-medium hidden md:block">
-            Menampilkan <span className="text-slate-900">{list.length}</span> dari <span className="text-slate-900">{pagination.totalData}</span> rencana
+        <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50 dark:bg-slate-800">
+          <p className="text-xs text-slate-500 font-medium hidden md:block dark:text-slate-400">
+            Menampilkan <span className="text-slate-900 dark:text-white">{list.length}</span> dari <span className="text-slate-900 dark:text-white">{pagination.totalData}</span> rencana
           </p>
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               disabled={page === 1}
               onClick={() => setPage(p => p - 1)}
-              className="h-8 px-3 text-xs"
+              className="h-8 px-3 text-xs dark:text-slate-400 dark:hover:text-slate-300"
             >
               Sebelumnya
             </Button>
             <div className="flex items-center gap-2 px-2">
-              <span className="text-xs font-bold text-blue-600 bg-blue-50 h-8 w-8 flex items-center justify-center rounded-lg border border-blue-100">
+              <span className="text-xs font-bold text-blue-600 bg-blue-50 h-8 w-8 flex items-center justify-center rounded-lg border border-blue-100 dark:bg-slate-700 dark:border-none dark:text-slate-400">
                 {page}
               </span>
-              <span className="text-xs text-slate-400">/</span>
-              <span className="text-xs font-medium text-slate-600">{pagination.totalPages}</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">/</span>
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{pagination.totalPages}</span>
             </div>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               disabled={page === pagination.totalPages}
               onClick={() => setPage(p => p + 1)}
-              className="h-8 px-3 text-xs"
+              className="h-8 px-3 text-xs dark:text-slate-400 dark:hover:text-slate-300"
             >
               Selanjutnya
             </Button>
@@ -685,24 +685,24 @@ export default function Shopping() {
         setIsAddOpen(open);
         if (!open) setSuggestion(null); // Reset saran saat dialog ditutup
       }}>
-        <DialogContent>
+        <DialogContent className="dark:bg-slate-800">
           <DialogHeader><DialogTitle>Rencana Belanja Baru</DialogTitle></DialogHeader>
           {/* --- KARTU PREDIKSI TANGGAL BELANJA --- */}
           {suggestion && (
-            <div className={`p-4 rounded-xl border flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-300 ${suggestion.isUrgent ? "bg-red-50 border-red-100 shadow-sm" : "bg-blue-50 border-blue-100"
+            <div className={`p-4 rounded-xl border flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-300 ${suggestion.isUrgent ? "bg-red-50 border-red-100 shadow-sm dark:bg-slate-700 dark:border-red-400" : "bg-blue-50 border-blue-100 dark:bg-slate-700 dark:border-blue-400 shadow-sm"
               }`}>
-              <div className={`p-2 rounded-lg ${suggestion.isUrgent ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600"}`}>
+              <div className={`p-2 rounded-lg ${suggestion.isUrgent ? "bg-red-100 text-red-600 dark:bg-red-600 dark:text-slate-200" : "bg-blue-100 text-blue-600 dark:bg-blue-600 dark:text-slate-200"}`}>
                 <Calendar size={20} />
               </div>
               <div className="flex-1">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Saran Tanggal Belanja</p>
-                <p className={`text-sm font-black ${suggestion.isUrgent ? "text-red-600" : "text-blue-600"}`}>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight dark:text-slate-300">Saran Tanggal Belanja</p>
+                <p className={`text-sm font-black ${suggestion.isUrgent ? "text-red-600 dark:text-red-400" : "text-blue-600 dark:text-blue-400"}`}>
                   {new Date(suggestion.suggestedDate).toLocaleDateString('id-ID', {
                     day: 'numeric', month: 'long', year: 'numeric'
                   })}
                 </p>
                 <p className="text-[10px] text-slate-400 font-medium">
-                  Estimasi stok habis dalam <span className="font-bold text-slate-600">{suggestion.daysLeft} hari</span>
+                  Estimasi stok habis dalam <span className="font-bold text-slate-600 dark:text-slate-300">{suggestion.daysLeft} hari</span>
                 </p>
               </div>
             </div>
@@ -711,7 +711,7 @@ export default function Shopping() {
           <div className="space-y-4 py-4">
             {/* SEARCH INPUT FIELD */}
             <div className="space-y-1 relative">
-              <p className="text-[10px] font-bold uppercase text-slate-500">Cari Produk</p>
+              <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Cari Produk</p>
               <div className="relative">
                 <Input
                   placeholder="Ketik nama atau SKU..."
@@ -720,29 +720,29 @@ export default function Shopping() {
                     setProductQuery(e.target.value);
                     setIsSelected(false); // BUKA KUNCI: Jika user ngetik lagi, berarti dia mau cari ulang
                   }}
-                  className={`pr-10 w-full border p-2 rounded-md text-sm ${errors.product ? 'border-pink-500' : ''} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500`}
+                  className={`pr-10 w-full border p-2 rounded-md text-sm ${errors.product ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500`}
                 />
                 {errors.product && <FieldError>{errors.product}</FieldError>}
-                <div className="absolute right-3 top-2.5 text-slate-400">
+                <div className="absolute right-3 top-2.5 text-slate-400 dark:text-slate-500">
                   {isSearching ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
                 </div>
               </div>
 
               {/* DROPDOWN SARAN (Muncul jika ada hasil) */}
               {suggestions.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-white border rounded-lg shadow-xl max-h-60 overflow-y-auto overflow-x-hidden animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute z-50 w-full mt-1 bg-white border rounded-lg shadow-xl max-h-60 overflow-y-auto overflow-x-hidden animate-in fade-in zoom-in-95 duration-200 dark:bg-slate-800 dark:border-slate-600">
                   {suggestions.map((p) => (
                     <div
                       key={p.id}
                       onClick={() => selectProduct(p)}
-                      className="p-3 hover:bg-blue-50 cursor-pointer border-b last:border-0 flex justify-between items-center"
+                      className="p-3 hover:bg-blue-50 cursor-pointer border-b last:border-0 flex justify-between items-center dark:hover:bg-slate-700"
                     >
                       <div className="flex flex-col">
-                        <span className="text-sm font-bold text-slate-700">{p.name}</span>
-                        <span className="text-[10px] text-slate-400 uppercase">{p.sku}</span>
+                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{p.name}</span>
+                        <span className="text-[10px] text-slate-400 uppercase dark:text-slate-500">{p.sku}</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-bold">Stok: {p.quantity}</span>
+                        <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-bold dark:bg-slate-700 dark:text-slate-400">Stok: {p.quantity}</span>
                       </div>
                     </div>
                   ))}
@@ -751,34 +751,36 @@ export default function Shopping() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <p className="text-[10px] font-bold uppercase text-slate-500">Jumlah Beli</p>
+                <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Jumlah Beli</p>
                 <Input
                   type="number"
                   value={newOrder.qty}
                   onChange={e => setNewOrder({ ...newOrder, qty: Number(e.target.value) })}
+                  className="w-full border p-2 rounded-md text-sm dark:border-slate-600"
                 />
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] font-bold uppercase text-slate-500">Harga Beli Satuan</p>
+                <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Harga Beli Satuan</p>
                 <Input
                   type="number"
                   value={newOrder.buy_price}
                   onChange={e => setNewOrder({ ...newOrder, buy_price: Number(e.target.value) })}
+                  className="w-full border p-2 rounded-md text-sm dark:border-slate-600"
                 />
               </div>
             </div>
             {/* --- INI BAGIAN TOTALNYA --- */}
             <div className="pt-2 border-t border-dashed">
-              <div className="flex justify-between items-center bg-blue-50 p-3 rounded-lg border border-blue-100">
-                <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Estimasi Total</span>
-                <span className="text-lg font-black text-blue-700">
+              <div className="flex justify-between items-center bg-blue-50 p-3 rounded-lg border border-blue-100 dark:bg-slate-700">
+                <span className="text-xs font-bold text-blue-600 uppercase tracking-wider dark:text-slate-400">Estimasi Total</span>
+                <span className="text-lg font-black text-blue-700 dark:text-slate-200">
                   Rp {(newOrder.qty * newOrder.buy_price).toLocaleString('id-ID')}
                 </span>
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddOpen(false)}>Batal</Button>
+            <Button variant="ghost" onClick={() => setIsAddOpen(false)} className="dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-700 dark:bg-slate-800">Batal</Button>
             <Button onClick={handleAdd}>Simpan Rencana</Button>
           </DialogFooter>
         </DialogContent>
@@ -786,39 +788,41 @@ export default function Shopping() {
 
       {/* DIALOG EDIT */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
+        <DialogContent className="dark:bg-slate-800">
           <DialogHeader>
             <DialogTitle>Edit Rencana Belanja</DialogTitle>
           </DialogHeader>
           {editingOrder && (
             <div className="space-y-4 py-4">
               <div className="space-y-1">
-                <p className="text-[10px] font-bold uppercase text-slate-500">Nama Produk</p>
-                <Input value={editingOrder.product_name} disabled className="bg-slate-50" />
+                <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Nama Produk</p>
+                <Input value={editingOrder.product_name} disabled className="bg-slate-50 dark:bg-slate-700" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <p className="text-[10px] font-bold uppercase text-slate-500">Jumlah Beli</p>
+                  <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Jumlah Beli</p>
                   <Input
                     type="number"
                     value={editingOrder.qty}
                     onChange={e => setEditingOrder({ ...editingOrder, qty: Number(e.target.value) })}
+                    className="w-full border p-2 rounded-md text-sm dark:border-slate-600"
                   />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[10px] font-bold uppercase text-slate-500">Harga Beli Satuan</p>
+                  <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Harga Beli Satuan</p>
                   <Input
                     type="number"
                     value={editingOrder.buy_price}
                     onChange={e => setEditingOrder({ ...editingOrder, buy_price: Number(e.target.value) })}
+                    className="w-full border p-2 rounded-md text-sm dark:border-slate-600"
                   />
                 </div>
               </div>
               {/* --- INI BAGIAN TOTALNYA --- */}
               <div className="pt-2 border-t border-dashed">
-                <div className="flex justify-between items-center bg-blue-50 p-3 rounded-lg border border-blue-100">
-                  <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Estimasi Total</span>
-                  <span className="text-lg font-black text-blue-700">
+                <div className="flex justify-between items-center bg-blue-50 p-3 rounded-lg border border-blue-100 dark:bg-slate-700">
+                  <span className="text-xs font-bold text-blue-600 uppercase tracking-wider dark:text-slate-400">Estimasi Total</span>
+                  <span className="text-lg font-black text-blue-700 dark:text-slate-200">
                     Rp {(editingOrder.qty * editingOrder.buy_price).toLocaleString('id-ID')}
                   </span>
                 </div>
@@ -826,7 +830,7 @@ export default function Shopping() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditOpen(false)}>Batal</Button>
+            <Button variant="ghost" onClick={() => setIsEditOpen(false)} className="dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-700 dark:bg-slate-800">Batal</Button>
             <Button onClick={handleUpdate}>Simpan Perubahan</Button>
           </DialogFooter>
         </DialogContent>
@@ -834,7 +838,7 @@ export default function Shopping() {
 
       {/* Alert Dialog */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent className="max-w-sm">
+        <AlertDialogContent className="max-w-sm dark:bg-slate-800">
           <AlertDialogHeader>
             <AlertDialogTitle>Apakah kamu yakin?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -842,8 +846,8 @@ export default function Shopping() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleDelete(deleteId)}>Ya</AlertDialogAction>
+            <AlertDialogCancel className="dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-700 dark:bg-slate-800">Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={() => handleDelete(deleteId)} className="dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-700 dark:bg-red-800">Ya</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

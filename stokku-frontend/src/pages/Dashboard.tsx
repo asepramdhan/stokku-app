@@ -100,15 +100,15 @@ export default function Dashboard() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Ringkasan Bisnis</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">Update terakhir: {isLoading ? "..." : new Date().toLocaleString('id-ID')}</p>
+          <p className="text-slate-500 text-sm dark:text-slate-400">Update terakhir: {isLoading ? "..." : new Date().toLocaleString('id-ID')}</p>
         </div>
         {/* DROPDOWN FILTER */}
-        <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border p-1.5 rounded-lg shadow-sm w-full md:w-auto">
-          <Calendar size={16} className="text-slate-400 dark:text-slate-500 ml-2" />
+        <div className="flex items-center gap-2 bg-white border p-1.5 rounded-lg shadow-sm w-full md:w-auto dark:bg-slate-800">
+          <Calendar size={16} className="text-slate-400 ml-2 dark:text-slate-500" />
           <select
             value={range}
             onChange={(e) => setRange(e.target.value)}
-            className="text-sm w-full font-bold bg-transparent outline-none pr-4 cursor-pointer"
+            className="text-sm w-full font-bold bg-transparent outline-none pr-4 cursor-pointer dark:bg-slate-800"
           >
             <option value="all">Semua Waktu</option>
             <option value="today">Hari Ini</option>
@@ -120,7 +120,7 @@ export default function Dashboard() {
 
       {/* STATS CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-blue-600 dark:bg-blue-800 text-white border-none shadow-blue-200 shadow-lg dark:shadow-none">
+        <Card className="bg-blue-600 text-white border-none shadow-blue-200 shadow-lg dark:shadow-none dark:bg-blue-800">
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-sm font-medium opacity-80">Total Omset</CardTitle>
             <Landmark size={18} className="opacity-80" />
@@ -131,36 +131,36 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dark:border-none dark:bg-slate-800">
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Pesanan</CardTitle>
             <ShoppingBag size={18} className="text-slate-400 dark:text-slate-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{isLoading ? "..." : stats?.orders}</div>
-            <p className="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center gap-1"><ArrowUpRight size={12} /> 5 hari ini</p>
+            <p className="text-xs text-green-600 mt-1 flex items-center gap-1 dark:text-green-400"><ArrowUpRight size={12} /> 5 hari ini</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dark:border-none dark:bg-slate-800">
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-sm font-medium text-slate-500 dark:text-slate-400">Aset Stok</CardTitle>
             <Package size={18} className="text-slate-400 dark:text-slate-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">Rp {isLoading ? "..." : Number(stats?.stockValue || 0).toLocaleString()}</div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Nilai barang di gudang</p>
+            <p className="text-xs text-slate-400 mt-1 dark:text-slate-500">Nilai barang di gudang</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dark:border-none dark:bg-slate-800">
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-sm font-medium text-slate-500 dark:text-slate-400">Efisiensi</CardTitle>
             <TrendingUp size={18} className="text-slate-400 dark:text-slate-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{isLoading ? "..." : (stats?.turnover || 0)}%</div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Perputaran stok</p>
+            <p className="text-xs text-slate-400 mt-1 dark:text-slate-500">Perputaran stok</p>
           </CardContent>
         </Card>
       </div>
@@ -168,7 +168,7 @@ export default function Dashboard() {
       {/* CHARTS SECTION */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* BAR CHART: Tren Penjualan */}
-        <Card className="md:col-span-2">
+        <Card className="md:col-span-2 dark:border-none dark:bg-slate-800">
           <CardHeader><CardTitle className="text-lg">Tren Penjualan (7 Hari)</CardTitle></CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -177,7 +177,7 @@ export default function Dashboard() {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} tickFormatter={(value: number) => `${Number(value || 0).toLocaleString()}`} />
-                  <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '10px 14px' }}
+                  <Tooltip cursor={false} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '10px 14px' }}
                     // --- INI BAGIAN KUNCINYA ---
                     formatter={(value: number) => [
                       `Rp ${Number(value || 0).toLocaleString()}`,
@@ -193,7 +193,7 @@ export default function Dashboard() {
         </Card>
 
         {/* PIE CHART: Per Platform */}
-        <Card>
+        <Card className="dark:border-none dark:bg-slate-800">
           <CardHeader>
             <CardTitle className="text-lg">Sumber Penjualan</CardTitle>
           </CardHeader>
@@ -209,6 +209,7 @@ export default function Dashboard() {
                           innerRadius={60}
                           outerRadius={80}
                           paddingAngle={5}
+                          stroke="none"
                           dataKey="value"
                           nameKey="name"
                         >
@@ -250,7 +251,7 @@ export default function Dashboard() {
       {/* TOP PRODUCTS & STATUS STOK */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* TOP PRODUCTS */}
-        <Card className="shadow-sm lg:col-span-2">
+        <Card className="shadow-sm lg:col-span-2 dark:border-none dark:bg-slate-800">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-lg font-bold">Top 5 Produk</CardTitle>
             <TrendingUp size={18} className="text-green-500 dark:text-green-400" />
@@ -266,8 +267,8 @@ export default function Dashboard() {
                           <div className="flex items-center gap-3">
                             <span className="text-xs font-bold text-slate-400 dark:text-slate-500">{index + 1}.</span>
                             <div className="flex flex-col">
-                              <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate w-[200px]">{product.name}</span>
-                              <span className="text-[9px] text-slate-400 dark:text-slate-500 uppercase">{product.sku}</span>
+                              <span className="text-[11px] font-bold text-slate-800 truncate w-[200px] dark:text-slate-200">{product.name}</span>
+                              <span className="text-[9px] text-slate-400 uppercase dark:text-slate-500">{product.sku}</span>
                             </div>
                           </div>
                           <div className="text-right">
@@ -275,9 +276,9 @@ export default function Dashboard() {
                           </div>
                         </div>
                         {/* Progress Bar Visual */}
-                        <div className="h-1 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                        <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden dark:bg-slate-700">
                           <div
-                            className="h-full bg-blue-500 dark:bg-blue-400 transition-all duration-500"
+                            className="h-full bg-blue-500 transition-all duration-500 ease-in-out dark:bg-blue-400"
                             style={{ width: `${(product.total_qty / stats.topProducts[0].total_qty) * 100}%` }}
                           />
                         </div>
@@ -296,17 +297,17 @@ export default function Dashboard() {
         </Card>
 
         {/* STATUS STOK (WIDGET IMPROVED) */}
-        <Card className="border-t-4 border-t-red-500 dark:border-t-red-400 shadow-md flex flex-col h-full">
+        <Card className={`shadow-md flex flex-col h-full dark:bg-slate-800 ${stats?.lowStock?.length > 0 ? "border-t-4 border-t-red-500 dark:border-t-red-400 dark:border-b-0 dark:border-l-0 dark:border-r-0 dark:shadow-none" : "border-none"}`}>
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
             <div className="space-y-1">
-              <CardTitle className="text-sm font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">Perlu Re-Stok</CardTitle>
+              <CardTitle className="text-sm font-bold uppercase text-slate-500 tracking-wider dark:text-slate-400">Perlu Re-Stok</CardTitle>
               {!isLoading && stats?.lowStock?.length > 0 && (
-                <p className="text-[10px] text-red-500 dark:text-red-400 font-medium animate-pulse">
+                <p className="text-[10px] text-red-500 font-medium animate-pulse dark:text-red-400">
                   Ada {stats.lowStock.length} barang hampir habis!
                 </p>
               )}
             </div>
-            <AlertCircle size={18} className="text-red-500 dark:text-red-400" />
+            {stats?.lowStock?.length > 0 && <AlertCircle size={18} className="text-red-500 dark:text-red-400" />}
           </CardHeader>
 
           <CardContent className="flex-1">
@@ -326,11 +327,11 @@ export default function Dashboard() {
                     <div
                       key={i}
                       onClick={() => handleQuickAdd(item.id, item.name)}
-                      className="group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-800 transition-all active:scale-95"
+                      className="group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-blue-50 transition-all active:scale-95 dark:hover:bg-slate-700"
                     >
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-xs font-bold text-slate-700 group-hover:text-blue-600 dark:text-slate-200 dark:group-hover:text-blue-400 transition-colors truncate w-32">
+                          <span className="text-xs font-bold text-slate-700 group-hover:text-blue-600 transition-colors truncate w-32 dark:text-slate-200 dark:group-hover:text-blue-400">
                             {item.name}
                           </span>
                           <span className="text-[10px] font-black tracking-tight text-slate-400 dark:text-slate-500">
@@ -339,14 +340,14 @@ export default function Dashboard() {
                         </div>
                         <div className={cn(
                           "text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-tighter",
-                          isCritical ? "bg-red-500 text-white shadow-sm dark:bg-red-400 dark:shadow-none" : "bg-orange-100 text-orange-600 dark:bg-orange-800 dark:text-orange-400"
+                          isCritical ? "bg-red-500 text-white shadow-sm dark:bg-red-400" : "bg-orange-100 text-orange-600 dark:bg-orange-400 dark:text-white"
                         )}>
                           {isCritical ? 'Kritis' : 'Menipis'}
                         </div>
                       </div>
 
                       {/* MINI PROGRESS BAR */}
-                      <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                      <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden dark:bg-slate-700">
                         <div
                           className={cn(
                             "h-full transition-all duration-1000 ease-out",
@@ -360,7 +361,7 @@ export default function Dashboard() {
                 })
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <div className="h-12 w-12 rounded-full bg-green-50 dark:bg-slate-800 flex items-center justify-center mb-2">
+                  <div className="h-12 w-12 rounded-full bg-green-50 flex items-center justify-center mb-2 dark:bg-slate-700">
                     <CheckCircle2 size={24} className="text-green-500 dark:text-green-400" />
                   </div>
                   <p className="text-xs font-bold text-slate-600 dark:text-slate-200">Gudang Aman!</p>
@@ -374,7 +375,7 @@ export default function Dashboard() {
           <div className="p-4 pt-0">
             <Link
               to="/shopping"
-              className="flex items-center justify-center gap-2 w-full py-2 bg-slate-50 hover:bg-blue-50 text-blue-600 rounded-lg text-[11px] font-bold transition-all border border-dashed border-slate-200 hover:border-blue-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:border-slate-700 dark:hover:border-slate-600"
+              className="flex items-center justify-center gap-2 w-full py-2 bg-slate-50 hover:bg-blue-50 text-blue-600 rounded-lg text-[11px] font-bold transition-all border border-dashed border-slate-200 hover:border-blue-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 dark:border-slate-600 dark:hover:border-slate-500"
             >
               <ShoppingCart size={14} />
               Buka Daftar Belanja
