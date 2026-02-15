@@ -547,8 +547,7 @@ export default function Shopping() {
                 ))
               ) : list.length > 0 ? (
                 list.map((item: any) => (
-                  // "hover:bg-slate-50/50 transition-colors group"
-                  <TableRow key={item.id} className={selectedIds.includes(item.id) ? "bg-blue-50/50 dark:bg-slate-700" : ""}>
+                  <TableRow key={item.id} className={selectedIds.includes(item.id) ? "bg-blue-50/50 dark:bg-slate-700" : "hover:bg-slate-50/50 transition-colors group dark:hover:bg-slate-700"}>
                     <TableCell>
                       {item.status === 'pending' && (
                         <input
@@ -607,7 +606,7 @@ export default function Shopping() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-500"
+                              className="h-8 w-8 text-slate-500 hover:text-blue-600 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-300"
                               onClick={() => {
                                 setEditingOrder(item);
                                 setIsEditOpen(true);
@@ -618,7 +617,7 @@ export default function Shopping() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-red-500 hover:text-red-600 dark:text-red-500 dark:hover:text-red-600"
+                              className="h-8 w-8 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:bg-slate-800 dark:hover:text-red-500"
                               onClick={() => {
                                 setIsDeleteOpen(true);
                                 setDeleteId(item.id);
@@ -656,7 +655,7 @@ export default function Shopping() {
               size="sm"
               disabled={page === 1}
               onClick={() => setPage(p => p - 1)}
-              className="h-8 px-3 text-xs dark:text-slate-400 dark:hover:text-slate-300"
+              className="h-8 px-3 text-xs dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-700 dark:border-slate-600"
             >
               Sebelumnya
             </Button>
@@ -672,7 +671,7 @@ export default function Shopping() {
               size="sm"
               disabled={page === pagination.totalPages}
               onClick={() => setPage(p => p + 1)}
-              className="h-8 px-3 text-xs dark:text-slate-400 dark:hover:text-slate-300"
+              className="h-8 px-3 text-xs dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-700 dark:border-slate-600"
             >
               Selanjutnya
             </Button>

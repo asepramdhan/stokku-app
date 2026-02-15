@@ -169,8 +169,8 @@ export default function Layout() {
             {/* LONCENG NOTIFIKASI (Tampilan Premium) */}
             <Popover onOpenChange={() => setNotifSearch("")}> {/* Reset pencarian saat popover ditutup */}
               <PopoverTrigger asChild>
-                <button className="relative p-2 rounded-xl hover:bg-slate-100 transition-colors dark:hover:bg-slate-800">
-                  <Bell size={20} className={cn(lowStockCount > 0 ? "text-red-500 animate-ring dark:text-red-400" : "text-slate-400 dark:text-slate-600")} />
+                <button className="relative p-2 rounded-xl hover:bg-slate-100 transition-colors dark:hover:bg-slate-700">
+                  <Bell size={20} className={cn(lowStockCount > 0 ? "text-red-500 animate-ring dark:text-red-400" : "text-slate-400 dark:text-slate-500")} />
                   {lowStockCount > 0 && (
                     <span className="absolute top-1.5 right-1.5 h-4 w-4 bg-red-600 text-white text-[9px] font-black flex items-center justify-center rounded-full dark:bg-red-400">
                       {lowStockCount}
@@ -193,7 +193,7 @@ export default function Layout() {
                 </div>
 
                 {/* 3. INPUT SEARCH DI DALAM POPOVER */}
-                <div className="my-2 px-4 relative group">
+                <div className="px-4 py-2 relative group border-b border-slate-100 dark:border-slate-700 dark:bg-slate-800">
                   <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-600" />
                   <input
                     type="text"

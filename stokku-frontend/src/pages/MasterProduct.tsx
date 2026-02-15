@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Table,
   TableBody,
@@ -21,6 +21,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
+import { useReactToPrint } from "react-to-print";
+import { Printer } from "lucide-react";
+import { SKULabel } from "@/components/SKULabel";
+import { Scan } from "lucide-react";
+import QRScanner from "../components/QRScanner";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/products`,
   API_SHOPPING = `${import.meta.env.VITE_API_URL}/shopping`; // Pastikan ini ada
@@ -55,6 +60,9 @@ export default function MasterProduct() {
     [historyLoading, setHistoryLoading] = useState(false),
     [isAddToShoppingOpen, setIsAddToShoppingOpen] = useState(false),
     [shoppingFormData, setShoppingFormData] = useState({ product_id: 0, name: "", qty: 1, buy_price: 0 }),
+    printRef = useRef<HTMLDivElement>(null),
+    [productToPrint, setProductToPrint] = useState<any>(null),
+    [isScannerOpen, setIsScannerOpen] = useState(false),
     // 💡 Buat fungsi helper biar gak capek ngetik header terus
     getHeaders = () => ({
       "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -347,7 +355,21 @@ export default function MasterProduct() {
       if (days > 7) return { width: percentage, color: "bg-blue-500 dark:bg-blue-400", label: "Cukup" };
       if (days > 3) return { width: percentage, color: "bg-orange-500 dark:bg-orange-400", label: "Menipis" };
       return { width: Math.max(percentage, 10), color: "bg-red-500 dark:bg-red-400", label: "Kritis" };
-    };
+    },
+
+    // Fungsi Cetak
+    handlePrint = useReactToPrint({
+      contentRef: printRef, // Ganti dari 'content: () => printRef.current' menjadi ini
+      documentTitle: `Label-${productToPrint?.sku}`,
+    });
+
+  // Pemicu cetak
+  useEffect(() => {
+    if (productToPrint) {
+      handlePrint();
+      setProductToPrint(null); // Reset setelah cetak
+    }
+  }, [productToPrint]);
 
   return (
     <div className="space-y-6">
@@ -418,6 +440,15 @@ export default function MasterProduct() {
             />
             <InputGroupAddon>
               <Search />
+            </InputGroupAddon>
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
+                variant="ghost"
+                className="h-6 w-6 p-0 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                onClick={() => setIsScannerOpen(true)}
+              >
+                <Scan size={18} />
+              </InputGroupButton>
             </InputGroupAddon>
             <InputGroupAddon align="inline-end">
               {search &&
@@ -549,6 +580,15 @@ export default function MasterProduct() {
                           onClick={() => { setEditingProduct(product); setIsEditOpen(true); setErrors({}) }}
                         >
                           <Edit2 size={16} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-slate-800"
+                          onClick={() => setProductToPrint(product)}
+                          title="Cetak Label SKU"
+                        >
+                          <Printer size={16} />
                         </Button>
                         <Button
                           variant="ghost"
@@ -706,6 +746,31 @@ export default function MasterProduct() {
             </Button>
             <Button onClick={handleAdd}>Simpan Produk</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* DIALOG SCANNER */}
+      <Dialog open={isScannerOpen} onOpenChange={setIsScannerOpen}>
+        <DialogContent className="sm:max-w-[400px] dark:bg-slate-950 dark:border-slate-800">
+          <DialogHeader>
+            <DialogTitle className="dark:text-slate-100 italic font-black uppercase tracking-tighter flex items-center gap-2">
+              <Scan size={20} className="text-blue-600" /> Scanner Stokku.id
+            </DialogTitle>
+          </DialogHeader>
+
+          <QRScanner
+            onScanSuccess={(sku) => {
+              setSearch(sku); // Masukkan hasil scan ke kolom search
+              setIsScannerOpen(false); // Tutup scanner
+              setPage(1); // Reset halaman ke 1
+              toast.success(`Berhasil scan SKU: ${sku}`);
+            }}
+            onClose={() => setIsScannerOpen(false)}
+          />
+
+          <Button variant="outline" className="w-full dark:border-slate-800 dark:text-slate-400" onClick={() => setIsScannerOpen(false)}>
+            Batal
+          </Button>
         </DialogContent>
       </Dialog>
 
@@ -923,6 +988,11 @@ export default function MasterProduct() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Hidden Printable Area */}
+      <div className="hidden">
+        <SKULabel ref={printRef} product={productToPrint} />
+      </div>
     </div >
   );
 }

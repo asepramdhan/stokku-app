@@ -216,7 +216,7 @@ export default function Stores() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Pengaturan Toko</h1>
-          <p className="text-slate-500 text-sm font-medium">
+          <p className="text-slate-500 text-sm font-medium dark:text-slate-400">
             Kelola channel penjualan online dan offline kamu.
           </p>
         </div>
@@ -224,7 +224,7 @@ export default function Stores() {
         {/* Button jadi full width di mobile, balik ke auto di desktop */}
         <Button
           onClick={() => { setIsAddOpen(true); setErrors({}) }}
-          className="gap-2 w-full md:w-auto shadow-md"
+          className="gap-2 w-full md:w-auto shadow-md dark:shadow-none dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white"
         >
           <Plus size={18} /> Tambah Toko
         </Button>
@@ -232,37 +232,37 @@ export default function Stores() {
 
       {/* STATS CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-blue-500 shadow-sm">
+        <Card className="border-l-4 border-l-blue-500 shadow-sm dark:border-t-0 dark:border-r-0 dark:border-b dark:bg-slate-800">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-full">
+            <div className="p-2 bg-blue-100 text-blue-600 rounded-full dark:bg-slate-700 dark:text-slate-200">
               <Store size={20} />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Total Toko</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Toko</p>
               <h3 className="text-2xl font-bold">{isLoading ? "..." : globalStats.totalStores}</h3>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-green-500 shadow-sm">
+        <Card className="border-l-4 border-l-green-500 shadow-sm dark:border-t-0 dark:border-r-0 dark:border-b dark:bg-slate-800">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-green-100 text-green-600 rounded-full">
+            <div className="p-2 bg-green-100 text-green-600 rounded-full dark:bg-green-600 dark:text-white">
               <Globe size={20} />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Toko Online</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Toko Online</p>
               <h3 className="text-2xl font-bold">{isLoading ? "..." : globalStats.onlineStores}</h3>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-orange-500 shadow-sm">
+        <Card className="border-l-4 border-l-orange-500 shadow-sm dark:border-t-0 dark:border-r-0 dark:border-b dark:bg-slate-800">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-orange-100 text-orange-600 rounded-full">
+            <div className="p-2 bg-orange-100 text-orange-600 rounded-full dark:bg-orange-600 dark:text-white">
               <Building2 size={20} />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Toko Offline</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Toko Offline</p>
               <h3 className="text-2xl font-bold">{isLoading ? "..." : globalStats.offlineStores}</h3>
             </div>
           </CardContent>
@@ -272,7 +272,7 @@ export default function Stores() {
       {/* SEARCH & FILTER BAR */}
       <div className="flex flex-col md:flex-row gap-3">
         {/* INPUT SEARCH BAR */}
-        <div className="flex-1 bg-white border rounded-lg shadow-sm">
+        <div className="flex-1 bg-white border rounded-lg shadow-sm dark:bg-slate-800 dark:border-slate-700">
           <InputGroup>
             <InputGroupInput
               placeholder="Cari toko..."
@@ -297,10 +297,10 @@ export default function Stores() {
           </InputGroup>
         </div>
         {/* DROPDOWN FILTER PLATFORM */}
-        <div className="flex items-center gap-2 bg-white border px-3 py-1 rounded-lg shadow-sm">
-          <Filter size={14} className="text-slate-400" />
+        <div className="flex items-center gap-2 bg-white border px-3 py-1 rounded-lg shadow-sm dark:bg-slate-800 dark:border-slate-700">
+          <Filter size={14} className="text-slate-400 dark:text-slate-300" />
           <select
-            className="w-full text-sm font-bold bg-transparent outline-none min-w-[120px] cursor-pointer"
+            className="w-full text-sm font-bold bg-transparent outline-none min-w-[120px] cursor-pointer dark:bg-slate-800"
             value={filterPlatform}
             onChange={(e) => handlePlatformChange(e.target.value)}
           >
@@ -315,7 +315,7 @@ export default function Stores() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-white border rounded-lg shadow-sm overflow-hidden dark:bg-slate-800">
         <div className="overflow-x-auto"> {/* Memastikan tabel bisa di-scroll di HP jika kolom terlalu panjang */}
           <Table>
             <TableHeader className="bg-slate-50/50">
