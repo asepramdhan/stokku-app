@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from "react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 
-export default function QRScanner({ onScanSuccess, onClose }: { onScanSuccess: (text: string) => void; onClose: () => void }) {
+export default function QRScanner({ onScanSuccess }: { onScanSuccess: (text: string) => void }) {
   useEffect(() => {
     const scanner = new Html5QrcodeScanner(
       "reader",
@@ -17,6 +17,7 @@ export default function QRScanner({ onScanSuccess, onClose }: { onScanSuccess: (
       },
       (error) => {
         // Abaikan error scanning biasa (saat belum nemu QR)
+        console.error(error);
       }
     );
 
