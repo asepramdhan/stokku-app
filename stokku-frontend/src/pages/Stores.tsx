@@ -592,7 +592,7 @@ export default function Stores() {
                     type="number"
                     placeholder="1250"
                     value={editingStore.handling_fee}
-                    onChange={e => ({ ...editingStore, handling_fee: Number(e.target.value) })}
+                    onChange={e => setEditingStore({ ...editingStore, handling_fee: Number(e.target.value) })}
                   />
                 </div>
               </div>

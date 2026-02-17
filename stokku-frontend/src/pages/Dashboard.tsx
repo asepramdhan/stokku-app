@@ -253,7 +253,7 @@ export default function Dashboard() {
         {/* TOP PRODUCTS */}
         <Card className="shadow-sm lg:col-span-2 dark:border-none dark:bg-slate-800">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-lg font-bold">Top 5 Produk</CardTitle>
+            <CardTitle className="text-lg font-bold">Top 8 Produk</CardTitle>
             <TrendingUp size={18} className="text-green-500 dark:text-green-400" />
           </CardHeader>
           <CardContent>

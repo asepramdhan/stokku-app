@@ -33,7 +33,7 @@ router.get("/stats", async (req, res) => {
       FROM sales s JOIN inventory i ON s.product_id = i.id
       ${dateFilter}
       GROUP BY s.product_id, i.name, i.sku 
-      ORDER BY total_qty DESC LIMIT 5
+      ORDER BY total_qty DESC LIMIT 8
     `),
 			// 4. Low Stock Alert (Barang yang stoknya < 10)
 			[lowStock] = await db.query(
