@@ -82,6 +82,25 @@ router.get("/", async (req, res) => {
 	}
 });
 
+// Summary Hari Ini
+router.get("/today-summary", async (req, res) => {
+	try {
+		const [rows] = await db.query(`
+      SELECT 
+        COALESCE(SUM(qty), 0) as total_qty, 
+        COALESCE(SUM(qty * selling_price), 0) as total_sales 
+      FROM sales 
+      WHERE DATE(created_at) = CURDATE()
+    `);
+
+		// Kirim hasil baris pertama saja
+		res.json(rows[0]);
+	} catch (err) {
+		console.error("Error Summary:", err);
+		res.status(500).json({ error: err.message });
+	}
+});
+
 // 2. Tambah Transaksi + Kurangi Stok
 router.post("/", async (req, res) => {
 	const { product_id, store_id, qty, selling_price } = req.body,
