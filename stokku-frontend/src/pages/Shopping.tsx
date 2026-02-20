@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, Clock, Plus, Search, Trash2, X, ShoppingCart, Edit2, Filter, Loader2, Calendar } from "lucide-react";
+import { CheckCircle2, Clock, Plus, Search, Trash2, X, ShoppingCart, Edit2, Filter, Loader2, Calendar, BadgeDollarSign } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
@@ -22,9 +22,10 @@ export default function Shopping() {
     [search, setSearch] = useState(localStorage.getItem("shop_search") || ""),
     [filterStatus, setFilterStatus] = useState(localStorage.getItem("shop_status") || "All"),
     [filterCategory, setFilterCategory] = useState(localStorage.getItem("shop_category") || "All"),
+    [filterPayment, setFilterPayment] = useState(localStorage.getItem("shop_payment") || "All"),
     [isLoading, setIsLoading] = useState(true),
     [isAddOpen, setIsAddOpen] = useState(false),
-    [newOrder, setNewOrder] = useState({ product_id: "", qty: 1, buy_price: 0 }),
+    [newOrder, setNewOrder] = useState({ product_id: "", qty: 1, buy_price: 0, payment_type: "cash" }),
     [isEditOpen, setIsEditOpen] = useState(false),
     [editingOrder, setEditingOrder] = useState<any>(null),
     [errors, setErrors] = useState<{ [key: string]: string }>({}),
@@ -52,7 +53,7 @@ export default function Shopping() {
   // Trigger fetch saat filter atau halaman berubah
   useEffect(() => {
     fetchData();
-  }, [page, search, filterStatus, filterCategory]);
+  }, [page, search, filterStatus, filterCategory, filterPayment]);
 
   // LOGIKA DEBOUNCE: Cari produk setelah user berhenti mengetik 500ms
   useEffect(() => {
@@ -75,7 +76,8 @@ export default function Shopping() {
     localStorage.setItem("shop_status", filterStatus);
     localStorage.setItem("shop_category", filterCategory);
     localStorage.setItem("shop_page", page.toString());
-  }, [search, filterStatus, filterCategory, page]);
+    localStorage.setItem("shop_payment", filterPayment);
+  }, [search, filterStatus, filterCategory, page, filterPayment]);
 
   // Fungsi cari produk
   const searchProducts = async (query: string) => {
@@ -121,7 +123,7 @@ export default function Shopping() {
       setIsLoading(true);
       try {
         // 1. Ambil data belanja dengan params
-        const shopUrl = `${API_SHOPPING}?page=${page}&search=${search}&status=${filterStatus}&category=${filterCategory}&limit=10`,
+        const shopUrl = `${API_SHOPPING}?page=${page}&search=${search}&status=${filterStatus}&category=${filterCategory}&payment_type=${filterPayment}&limit=10`,
           resShop = await fetch(shopUrl, { headers: getHeaders() });
 
         // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
@@ -157,10 +159,15 @@ export default function Shopping() {
       const matchesSearch = item.product_name.toLowerCase().includes(search.toLowerCase()) ||
         (item.sku && item.sku.toLowerCase().includes(search.toLowerCase())),
         matchesStatus = filterStatus === "All" || item.status === filterStatus,
-        matchesCategory = filterCategory === "All" || (item.category || "Umum") === filterCategory;
+        matchesCategory = filterCategory === "All" || (item.category || "Umum") === filterCategory,
+        // Tambahkan baris ini:
+        matchesPayment = filterPayment === "All" || item.payment_type === filterPayment;
 
-      return matchesSearch && matchesStatus && matchesCategory;
+      return matchesSearch && matchesStatus && matchesCategory && matchesPayment;
     }),
+
+    // HITUNG TOTAL SPENDING
+    filteredTotalSpending = filtered.reduce((acc, curr) => acc + (curr.qty * curr.buy_price), 0),
 
     // Fungsi untuk menampilkan teks error
     FieldError = ({ children }: { children: React.ReactNode }) => (
@@ -399,21 +406,26 @@ export default function Shopping() {
 
       {/* STATS CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="border-l-4 border-l-orange-500 shadow-sm dark:bg-slate-800 dark:border-l-orange-600 dark:border-t-0 dark:border-b-0 dark:border-r-0">
+        {/* Card Rencana Menunggu */}
+        <Card className="border-l-4 border-l-orange-500 shadow-sm dark:bg-slate-800">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-orange-100 text-orange-600 rounded-full dark:bg-slate-700 dark:text-orange-500"><Clock size={20} /></div>
+            <div className="p-2 bg-orange-100 text-orange-600 rounded-full"><Clock size={20} /></div>
             <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Rencana Menunggu</p>
-              <h3 className="text-xl font-bold">{globalStats.pendingCount} Transaksi</h3>
+              <p className="text-sm font-medium text-slate-500">Hasil Filter: {filterStatus}</p>
+              <h3 className="text-xl font-bold">{filtered.length} Transaksi</h3>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-blue-500 shadow-sm dark:bg-slate-800 dark:border-l-blue-600 dark:border-t-0 dark:border-b-0 dark:border-r-0">
+
+        {/* Card Total Belanja (Otomatis Menyesuaikan) */}
+        <Card className="border-l-4 border-l-blue-500 shadow-sm dark:bg-slate-800">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-full dark:bg-slate-700 dark:text-blue-500"><ShoppingCart size={20} /></div>
+            <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><ShoppingCart size={20} /></div>
             <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Estimasi Biaya Belanja</p>
-              <h3 className="text-xl font-bold">Rp {Number(globalStats.estimatedSpending).toLocaleString()}</h3>
+              <p className="text-sm font-medium text-slate-500">Total Belanja (Filtered)</p>
+              <h3 className="text-xl font-bold text-blue-600">
+                Rp {filteredTotalSpending.toLocaleString('id-ID')}
+              </h3>
             </div>
           </CardContent>
         </Card>
@@ -493,6 +505,19 @@ export default function Shopping() {
             ))}
           </select>
         </div>
+
+        <div className="flex items-center gap-2 bg-white border px-3 py-2 rounded-xl shadow-sm w-full lg:w-auto dark:bg-slate-800 dark:border-slate-700">
+          <BadgeDollarSign size={14} className="text-slate-400" />
+          <select
+            className="w-full text-xs font-bold bg-transparent outline-none min-w-[120px] cursor-pointer dark:text-white"
+            value={filterPayment}
+            onChange={(e) => { setFilterPayment(e.target.value); setPage(1); }}
+          >
+            <option value="All">Semua Pembayaran</option>
+            <option value="cash">Tunai (Cash)</option>
+            <option value="weekly">Mingguan</option>
+          </select>
+        </div>
       </div>
 
       {/* --- ACTION BAR (Muncul saat ada yang dicentang) --- */}
@@ -532,13 +557,14 @@ export default function Shopping() {
                     onChange={toggleSelectAll}
                   />
                 </TableHead>
-                <TableHead className="font-semibold w-[250px]">Produk</TableHead>
-                <TableHead className="font-semibold w-[80px]">Qty</TableHead>
+                <TableHead className="font-semibold w-[150px]">Tanggal</TableHead> {/* Kolom Baru */}
+                <TableHead className="font-semibold w-[300px]">Produk</TableHead>
+                <TableHead className="font-semibold w-[50px]">Qty</TableHead>
                 <TableHead className="font-semibold w-[100px] truncate">Harga Beli</TableHead>
-                <TableHead className="font-semibold w-[120px]">Total</TableHead>
-                <TableHead className="font-semibold w-[100px]">Waktu</TableHead> {/* Kolom Baru */}
+                <TableHead className="font-semibold w-[100px]">Total</TableHead>
+                <TableHead className="font-semibold w-[100px]">Pembayaran</TableHead>
                 <TableHead className="font-semibold w-[100px]">Status</TableHead>
-                <TableHead className="text-right font-semibold w-[100px]">Aksi</TableHead>
+                <TableHead className="text-right font-semibold w-[200px]">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -546,13 +572,14 @@ export default function Shopping() {
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-5 w-10" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-[250px]" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-[80px]" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-[100px]" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-[150px]" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-[300px]" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-[50px]" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-[100px]" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-[100px]" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-[100px]" /></TableCell>
-                    <TableCell><Skeleton className="h-8 w-[100px] ml-auto" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-[100px]" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-[200px] ml-auto" /></TableCell>
                   </TableRow>
                 ))
               ) : list.length > 0 ? (
@@ -568,6 +595,16 @@ export default function Shopping() {
                         />
                       )}
                     </TableCell>
+                    {/* KOLOM WAKTU */}
+                    <TableCell className="text-xs text-slate-500 truncate dark:text-slate-400">
+                      {new Date(item.created_at).toLocaleString('id-ID', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </TableCell>
                     <TableCell className="truncate max-w-[200px]">
                       <div className="flex flex-col">
                         <span className="font-medium">{item.product_name}</span>
@@ -581,15 +618,13 @@ export default function Shopping() {
                     <TableCell className="font-bold text-blue-600 dark:text-blue-400 truncate">
                       Rp {Number(item.qty * item.buy_price).toLocaleString()}
                     </TableCell>
-                    {/* KOLOM WAKTU */}
-                    <TableCell className="text-xs text-slate-500 truncate dark:text-slate-400">
-                      {new Date(item.created_at).toLocaleString('id-ID', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                    <TableCell>
+                      <Badge variant="outline" className={`text-[10px] font-bold ${item.payment_type === 'cash'
+                        ? "text-green-600 border-green-200 bg-green-50"
+                        : "text-purple-600 border-purple-200 bg-purple-50"
+                        }`}>
+                        {item.payment_type === 'cash' ? 'CASH' : 'MINGGUAN'}
+                      </Badge>
                     </TableCell>
                     <TableCell className="truncate">
                       {item.status === 'pending' ? (
@@ -777,6 +812,27 @@ export default function Shopping() {
                   className="w-full border p-2 rounded-md text-sm dark:border-slate-600"
                 />
               </div>
+              <div className="space-y-1 col-span-2">
+                <p className="text-[10px] font-bold uppercase text-slate-500">Metode Pembayaran</p>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={newOrder.payment_type === 'cash' ? 'default' : 'outline'}
+                    className="flex-1 h-9 text-xs"
+                    onClick={() => setNewOrder({ ...newOrder, payment_type: 'cash' })}
+                  >
+                    Cash / Tunai
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={newOrder.payment_type === 'weekly' ? 'default' : 'outline'}
+                    className="flex-1 h-9 text-xs"
+                    onClick={() => setNewOrder({ ...newOrder, payment_type: 'weekly' })}
+                  >
+                    Mingguan
+                  </Button>
+                </div>
+              </div>
             </div>
             {/* --- INI BAGIAN TOTALNYA --- */}
             <div className="pt-2 border-t border-dashed">
@@ -825,6 +881,31 @@ export default function Shopping() {
                     onChange={e => setEditingOrder({ ...editingOrder, buy_price: Number(e.target.value) })}
                     className="w-full border p-2 rounded-md text-sm dark:border-slate-600"
                   />
+                </div>
+                <div className="space-y-1 col-span-2"> {/* Tambahkan col-span-2 agar lebar penuh & sejajar */}
+                  <p className="text-[10px] font-bold uppercase text-slate-500">Metode Pembayaran</p>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      // GANTI: pakai editingOrder, bukan newOrder
+                      variant={editingOrder.payment_type === 'cash' ? 'default' : 'outline'}
+                      className="flex-1 h-9 text-xs"
+                      // GANTI: pakai setEditingOrder
+                      onClick={() => setEditingOrder({ ...editingOrder, payment_type: 'cash' })}
+                    >
+                      Cash / Tunai
+                    </Button>
+                    <Button
+                      type="button"
+                      // GANTI: pakai editingOrder
+                      variant={editingOrder.payment_type === 'weekly' ? 'default' : 'outline'}
+                      className="flex-1 h-9 text-xs"
+                      // GANTI: pakai setEditingOrder
+                      onClick={() => setEditingOrder({ ...editingOrder, payment_type: 'weekly' })}
+                    >
+                      Mingguan
+                    </Button>
+                  </div>
                 </div>
               </div>
               {/* --- INI BAGIAN TOTALNYA --- */}
