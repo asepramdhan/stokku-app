@@ -678,7 +678,7 @@ export default function Shopping() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-48 text-center py-10">
+                  <TableCell colSpan={9} className="h-48 text-center py-10">
                     <div className="flex flex-col items-center gap-2 text-slate-400 dark:text-slate-500">
                       <ShoppingCart size={40} className="opacity-20" />
                       <p>Belum ada rencana belanja.</p>
