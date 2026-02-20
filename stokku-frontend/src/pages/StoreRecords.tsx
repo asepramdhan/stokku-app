@@ -1,13 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, Wallet, Receipt, Search, X, Filter,
   Calendar, AlertCircle, CheckCircle2, ArrowUpRight,
   Plus, Edit, Trash2,
-  ShoppingBag
+  ShoppingBag,
+  Calculator,
+  FileText,
+  BarChart3,
+  Download
 } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -19,15 +23,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { toPng } from 'html-to-image';
 
 const API_RECORDS = `${import.meta.env.VITE_API_URL}/records`;
 
 export default function StoreRecords() {
   const [data, setData] = useState<any[]>([]),
-    [search, setSearch] = useState(""),
-    [filterStatus, setFilterStatus] = useState("all"),
-    [filterType, setFilterType] = useState("all"),
-    [page, setPage] = useState(1),
+    [search, setSearch] = useState(localStorage.getItem("sr_search") || ""),
+    [filterStatus, setFilterStatus] = useState(localStorage.getItem("sr_status") || "all"),
+    [filterType, setFilterType] = useState(localStorage.getItem("sr_type") || "all"),
+    [page, setPage] = useState(Number(localStorage.getItem("sr_page")) || 1),
     [pagination, setPagination] = useState<any>({ totalPages: 1, totalData: 0 }),
     [summary, setSummary] = useState({ totalBill: 0, totalPaid: 0, totalDebt: 0 }),
     [isLoading, setIsLoading] = useState(true),
@@ -35,12 +40,18 @@ export default function StoreRecords() {
     [isPayModalOpen, setIsPayModalOpen] = useState(false),
     [selectedRecord, setSelectedRecord] = useState<any>(null),
     [payAmount, setPayAmount] = useState(""),
-    [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false),
     [paymentHistory, setPaymentHistory] = useState<any[]>([]),
     [historyLoading, setHistoryLoading] = useState(false),
     [isSpendModalOpen, setIsSpendModalOpen] = useState(false),
     [spendAmount, setSpendAmount] = useState(""),
     [spendNote, setSpendNote] = useState(""),
+    [isCalcOpen, setIsCalcOpen] = useState(false),
+    [calcInput, setCalcInput] = useState(""),
+    [calcTotal, setCalcTotal] = useState(0),
+    [calcLabel, setCalcLabel] = useState(""),
+    [calcTarget, setCalcTarget] = useState<'main' | 'spending'>('main'),
+    [isReportOpen, setIsReportOpen] = useState(false),
+    reportRef = useRef<HTMLDivElement>(null),
     // State untuk form Tambah/Edit
     [formData, setFormData] = useState({
       toko_name: "",
@@ -53,6 +64,14 @@ export default function StoreRecords() {
     });
 
   useEffect(() => { fetchRecords(); }, [page, search, filterStatus, filterType]);
+
+  // Simpan filter pencatatan toko ke localStorage tiap kali ada perubahan
+  useEffect(() => {
+    localStorage.setItem("sr_search", search);
+    localStorage.setItem("sr_status", filterStatus);
+    localStorage.setItem("sr_type", filterType);
+    localStorage.setItem("sr_page", page.toString());
+  }, [search, filterStatus, filterType, page]);
 
   // FUNGSI AMBIL DATA
   const fetchRecords = async () => {
@@ -86,7 +105,7 @@ export default function StoreRecords() {
   // FUNGSI AMBIL RIWAYAT
   const fetchHistory = async (record: any) => {
     setSelectedRecord(record);
-    setIsHistoryModalOpen(true);
+    setIsReportOpen(true);
     setHistoryLoading(true);
     try {
       const res = await fetch(`${API_RECORDS}/${record.id}/history`, {
@@ -246,6 +265,47 @@ export default function StoreRecords() {
 
     const dueDate = new Date(dateString);
     return dueDate < today; // True jika sudah lewat dari hari ini
+  },
+
+    // Fungsi hitung otomatis (Simple Math Evaluator)
+    evaluateMath = (val: string) => {
+      setCalcInput(val);
+      try {
+        // Hanya izinkan angka dan operator matematika dasar
+        const sanitized = val.replace(/[^0-9+\-*/. ]/g, "");
+        const result = new Function(`return ${sanitized || 0}`)();
+        setCalcTotal(typeof result === "number" ? result : 0);
+      } catch {
+        setCalcTotal(0);
+      }
+    };
+
+  const handleExportImage = async () => {
+    if (reportRef.current === null) return;
+
+    const loadingToast = toast.loading("Sedang menyiapkan gambar...");
+
+    try {
+      const dataUrl = await toPng(reportRef.current, {
+        cacheBust: true,
+        backgroundColor: '#ffffff', // Biar background-nya putih bersih, gak transparan
+        style: {
+          padding: '20px', // Kasih jarak aman di pinggir gambar
+        }
+      });
+
+      const link = document.createElement('a');
+      link.download = `Laporan-Piutang-${selectedRecord?.toko_name}.png`;
+      link.href = dataUrl;
+      link.click();
+
+      toast.dismiss(loadingToast);
+      toast.success("Laporan berhasil diunduh!");
+    } catch (err) {
+      toast.dismiss(loadingToast);
+      toast.error("Gagal mengambil gambar laporan.");
+      console.error(err);
+    }
   };
 
   return (
@@ -399,22 +459,33 @@ export default function StoreRecords() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          <Button variant="outline" size="icon" className="h-8 w-8 text-amber-600" onClick={() => fetchHistory(item)}>
-                            <BookOpen size={14} /> {/* Icon buku untuk riwayat */}
-                          </Button>
-                          <Button variant="outline" size="icon" className="h-8 w-8 text-blue-600" onClick={() => openEdit(item)}><Edit size={14} /></Button>
-                          <Button variant="outline" size="icon" className="h-8 w-8 text-red-600" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></Button>
                           <Button
                             variant="outline"
                             size="icon"
                             className="h-8 w-8 text-orange-600 border-orange-200 hover:bg-orange-50"
                             onClick={() => { setSelectedRecord(item); setIsSpendModalOpen(true); }}
+                            title="Pengeluaran"
                           >
                             <ShoppingBag size={14} />
                           </Button>
-                          <Button variant="outline" size="sm" disabled={item.status === 'paid'} onClick={() => { setSelectedRecord(item); setIsPayModalOpen(true); }} className="h-8 text-xs font-bold bg-green-50 text-green-700 border-green-200 hover:bg-green-100">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                            onClick={() => {
+                              setSelectedRecord(item);
+                              fetchHistory(item); // Kita pakai history yang sudah ada
+                              setIsReportOpen(true);
+                            }}
+                            title="Laporan Piutang"
+                          >
+                            <FileText size={14} />
+                          </Button>
+                          <Button variant="outline" size="sm" disabled={item.status === 'paid'} onClick={() => { setSelectedRecord(item); setIsPayModalOpen(true); }} className="h-8 text-xs font-bold bg-green-50 text-green-700 border-green-200 hover:bg-green-100" title="Bayar">
                             <Wallet className="w-3 h-3 mr-1" /> Bayar
                           </Button>
+                          <Button variant="outline" size="icon" className="h-8 w-8 text-blue-600" onClick={() => openEdit(item)} title="Edit"><Edit size={14} /></Button>
+                          <Button variant="outline" size="icon" className="h-8 w-8 text-red-600" onClick={() => handleDelete(item.id)} title="Hapus"><Trash2 size={14} /></Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -453,13 +524,37 @@ export default function StoreRecords() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
+              {/* KOLOM KIRI */}
               <div className="space-y-1">
-                <Label className="text-xs">Total Harga</Label>
-                <Input type="number" required value={formData.total_price} onChange={e => setFormData({ ...formData, total_price: e.target.value })} />
+                <Label className="text-xs flex justify-between items-center h-5"> {/* Tambah items-center & h-5 */}
+                  <span>Total Harga</span>
+                  <button
+                    type="button"
+                    onClick={() => { setCalcTarget('main'); setIsCalcOpen(true); }}
+                    className="text-blue-600 hover:underline flex items-center gap-1 text-[10px]"
+                  >
+                    <Calculator size={10} /> Buka Kalkulator
+                  </button>
+                </Label>
+                <Input
+                  type="number"
+                  required
+                  value={formData.total_price}
+                  onChange={e => setFormData({ ...formData, total_price: e.target.value })}
+                />
               </div>
+
+              {/* KOLOM KANAN */}
               <div className="space-y-1">
-                <Label className="text-xs">Uang Muka / DP</Label>
-                <Input type="number" required value={formData.paid_amount} onChange={e => setFormData({ ...formData, paid_amount: e.target.value })} />
+                <Label className="text-xs flex items-center h-5"> {/* Tambah flex items-center & h-5 */}
+                  Uang Muka / DP
+                </Label>
+                <Input
+                  type="number"
+                  required
+                  value={formData.paid_amount}
+                  onChange={e => setFormData({ ...formData, paid_amount: e.target.value })}
+                />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -491,8 +586,24 @@ export default function StoreRecords() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Nominal Belanja (Rp)</Label>
-              <Input type="number" placeholder="Contoh: 50000" value={spendAmount} onChange={e => setSpendAmount(e.target.value)} autoFocus />
+              <Label className="text-xs flex justify-between">
+                Nominal Belanja (Rp)
+                {/* Tombol pemicu khusus modal belanja */}
+                <button
+                  type="button"
+                  onClick={() => { setCalcTarget('spending'); setIsCalcOpen(true); }}
+                  className="text-orange-600 hover:underline flex items-center gap-1"
+                >
+                  <Calculator size={12} /> Kalkulator
+                </button>
+              </Label>
+              <Input
+                type="number"
+                placeholder="Contoh: 50000"
+                value={spendAmount}
+                onChange={e => setSpendAmount(e.target.value)}
+                autoFocus
+              />
             </div>
             <div className="space-y-2">
               <Label>Catatan Barang (Opsional)</Label>
@@ -526,96 +637,208 @@ export default function StoreRecords() {
         </DialogContent>
       </Dialog>
 
-      {/* MODAL RIWAYAT GABUNGAN + SUMMARY */}
-      <Dialog open={isHistoryModalOpen} onOpenChange={setIsHistoryModalOpen}>
-        <DialogContent className="max-w-lg">
+      {/* MODAL LAPORAN IKHTISAR PIUTANG */}
+      <Dialog open={isReportOpen} onOpenChange={setIsReportOpen}>
+        <DialogContent className="max-w-2xl">
+          <div ref={reportRef} className="bg-white p-2">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-indigo-700">
+                <BarChart3 size={22} />
+                Laporan Ikhtisar Piutang
+              </DialogTitle>
+              <DialogDescription>
+                Ringkasan saldo dan riwayat transaksi untuk <b>{selectedRecord?.toko_name}</b>.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              {/* 1. KARTU RINGKASAN */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {/* Total Belanja */}
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Belanja</p>
+                  <p className="text-sm font-black text-slate-700">{toRp(selectedRecord?.total_price)}</p>
+                </div>
+                {/* Sudah Dibayar */}
+                <div className="p-3 rounded-xl bg-green-50 border border-green-100">
+                  <p className="text-[10px] font-bold text-green-600 uppercase tracking-wider">Sudah Dibayar</p>
+                  <p className="text-sm font-black text-green-700">{toRp(selectedRecord?.paid_amount)}</p>
+                </div>
+                {/* Sisa Piutang */}
+                <div className="p-3 rounded-xl bg-red-50 border border-red-100">
+                  <p className="text-[10px] font-bold text-red-600 uppercase tracking-wider">Sisa Piutang</p>
+                  <p className="text-sm font-black text-red-700">{toRp(selectedRecord?.total_price - selectedRecord?.paid_amount)}</p>
+                </div>
+              </div>
+
+              {/* 2. PROGRESS BAR */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-bold">
+                  <span className="text-slate-500 font-medium">Status Pelunasan</span>
+                  <span className="text-indigo-600">
+                    {Math.round((selectedRecord?.paid_amount / selectedRecord?.total_price) * 100)}%
+                  </span>
+                </div>
+                <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden border">
+                  <div
+                    className="h-full bg-indigo-500 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                    style={{ width: `${(selectedRecord?.paid_amount / selectedRecord?.total_price) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* 3. DAFTAR RIWAYAT (DENGAN LOGIKA LOADING) */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+                  <BookOpen size={14} /> Riwayat Transaksi Lengkap
+                </h4>
+
+                <div className="border rounded-lg overflow-hidden max-h-[250px] overflow-y-auto shadow-inner bg-white">
+                  <div className="divide-y divide-slate-100">
+                    {/* LOGIKA LOADING SKELETON */}
+                    {historyLoading ? (
+                      <div className="p-4 space-y-4">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="flex justify-between items-center">
+                            <div className="space-y-2">
+                              <Skeleton className="h-4 w-[150px]" />
+                              <Skeleton className="h-3 w-[100px]" />
+                            </div>
+                            <Skeleton className="h-5 w-[80px]" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : paymentHistory.length > 0 ? (
+                      paymentHistory.map((h, i) => (
+                        <div key={i} className="p-3 flex justify-between items-center hover:bg-slate-50 transition-colors">
+                          <div className="space-y-0.5">
+                            <p className="text-xs font-bold text-slate-700">{h.notes || "Transaksi Toko"}</p>
+                            <p className="text-[10px] text-slate-400 font-medium">
+                              {new Date(h.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </p>
+                          </div>
+                          <div className={`text-xs font-black ${h.type === 'spending' ? "text-red-600" : "text-green-600"}`}>
+                            {h.type === 'spending' ? "+" : "-"}{toRp(h.amount)}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-10 text-center text-xs text-slate-400 italic font-medium">
+                        Belum ada aktivitas transaksi.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-[8px] text-slate-300 text-right uppercase tracking-widest mt-4">
+              Generated by Stokku App - {new Date().toLocaleDateString('id-ID')}
+            </p>
+          </div>
+
+          <DialogFooter className="flex-row gap-2 border-t pt-4">
+            <Button variant="outline" className="flex-1" onClick={() => setIsReportOpen(false)}>
+              Tutup
+            </Button>
+            <Button
+              onClick={handleExportImage}
+              className="flex-1 bg-indigo-600 hover:bg-indigo-700 gap-2 font-bold"
+            >
+              <Download size={16} /> Download Gambar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* KALKULATOR */}
+      <Dialog open={isCalcOpen} onOpenChange={setIsCalcOpen}>
+        <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <BookOpen className="text-blue-600" size={20} />
-              Riwayat Mutasi: {selectedRecord?.toko_name}
+              <Calculator className="text-blue-600" size={20} />
+              Kalkulator Piutang Toko
             </DialogTitle>
-            <DialogDescription className="text-xs">
-              Data transaksi kronologis belanja dan pembayaran.
+            <DialogDescription>
+              Masukkan rincian nota (contoh: 50000 + 25000 * 2)
             </DialogDescription>
           </DialogHeader>
 
-          {/* SEKSI SUMMARY CARD */}
-          {!historyLoading && paymentHistory.length > 0 && (
-            <div className="grid grid-cols-2 gap-3 mb-2">
-              <div className="bg-orange-50 border border-orange-100 p-3 rounded-xl">
-                <p className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">Belanja Bulan Ini</p>
-                <p className="text-sm font-bold text-orange-700">
-                  {toRp(paymentHistory
-                    .filter(h => h.type === 'spending' && new Date(h.date).getMonth() === new Date().getMonth())
-                    .reduce((acc, curr) => acc + parseFloat(curr.amount), 0)
-                  )}
-                </p>
-              </div>
-              <div className="bg-green-50 border border-green-100 p-3 rounded-xl">
-                <p className="text-[10px] font-bold text-green-600 uppercase tracking-wider">Cicilan Bulan Ini</p>
-                <p className="text-sm font-bold text-green-700">
-                  {toRp(paymentHistory
-                    .filter(h => h.type === 'payment' && new Date(h.date).getMonth() === new Date().getMonth())
-                    .reduce((acc, curr) => acc + parseFloat(curr.amount), 0)
-                  )}
-                </p>
-              </div>
+          <div className="space-y-4 py-4">
+            {/* Input Label Baru */}
+            <div className="space-y-1">
+              <Label className="text-[10px] font-bold uppercase text-slate-500">Nama Barang / Keterangan</Label>
+              <Input
+                placeholder="Contoh: Pakan Burung & Aksesoris"
+                value={calcLabel}
+                onChange={(e) => setCalcLabel(e.target.value)}
+                className="bg-slate-50"
+              />
             </div>
-          )}
 
-          {/* TABEL RIWAYAT */}
-          <div className="space-y-4 py-2">
-            {historyLoading ? (
-              <div className="space-y-2"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div>
-            ) : paymentHistory.length > 0 ? (
-              <div className="border rounded-lg overflow-hidden max-h-[350px] overflow-y-auto shadow-inner">
-                <Table>
-                  <TableHeader className="bg-slate-50 sticky top-0 z-10">
-                    <TableRow>
-                      <TableHead className="text-xs">Keterangan</TableHead>
-                      <TableHead className="text-right text-xs">Nominal</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paymentHistory.map((h, idx) => (
-                      <TableRow key={idx} className="hover:bg-slate-50/50">
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span className="text-[10px] text-slate-400 font-medium">
-                              {new Date(h.date).toLocaleString("id-ID", { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                            <span className="text-xs font-semibold text-slate-700">{h.notes || "Tanpa catatan"}</span>
-                            <div className="mt-1">
-                              <Badge variant="outline" className={`text-[9px] px-1.5 py-0 h-4 border-none ${h.type === 'spending' ? "text-orange-600 bg-orange-100" : "text-green-600 bg-green-100"
-                                }`}>
-                                {h.type === 'spending' ? "Belanja Stok" : "Cicilan Masuk"}
-                              </Badge>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right align-top">
-                          <span className={`text-sm font-bold ${h.type === 'spending' ? "text-red-600" : "text-green-600"}`}>
-                            {h.type === 'spending' ? "+" : "-"}{toRp(h.amount)}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="text-center py-10 border-2 border-dashed rounded-lg text-slate-400 text-sm italic">
-                Belum ada aktivitas transaksi.
-              </div>
-            )}
+            <div className="space-y-1">
+              <Label className="text-[10px] font-bold uppercase text-slate-500">Input Perhitungan</Label>
+              <Input
+                placeholder="0"
+                value={calcInput}
+                onChange={(e) => evaluateMath(e.target.value)}
+                className="text-lg font-mono tracking-widest"
+              />
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Hasil Perhitungan</p>
+              <p className="text-2xl font-black text-blue-700">
+                {toRp(calcTotal)}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-4 gap-2">
+              {['+', '-', '*', '/'].map(op => (
+                <Button
+                  key={op}
+                  variant="outline"
+                  onClick={() => evaluateMath(calcInput + op)}
+                  className="font-bold"
+                >
+                  {op === '*' ? '×' : op === '/' ? '÷' : op}
+                </Button>
+              ))}
+            </div>
           </div>
 
-          <DialogFooter className="flex-row items-center justify-between gap-2 border-t pt-4">
-            <div className="text-[10px] text-slate-400 leading-tight">
-              Sisa Hutang Saat Ini:<br />
-              <span className="text-sm font-bold text-slate-900">{toRp(selectedRecord?.total_price - selectedRecord?.paid_amount)}</span>
-            </div>
-            <Button variant="outline" onClick={() => setIsHistoryModalOpen(false)}>Tutup</Button>
+          <DialogFooter className="flex flex-col gap-2">
+            <Button
+              className="w-full bg-blue-600 hover:bg-blue-700"
+              onClick={() => {
+                const fullNote = calcLabel
+                  ? `${calcLabel} (${calcInput})`
+                  : `Rincian: ${calcInput}`;
+
+                // CEK TARGET: Mau dimasukkan ke mana angkanya?
+                if (calcTarget === 'main') {
+                  setFormData({
+                    ...formData,
+                    total_price: calcTotal.toString(),
+                    notes: fullNote
+                  });
+                } else if (calcTarget === 'spending') {
+                  setSpendAmount(calcTotal.toString());
+                  setSpendNote(fullNote); // Otomatis mengisi Catatan Barang di Modal Belanja
+                }
+
+                setIsCalcOpen(false);
+                setCalcInput("");
+                setCalcLabel("");
+                setCalcTotal(0);
+                toast.success("Data belanja berhasil dipindahkan!");
+              }}
+            >
+              Terapkan ke Modal
+            </Button>
+            <Button variant="ghost" className="w-full" onClick={() => setIsCalcOpen(false)}>
+              Batal
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

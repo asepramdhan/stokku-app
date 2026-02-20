@@ -14,7 +14,7 @@ const API_DASHBOARD = `${import.meta.env.VITE_API_URL}/dashboard/stats`,
 export default function Dashboard() {
   const [stats, setStats] = useState<any>(null),
     [isLoading, setIsLoading] = useState(true),
-    [range, setRange] = useState("all"),
+    [range, setRange] = useState(localStorage.getItem("dashboard_range") || "all"),
     // 💡 Buat fungsi helper biar gak capek ngetik header terus
     getHeaders = () => ({
       "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -45,6 +45,11 @@ export default function Dashboard() {
     };
 
     fetchStats();
+  }, [range]);
+
+  // Simpan ke storage tiap kali range berubah
+  useEffect(() => {
+    localStorage.setItem("dashboard_range", range);
   }, [range]);
 
   const handleQuickAdd = async (productId: number, productName: string) => {

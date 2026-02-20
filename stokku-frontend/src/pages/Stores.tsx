@@ -3,15 +3,16 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Building2, Edit2, Filter, Globe, Plus, Search, Store, Trash2, X } from "lucide-react";
+import { Building2, Calculator, Copy, Edit2, Filter, Globe, Plus, Search, Store, Trash2, X } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/stores`;
 
@@ -26,9 +27,9 @@ type Store = {
 export default function Stores() {
   // Initial State
   const [stores, setStores] = useState<Store[]>([]),
-    [search, setSearch] = useState(""),
-    [filterPlatform, setFilterPlatform] = useState("All"),
-    [page, setPage] = useState(1), // State Halaman
+    [search, setSearch] = useState(localStorage.getItem("st_search") || ""),
+    [filterPlatform, setFilterPlatform] = useState(localStorage.getItem("st_platform") || "All"),
+    [page, setPage] = useState(Number(localStorage.getItem("st_page")) || 1),
     [pagination, setPagination] = useState<any>({ totalPages: 1, totalData: 0 }),
     [globalStats, setGlobalStats] = useState<any>({ totalStores: 0, onlineStores: 0, offlineStores: 0 }),
     [isLoading, setIsLoading] = useState(true),
@@ -38,6 +39,10 @@ export default function Stores() {
     [isEditOpen, setIsEditOpen] = useState(false),
     [editingStore, setEditingStore] = useState<any>(null),
     [isDeleteOpen, setIsDeleteOpen] = useState(false),
+    [isCalcOpen, setIsCalcOpen] = useState(false),
+    [calcStore, setCalcStore] = useState<any>(null),
+    [calcInput, setCalcInput] = useState({ modal: 0, targetProfit: 0 }),
+    [calcResult, setCalcResult] = useState({ sellingPrice: 0, totalFees: 0 }),
     // Timer
     timer = 500;
 
@@ -45,6 +50,13 @@ export default function Stores() {
   useEffect(() => {
     fetchStores();
   }, [page, search, filterPlatform]);
+
+  // Simpan filter toko ke localStorage agar tidak hilang saat pindah halaman
+  useEffect(() => {
+    localStorage.setItem("st_search", search);
+    localStorage.setItem("st_platform", filterPlatform);
+    localStorage.setItem("st_page", page.toString());
+  }, [search, filterPlatform, page]);
 
   // Fungsi untuk menampilkan teks error
   const FieldError = ({ children }: { children: React.ReactNode }) => (
@@ -208,6 +220,24 @@ export default function Stores() {
           error: "Error",
         }
       )
+    },
+
+    // Fungsi Hitung
+    calculateSellingPrice = (modal: number, target: number, store: any) => {
+      const admin = Number(store.admin_fee) || 0;
+      const extra = Number(store.extra_promo_fee) || 0;
+      const handling = Number(store.handling_fee) || 0;
+
+      // Rumus: Jual = (Modal + Handling + Profit) / (1 - (Total % Fee / 100))
+      const totalPercent = (admin + extra) / 100;
+      const price = (modal + handling + target) / (1 - totalPercent);
+
+      const totalFees = (price * totalPercent) + handling;
+
+      setCalcResult({
+        sellingPrice: Math.ceil(price), // Dibulatkan ke atas
+        totalFees: Math.ceil(totalFees)
+      });
     };
 
   return (
@@ -375,6 +405,20 @@ export default function Stores() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                          onClick={() => {
+                            setCalcStore(store);
+                            setIsCalcOpen(true);
+                            setCalcInput({ modal: 0, targetProfit: 0 });
+                            setCalcResult({ sellingPrice: 0, totalFees: 0 });
+                          }}
+                          title="Kalkulator Profit"
+                        >
+                          <Calculator size={16} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                           onClick={() => { setEditingStore(store); setIsEditOpen(true); setErrors({}) }}
                         >
@@ -526,6 +570,87 @@ export default function Stores() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddOpen(false)}>Batal</Button>
             <Button onClick={handleAdd}>Simpan Toko</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Calculator */}
+      <Dialog open={isCalcOpen} onOpenChange={setIsCalcOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calculator className="text-purple-600" size={20} />
+              Hitung Harga Jual - {calcStore?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Bantu tentukan harga jual di {calcStore?.platform} agar profit tetap aman.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label className="text-xs font-bold uppercase">Harga Modal (Rp)</Label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={calcInput.modal || ""}
+                  onChange={e => {
+                    const val = Number(e.target.value);
+                    setCalcInput({ ...calcInput, modal: val });
+                    calculateSellingPrice(val, calcInput.targetProfit, calcStore);
+                  }}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs font-bold uppercase">Target Profit (Rp)</Label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={calcInput.targetProfit || ""}
+                  onChange={e => {
+                    const val = Number(e.target.value);
+                    setCalcInput({ ...calcInput, targetProfit: val });
+                    calculateSellingPrice(calcInput.modal, val, calcStore);
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200 space-y-3">
+              <div className="flex justify-between text-xs text-slate-500 font-medium">
+                <span>Potongan Fee ({calcStore?.admin_fee + calcStore?.extra_promo_fee}% + Rp {calcStore?.handling_fee.toLocaleString()})</span>
+                <span className="text-red-500">-Rp {calcResult.totalFees.toLocaleString()}</span>
+              </div>
+              <div className="pt-2 border-t flex justify-between items-center">
+                <span className="text-sm font-bold text-slate-700">Rekomendasi Harga Jual:</span>
+                <span className="text-xl font-black text-purple-600">
+                  Rp {calcResult.sellingPrice.toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-slate-400 italic">
+              *Harga jual ini sudah menutup modal, biaya admin marketplace, dan target profit bersih kamu.
+            </p>
+          </div>
+
+          <DialogFooter>
+            <Button
+              className="w-full bg-purple-600 hover:bg-purple-700 gap-2"
+              onClick={() => {
+                // Salin angka ke clipboard (tanpa titik/koma agar mudah dipaste)
+                navigator.clipboard.writeText(calcResult.sellingPrice.toString());
+
+                // Kasih notifikasi sukses
+                toast.success(`Harga Rp ${calcResult.sellingPrice.toLocaleString()} berhasil disalin!`);
+
+                // Tutup modal
+                setIsCalcOpen(false);
+              }}
+            >
+              <Copy size={16} /> Salin & Gunakan Harga
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

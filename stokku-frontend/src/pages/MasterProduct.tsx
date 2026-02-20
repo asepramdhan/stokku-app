@@ -43,9 +43,9 @@ type Product = {
 export default function MasterProduct() {
   // Initial State
   const [products, setProducts] = useState<Product[]>([]),
-    [search, setSearch] = useState(""),
-    [filterCategory, setFilterCategory] = useState("All"),
-    [page, setPage] = useState(1), // State Halaman
+    [search, setSearch] = useState(localStorage.getItem("mp_search") || ""),
+    [filterCategory, setFilterCategory] = useState(localStorage.getItem("mp_category") || "All"),
+    [page, setPage] = useState(Number(localStorage.getItem("mp_page")) || 1),
     [pagination, setPagination] = useState<any>({ totalPages: 1, totalData: 0 }),
     [globalStats, setGlobalStats] = useState<any>({ totalItems: 0, totalStock: 0, lowStock: 0 }),
     [isAddOpen, setIsAddOpen] = useState(false),
@@ -77,6 +77,13 @@ export default function MasterProduct() {
   useEffect(() => {
     fetchProducts();
   }, [page, search, filterCategory]);
+
+  // Simpan filter ke localStorage tiap kali ada perubahan
+  useEffect(() => {
+    localStorage.setItem("mp_search", search);
+    localStorage.setItem("mp_category", filterCategory);
+    localStorage.setItem("mp_page", page.toString());
+  }, [search, filterCategory, page]);
 
   // AMBIL DAFTAR KATEGORI UNIK DARI DATA
   const categories = ["All", ...new Set(products.map(p => p.category || "Umum"))],

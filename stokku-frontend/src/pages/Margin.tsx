@@ -16,16 +16,24 @@ const API_MARGIN = `${import.meta.env.VITE_API_URL}/margin`,
 export default function Margin() {
   const [data, setData] = useState<any[]>([]),
     [stores, setStores] = useState<any[]>([]),
-    [search, setSearch] = useState(""),
-    [range, setRange] = useState("all"),
-    [filterStore, setFilterStore] = useState("All"),
-    [page, setPage] = useState(1),
+    [search, setSearch] = useState(localStorage.getItem("mg_search") || ""),
+    [range, setRange] = useState(localStorage.getItem("mg_range") || "all"),
+    [filterStore, setFilterStore] = useState(localStorage.getItem("mg_store") || "All"),
+    [page, setPage] = useState(Number(localStorage.getItem("mg_page")) || 1),
     [pagination, setPagination] = useState<any>({ totalPages: 1, totalData: 0 }),
     [globalStats, setGlobalStats] = useState({ totalRevenue: 0, totalNetProfit: 0, avgMargin: 0 }),
     [isLoading, setIsLoading] = useState(true);
 
   // Re-fetch data jika range tanggal berubah
   useEffect(() => { fetchMargin(); }, [page, range, search, filterStore]);
+
+  // Simpan filter margin ke localStorage setiap ada perubahan
+  useEffect(() => {
+    localStorage.setItem("mg_search", search);
+    localStorage.setItem("mg_range", range);
+    localStorage.setItem("mg_store", filterStore);
+    localStorage.setItem("mg_page", page.toString());
+  }, [search, range, filterStore, page]);
 
   const fetchMargin = async () => {
     setIsLoading(true);

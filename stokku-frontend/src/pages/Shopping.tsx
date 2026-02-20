@@ -19,9 +19,9 @@ const API_SHOPPING = `${import.meta.env.VITE_API_URL}/shopping`,
 export default function Shopping() {
   const [list, setList] = useState<any[]>([]),
     [products, setProducts] = useState<any[]>([]),
-    [search, setSearch] = useState(""),
-    [filterStatus, setFilterStatus] = useState("All"),
-    [filterCategory, setFilterCategory] = useState("All"),
+    [search, setSearch] = useState(localStorage.getItem("shop_search") || ""),
+    [filterStatus, setFilterStatus] = useState(localStorage.getItem("shop_status") || "All"),
+    [filterCategory, setFilterCategory] = useState(localStorage.getItem("shop_category") || "All"),
     [isLoading, setIsLoading] = useState(true),
     [isAddOpen, setIsAddOpen] = useState(false),
     [newOrder, setNewOrder] = useState({ product_id: "", qty: 1, buy_price: 0 }),
@@ -36,7 +36,7 @@ export default function Shopping() {
     [isSelected, setIsSelected] = useState(false),
     [selectedIds, setSelectedIds] = useState<number[]>([]),
     [suggestion, setSuggestion] = useState<any>(null),
-    [page, setPage] = useState(1),
+    [page, setPage] = useState(Number(localStorage.getItem("shop_page")) || 1),
     [pagination, setPagination] = useState<any>({ totalPages: 1, totalData: 0 }),
     [globalStats, setGlobalStats] = useState({ pendingCount: 0, estimatedSpending: 0, totalAll: 0, totalPending: 0, totalCompleted: 0 }),
 
@@ -68,6 +68,14 @@ export default function Shopping() {
 
     return () => clearTimeout(delayDebounceFn);
   }, [productQuery, isSelected]); // Tambahkan isSelected di dependency
+
+  // Simpan semua filter belanja ke localStorage
+  useEffect(() => {
+    localStorage.setItem("shop_search", search);
+    localStorage.setItem("shop_status", filterStatus);
+    localStorage.setItem("shop_category", filterCategory);
+    localStorage.setItem("shop_page", page.toString());
+  }, [search, filterStatus, filterCategory, page]);
 
   // Fungsi cari produk
   const searchProducts = async (query: string) => {
@@ -527,6 +535,7 @@ export default function Shopping() {
                 <TableHead className="font-semibold w-[250px]">Produk</TableHead>
                 <TableHead className="font-semibold w-[80px]">Qty</TableHead>
                 <TableHead className="font-semibold w-[100px] truncate">Harga Beli</TableHead>
+                <TableHead className="font-semibold w-[120px]">Total</TableHead>
                 <TableHead className="font-semibold w-[100px]">Waktu</TableHead> {/* Kolom Baru */}
                 <TableHead className="font-semibold w-[100px]">Status</TableHead>
                 <TableHead className="text-right font-semibold w-[100px]">Aksi</TableHead>
@@ -539,6 +548,7 @@ export default function Shopping() {
                     <TableCell><Skeleton className="h-5 w-10" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-[250px]" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-[80px]" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-[100px]" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-[100px]" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-[100px]" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-[100px]" /></TableCell>
@@ -568,7 +578,9 @@ export default function Shopping() {
                       {item.qty} <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">Pcs</span>
                     </TableCell>
                     <TableCell className="truncate">Rp {Number(item.buy_price).toLocaleString()}</TableCell>
-
+                    <TableCell className="font-bold text-blue-600 dark:text-blue-400 truncate">
+                      Rp {Number(item.qty * item.buy_price).toLocaleString()}
+                    </TableCell>
                     {/* KOLOM WAKTU */}
                     <TableCell className="text-xs text-slate-500 truncate dark:text-slate-400">
                       {new Date(item.created_at).toLocaleString('id-ID', {
@@ -579,7 +591,6 @@ export default function Shopping() {
                         minute: '2-digit'
                       })}
                     </TableCell>
-
                     <TableCell className="truncate">
                       {item.status === 'pending' ? (
                         <Badge variant="outline" className="text-orange-500 bg-orange-50 border-orange-200 gap-1 font-medium dark:text-orange-400">
@@ -591,7 +602,6 @@ export default function Shopping() {
                         </Badge>
                       )}
                     </TableCell>
-
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         {item.status === 'pending' && (
@@ -633,7 +643,7 @@ export default function Shopping() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-48 text-center py-10">
+                  <TableCell colSpan={8} className="h-48 text-center py-10">
                     <div className="flex flex-col items-center gap-2 text-slate-400 dark:text-slate-500">
                       <ShoppingCart size={40} className="opacity-20" />
                       <p>Belum ada rencana belanja.</p>

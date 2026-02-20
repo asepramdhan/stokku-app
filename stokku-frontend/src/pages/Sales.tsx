@@ -21,12 +21,12 @@ export default function Sales() {
   const [sales, setSales] = useState<any[]>([]),
     [products, setProducts] = useState<any[]>([]),
     [stores, setStores] = useState<any[]>([]),
-    [search, setSearch] = useState(""),
-    [range, setRange] = useState("all"),
-    [page, setPage] = useState(1),
+    [search, setSearch] = useState(localStorage.getItem("sl_search") || ""),
+    [range, setRange] = useState(localStorage.getItem("sl_range") || "all"),
+    [page, setPage] = useState(Number(localStorage.getItem("sl_page")) || 1),
     [pagination, setPagination] = useState<any>({ totalPages: 1, totalData: 0 }),
     [globalStats, setGlobalStats] = useState({ totalRevenue: 0, totalQty: 0, transactionCount: 0 }),
-    [filterStore, setFilterStore] = useState("All"),
+    [filterStore, setFilterStore] = useState(localStorage.getItem("sl_store") || "All"),
     [isLoading, setIsLoading] = useState(true),
     [errors, setErrors] = useState<{ [key: string]: string }>({}),
     [isAddOpen, setIsAddOpen] = useState(false),
@@ -44,6 +44,7 @@ export default function Sales() {
     [activeSearchIdx, setActiveSearchIdx] = useState<number | null>(null),
     [isSearchingBulk, setIsSearchingBulk] = useState(false),
     inputRefs = useRef<(HTMLInputElement | null)[]>([]),
+    scrollRef = useRef<HTMLDivElement>(null),
     qtyRefs = useRef<(HTMLInputElement | null)[]>([]),
     timer = 500;
 
@@ -59,9 +60,22 @@ export default function Sales() {
       const lastIdx = bulkItems.length - 1;
       setTimeout(() => {
         inputRefs.current[lastIdx]?.focus();
+
+        scrollRef.current?.scrollTo({
+          top: scrollRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
       }, 50); // Kasih jeda dikit biar DOM-nya siap
     }
   }, [bulkItems.length, isBulkOpen]);
+
+  // Simpan filter transaksi ke localStorage tiap kali ada perubahan
+  useEffect(() => {
+    localStorage.setItem("sl_search", search);
+    localStorage.setItem("sl_range", range);
+    localStorage.setItem("sl_page", page.toString());
+    localStorage.setItem("sl_store", filterStore);
+  }, [search, range, page, filterStore]);
 
   // AMBIL DATA
   const fetchData = async () => {
@@ -540,11 +554,11 @@ export default function Sales() {
       {/* DIALOG BULK INPUT */}
       <Dialog open={isBulkOpen} onOpenChange={setIsBulkOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
-          <DialogHeader>
+          <DialogHeader className="px-6 pt-6">
             <DialogTitle>Input Penjualan Massal</DialogTitle>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4">
             {/* Pilih Toko Global */}
             <div className="bg-slate-50 p-3 rounded-lg flex items-center gap-4">
               <p className="text-xs font-bold uppercase text-slate-500">Target Toko:</p>
@@ -555,7 +569,7 @@ export default function Sales() {
             </div>
 
             {/* 1. Container Utama: overflow-hidden buat ngerapiin pojok, overflow-x-auto buat scroll */}
-            <div className="bg-white border rounded-lg shadow-sm min-h-[300px] overflow-hidden">
+            <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 {/* 2. Paksa Tabel punya lebar minimal 800px supaya di HP dia nggak ciut */}
                 <Table className="min-w-[800px] w-full overflow-visible">
@@ -569,98 +583,125 @@ export default function Sales() {
                     </TableRow>
                   </TableHeader>
                   <TableBody className="overflow-visible">
-                    {bulkItems.map((item, idx) => (
-                      <TableRow
-                        key={idx}
-                        style={{ zIndex: activeSearchIdx === idx ? 50 : 0 }}
-                        className="relative"
-                      >
-                        <TableCell className="relative p-2">
-                          <div className="relative">
-                            <Input
-                              ref={(el) => { inputRefs.current[idx] = el; }}
-                              placeholder="Cari produk..."
-                              value={item.product_name || ""}
-                              onChange={(e) => {
-                                updateBulkItem(idx, "product_name", e.target.value);
-                                handleSearchProductBulk(e.target.value, idx);
-                              }}
-                              className="h-9 text-sm pr-8 bg-white w-full"
-                            />
+                    {bulkItems.map((item, idx) => {
+                      // Logika cerdas:
+                      const isLastItems = idx >= bulkItems.length - 1 && bulkItems.length > 50;
 
-                            {isSearchingBulk && activeSearchIdx === idx && (
-                              <div className="absolute right-2 top-2.5 text-slate-400">
-                                <Loader2 size={14} className="animate-spin" />
-                              </div>
-                            )}
+                      // 🔍 Cari stok asli dari master data produk berdasarkan product_id
+                      const masterProduct = products.find(p => p.id === item.product_id);
+                      const currentStock = masterProduct?.quantity || 0;
 
-                            {/* Dropdown tetap fixed/melayang */}
-                            {activeSearchIdx === idx && bulkSuggestions.length > 0 && (
-                              <div
-                                className="fixed z-[9999] w-[330px] mt-1 bg-white border border-slate-200 rounded-lg shadow-2xl max-h-60 overflow-y-auto"
-                                style={{ top: 'auto' }}
-                              >
-                                {bulkSuggestions.map((p) => (
-                                  <div
-                                    key={p.id}
-                                    onClick={() => selectProductBulk(p, idx)}
-                                    className="p-3 hover:bg-blue-600 hover:text-white cursor-pointer border-b last:border-0 flex justify-between items-center text-xs"
-                                  >
-                                    <div className="flex flex-col">
-                                      <span className="font-bold">{p.name}</span>
-                                      <span className="text-[10px] opacity-70 uppercase">{p.sku}</span>
+                      // ⚠️ Tentukan kondisi stok kritis (misal: stok < 5)
+                      const isLowStock = item.product_id && currentStock < 5;
+                      const isOverStock = item.product_id && item.qty > currentStock;
+                      return (
+                        <TableRow
+                          key={idx}
+                          style={{ zIndex: activeSearchIdx === idx ? 50 : 0 }}
+                          // Pastikan baris yang aktif punya Z-Index paling tinggi agar tidak tertutup baris bawahnya
+                          className="relative"
+                        >
+                          <TableCell className="relative p-2">
+                            <div className="relative">
+                              <Input
+                                ref={(el) => { inputRefs.current[idx] = el; }}
+                                placeholder="Cari produk..."
+                                value={item.product_name || ""}
+                                onFocus={() => setActiveSearchIdx(idx)} // Pastikan index aktif terdeteksi
+                                onChange={(e) => {
+                                  updateBulkItem(idx, "product_name", e.target.value);
+                                  handleSearchProductBulk(e.target.value, idx);
+                                }}
+                                className="h-9 text-sm pr-8 bg-white w-full"
+                              />
+
+                              {isSearchingBulk && activeSearchIdx === idx && (
+                                <div className="absolute right-2 top-2.5 text-slate-400">
+                                  <Loader2 size={14} className="animate-spin" />
+                                </div>
+                              )}
+
+                              {/* --- DROPDOWN DENGAN SMART FLIP --- */}
+                              {activeSearchIdx === idx && bulkSuggestions.length > 0 && (
+                                <div
+                                  className={`fixed z-[9999] w-[330px] bg-white border border-slate-200 rounded-lg shadow-2xl max-h-60 overflow-y-auto 
+                  ${isLastItems ? "bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full top-auto" : "top-1/2 transform -translate-y-1/2"}`}
+                                >
+                                  {bulkSuggestions.map((p) => (
+                                    <div
+                                      key={p.id}
+                                      onClick={() => selectProductBulk(p, idx)}
+                                      className="p-3 hover:bg-blue-600 hover:text-white cursor-pointer border-b last:border-0 flex justify-between items-center text-xs"
+                                    >
+                                      <div className="flex flex-col text-left">
+                                        <span className="font-bold">{p.name}</span>
+                                        <span className="text-[10px] opacity-70 uppercase">{p.sku}</span>
+                                      </div>
+                                      <Badge variant="secondary" className="text-[10px] shrink-0">Stok: {p.quantity}</Badge>
                                     </div>
-                                    <Badge variant="secondary" className="text-[10px]">Stok: {p.quantity}</Badge>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="p-2">
-                          <Input
-                            ref={(el) => { qtyRefs.current[idx] = el; }}
-                            type="number"
-                            value={item.qty}
-                            onChange={e => updateBulkItem(idx, "qty", Number(e.target.value))}
-                            className="h-9 text-center"
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault(); // Mencegah form submit gak sengaja
-                                addBulkRow();
-                              }
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell className="p-2">
-                          <div className="relative flex items-center">
-                            <span className="absolute left-3 text-slate-400 text-xs font-bold">Rp</span>
-                            <Input
-                              type="number"
-                              value={item.selling_price}
-                              onChange={e => updateBulkItem(idx, "selling_price", Number(e.target.value))}
-                              className="h-9 pl-8 font-bold text-blue-600 border-blue-200 focus:ring-blue-500"
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  e.preventDefault(); // Mencegah form submit gak sengaja
-                                  addBulkRow();
-                                }
-                              }}
-                            />
-                          </div>
-                        </TableCell>
-                        <TableCell className="p-2 text-center">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeBulkRow(idx)}
-                            className="text-red-400 hover:text-red-600 hover:bg-red-50 h-9 w-9"
-                          >
-                            <Trash2 size={16} />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="p-2">
+                            <div className="flex items-center gap-2">
+                              <Input
+                                ref={(el) => { qtyRefs.current[idx] = el; }}
+                                type="number"
+                                value={item.qty}
+                                onChange={e => updateBulkItem(idx, "qty", Number(e.target.value))}
+                                className={`h-9 text-center transition-colors ${isOverStock
+                                  ? "border-red-500 bg-red-50 text-red-700 focus-visible:ring-red-500"
+                                  : isLowStock
+                                    ? "border-orange-400 bg-orange-50 text-orange-700"
+                                    : ""
+                                  }`}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault(); // Mencegah form submit gak sengaja
+                                    addBulkRow();
+                                  }
+                                }}
+                              />
+                              {/* Label kecil bantuan biar tahu sisa stoknya berapa tanpa perlu cek menu produk */}
+                              {isLowStock && (
+                                <span className={`text-[9px] font-bold truncate w-[60px] ${isLowStock ? "text-red-500" : "text-slate-400"}`}>
+                                  Sisa: {currentStock}
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="p-2">
+                            <div className="relative flex items-center">
+                              <span className="absolute left-3 text-slate-400 text-xs font-bold">Rp</span>
+                              <Input
+                                type="number"
+                                value={item.selling_price}
+                                onChange={e => updateBulkItem(idx, "selling_price", Number(e.target.value))}
+                                className="h-9 pl-8 font-bold text-blue-600 border-blue-200 focus:ring-blue-500"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault(); // Mencegah form submit gak sengaja
+                                    addBulkRow();
+                                  }
+                                }}
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell className="p-2 text-center">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeBulkRow(idx)}
+                              className="text-red-400 hover:text-red-600 hover:bg-red-50 h-9 w-9"
+                            >
+                              <Trash2 size={16} />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
