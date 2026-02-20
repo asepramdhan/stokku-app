@@ -428,7 +428,7 @@ export default function StoreRecords() {
                   const sisa = item.total_price - item.paid_amount;
                   return (
                     <TableRow key={item.id} className="hover:bg-slate-50/50 transition-colors">
-                      <TableCell>
+                      <TableCell className="truncate">
                         <div className="flex flex-col">
                           <span className="font-bold text-slate-800">{item.toko_name}</span>
                           <span className="text-[10px] text-slate-400 uppercase tracking-wider">{item.customer_name}</span>
@@ -639,105 +639,107 @@ export default function StoreRecords() {
 
       {/* MODAL LAPORAN IKHTISAR PIUTANG */}
       <Dialog open={isReportOpen} onOpenChange={setIsReportOpen}>
-        <DialogContent className="max-w-2xl">
-          <div ref={reportRef} className="bg-white p-2">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-indigo-700">
-                <BarChart3 size={22} />
-                Laporan Ikhtisar Piutang
-              </DialogTitle>
-              <DialogDescription>
-                Ringkasan saldo dan riwayat transaksi untuk <b>{selectedRecord?.toko_name}</b>.
-              </DialogDescription>
-            </DialogHeader>
+        <DialogContent className="sm:max-w-2xl w-[95vw] max-h-[96vh] p-0 overflow-hidden flex flex-col shadow-2xl border-none">
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
+            <div ref={reportRef} className="bg-white p-4 md:p-8">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-indigo-700">
+                  <BarChart3 size={22} />
+                  Laporan Ikhtisar Piutang
+                </DialogTitle>
+                <DialogDescription>
+                  Ringkasan saldo dan riwayat transaksi untuk <b>{selectedRecord?.toko_name}</b>.
+                </DialogDescription>
+              </DialogHeader>
 
-            <div className="space-y-6 py-4">
-              {/* 1. KARTU RINGKASAN */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {/* Total Belanja */}
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Belanja</p>
-                  <p className="text-sm font-black text-slate-700">{toRp(selectedRecord?.total_price)}</p>
+              <div className="space-y-6 py-4">
+                {/* 1. KARTU RINGKASAN */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {/* Total Belanja */}
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Belanja</p>
+                    <p className="text-sm font-black text-slate-700">{toRp(selectedRecord?.total_price)}</p>
+                  </div>
+                  {/* Sudah Dibayar */}
+                  <div className="p-3 rounded-xl bg-green-50 border border-green-100">
+                    <p className="text-[10px] font-bold text-green-600 uppercase tracking-wider">Sudah Dibayar</p>
+                    <p className="text-sm font-black text-green-700">{toRp(selectedRecord?.paid_amount)}</p>
+                  </div>
+                  {/* Sisa Piutang */}
+                  <div className="p-3 rounded-xl bg-red-50 border border-red-100">
+                    <p className="text-[10px] font-bold text-red-600 uppercase tracking-wider">Sisa Piutang</p>
+                    <p className="text-sm font-black text-red-700">{toRp(selectedRecord?.total_price - selectedRecord?.paid_amount)}</p>
+                  </div>
                 </div>
-                {/* Sudah Dibayar */}
-                <div className="p-3 rounded-xl bg-green-50 border border-green-100">
-                  <p className="text-[10px] font-bold text-green-600 uppercase tracking-wider">Sudah Dibayar</p>
-                  <p className="text-sm font-black text-green-700">{toRp(selectedRecord?.paid_amount)}</p>
-                </div>
-                {/* Sisa Piutang */}
-                <div className="p-3 rounded-xl bg-red-50 border border-red-100">
-                  <p className="text-[10px] font-bold text-red-600 uppercase tracking-wider">Sisa Piutang</p>
-                  <p className="text-sm font-black text-red-700">{toRp(selectedRecord?.total_price - selectedRecord?.paid_amount)}</p>
-                </div>
-              </div>
 
-              {/* 2. PROGRESS BAR */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs font-bold">
-                  <span className="text-slate-500 font-medium">Status Pelunasan</span>
-                  <span className="text-indigo-600">
-                    {Math.round((selectedRecord?.paid_amount / selectedRecord?.total_price) * 100)}%
-                  </span>
+                {/* 2. PROGRESS BAR */}
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs font-bold">
+                    <span className="text-slate-500 font-medium">Status Pelunasan</span>
+                    <span className="text-indigo-600">
+                      {Math.round((selectedRecord?.paid_amount / selectedRecord?.total_price) * 100)}%
+                    </span>
+                  </div>
+                  <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden border">
+                    <div
+                      className="h-full bg-indigo-500 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                      style={{ width: `${(selectedRecord?.paid_amount / selectedRecord?.total_price) * 100}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden border">
-                  <div
-                    className="h-full bg-indigo-500 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(99,102,241,0.5)]"
-                    style={{ width: `${(selectedRecord?.paid_amount / selectedRecord?.total_price) * 100}%` }}
-                  />
-                </div>
-              </div>
 
-              {/* 3. DAFTAR RIWAYAT (DENGAN LOGIKA LOADING) */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
-                  <BookOpen size={14} /> Riwayat Transaksi Lengkap
-                </h4>
+                {/* 3. DAFTAR RIWAYAT (DENGAN LOGIKA LOADING) */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+                    <BookOpen size={14} /> Riwayat Transaksi Lengkap
+                  </h4>
 
-                <div className="border rounded-lg overflow-hidden max-h-[250px] overflow-y-auto shadow-inner bg-white">
-                  <div className="divide-y divide-slate-100">
-                    {/* LOGIKA LOADING SKELETON */}
-                    {historyLoading ? (
-                      <div className="p-4 space-y-4">
-                        {[1, 2, 3].map((i) => (
-                          <div key={i} className="flex justify-between items-center">
-                            <div className="space-y-2">
-                              <Skeleton className="h-4 w-[150px]" />
-                              <Skeleton className="h-3 w-[100px]" />
+                  <div className="border rounded-lg overflow-hidden max-h-[250px] overflow-y-auto shadow-inner bg-white">
+                    <div className="divide-y divide-slate-100">
+                      {/* LOGIKA LOADING SKELETON */}
+                      {historyLoading ? (
+                        <div className="p-4 space-y-4">
+                          {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex justify-between items-center">
+                              <div className="space-y-2">
+                                <Skeleton className="h-4 w-[150px]" />
+                                <Skeleton className="h-3 w-[100px]" />
+                              </div>
+                              <Skeleton className="h-5 w-[80px]" />
                             </div>
-                            <Skeleton className="h-5 w-[80px]" />
-                          </div>
-                        ))}
-                      </div>
-                    ) : paymentHistory.length > 0 ? (
-                      paymentHistory.map((h, i) => (
-                        <div key={i} className="p-3 flex justify-between items-center hover:bg-slate-50 transition-colors">
-                          <div className="space-y-0.5">
-                            <p className="text-xs font-bold text-slate-700">{h.notes || "Transaksi Toko"}</p>
-                            <p className="text-[10px] text-slate-400 font-medium">
-                              {new Date(h.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                            </p>
-                          </div>
-                          <div className={`text-xs font-black ${h.type === 'spending' ? "text-red-600" : "text-green-600"}`}>
-                            {h.type === 'spending' ? "+" : "-"}{toRp(h.amount)}
-                          </div>
+                          ))}
                         </div>
-                      ))
-                    ) : (
-                      <div className="p-10 text-center text-xs text-slate-400 italic font-medium">
-                        Belum ada aktivitas transaksi.
-                      </div>
-                    )}
+                      ) : paymentHistory.length > 0 ? (
+                        paymentHistory.map((h, i) => (
+                          <div key={i} className="p-3 flex justify-between items-center hover:bg-slate-50 transition-colors">
+                            <div className="space-y-0.5">
+                              <p className="text-xs font-bold text-slate-700">{h.notes || "Transaksi Toko"}</p>
+                              <p className="text-[10px] text-slate-400 font-medium">
+                                {new Date(h.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              </p>
+                            </div>
+                            <div className={`text-xs font-black ${h.type === 'spending' ? "text-red-600" : "text-green-600"}`}>
+                              {h.type === 'spending' ? "+" : "-"}{toRp(h.amount)}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-10 text-center text-xs text-slate-400 italic font-medium">
+                          Belum ada aktivitas transaksi.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <p className="text-[8px] text-slate-300 text-right uppercase tracking-widest mt-4">
-              Generated by Stokku App - {new Date().toLocaleDateString('id-ID')}
-            </p>
+              <p className="text-[8px] text-slate-300 text-right uppercase tracking-widest mt-4">
+                Generated by Stokku App - {new Date().toLocaleDateString('id-ID')}
+              </p>
+            </div>
           </div>
 
-          <DialogFooter className="flex-row gap-2 border-t pt-4">
+          <DialogFooter className="p-4 md:p-6 bg-slate-50 border-t flex flex-row gap-3">
             <Button variant="outline" className="flex-1" onClick={() => setIsReportOpen(false)}>
               Tutup
             </Button>
