@@ -66,8 +66,24 @@ router.get("/", async (req, res) => {
 				params,
 			);
 
+		// 5. Ambil Top 3 Produk Paling Untung (Disesuaikan dengan filter)
+		const topQuery = `
+      SELECT 
+        i.name as product_name,
+        SUM(s.total_price - (s.qty * i.avg_cost) - ((s.total_price * st.admin_fee / 100) + (s.total_price * st.extra_promo_fee / 100) + st.handling_fee)) as total_net_profit
+      FROM sales s
+      JOIN inventory i ON s.product_id = i.id
+      JOIN stores st ON s.store_id = st.id
+      ${whereClause}
+      GROUP BY s.product_id
+      ORDER BY total_net_profit DESC
+      LIMIT 3`;
+
+		const [topProducts] = await db.query(topQuery, params);
+
 		res.json({
 			list: rows,
+			topProducts: topProducts,
 			stats: {
 				totalRevenue: revenue,
 				totalNetProfit: netProfit,

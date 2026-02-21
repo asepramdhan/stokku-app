@@ -105,7 +105,9 @@ router.get("/history/:id", async (req, res) => {
         'Kulakan / Restok' as note 
        FROM shopping_list 
        WHERE product_id = ? AND status = 'completed')
+
       UNION ALL
+
       (SELECT 
         'KELUAR' as type, 
         qty, 
@@ -115,9 +117,23 @@ router.get("/history/:id", async (req, res) => {
        FROM sales s
        JOIN stores st ON s.store_id = st.id
        WHERE s.product_id = ?)
+
+			 UNION ALL
+
+			 /* --- BAGIAN BARU: MENGAMBIL DATA OPNAME --- */
+      (SELECT 
+        CASE WHEN adjustment_qty > 0 THEN 'MASUK' ELSE 'KELUAR' END as type, 
+        ABS(adjustment_qty) as qty, 
+        0 as price, 
+        created_at, 
+        CONCAT('Opname: ', reason) as note 
+       FROM stock_adjustments 
+       WHERE product_id = ?)
+      /* ------------------------------------------ */
+
       ORDER BY created_at DESC 
       LIMIT 50`,
-			[rows] = await db.query(query, [productId, productId]);
+			[rows] = await db.query(query, [productId, productId, productId]);
 		res.json(rows);
 	} catch (err) {
 		res.status(500).json({ error: err.message });
@@ -180,6 +196,47 @@ router.post("/", async (req, res) => {
 		res.json({ id: result.insertId, ...req.body });
 	} catch (err) {
 		console.error(err);
+		res.status(500).json({ error: err.message });
+	}
+});
+
+// Endpoint Stock Opname
+router.post("/opname/:id", async (req, res) => {
+	const productId = req.params.id;
+	const { new_qty, reason } = req.body;
+
+	try {
+		await db.query("START TRANSACTION");
+
+		// 1. Ambil stok lama
+		const [rows] = await db.query(
+			"SELECT quantity FROM inventory WHERE id = ?",
+			[productId],
+		);
+		if (rows.length === 0) throw new Error("Produk tidak ditemukan");
+
+		const oldQty = rows[0].quantity;
+		const adjQty = new_qty - oldQty;
+
+		// 2. Update stok di inventory
+		await db.execute("UPDATE inventory SET quantity = ? WHERE id = ?", [
+			new_qty,
+			productId,
+		]);
+
+		// 3. Catat di tabel stock_adjustments
+		await db.execute(
+			"INSERT INTO stock_adjustments (product_id, old_qty, new_qty, adjustment_qty, reason) VALUES (?, ?, ?, ?, ?)",
+			[productId, oldQty, new_qty, adjQty, reason || "Stock Opname"],
+		);
+
+		await db.query("COMMIT");
+		res.json({
+			message: "Stock opname berhasil diperbarui",
+			adjustment: adjQty,
+		});
+	} catch (err) {
+		await db.query("ROLLBACK");
 		res.status(500).json({ error: err.message });
 	}
 });

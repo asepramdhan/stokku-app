@@ -22,6 +22,7 @@ export default function Margin() {
     [page, setPage] = useState(Number(localStorage.getItem("mg_page")) || 1),
     [pagination, setPagination] = useState<any>({ totalPages: 1, totalData: 0 }),
     [globalStats, setGlobalStats] = useState({ totalRevenue: 0, totalNetProfit: 0, avgMargin: 0 }),
+    [topProducts, setTopProducts] = useState<any[]>([]),
     [isLoading, setIsLoading] = useState(true);
 
   // Re-fetch data jika range tanggal berubah
@@ -35,6 +36,7 @@ export default function Margin() {
     localStorage.setItem("mg_page", page.toString());
   }, [search, range, filterStore, page]);
 
+  // Fungsi fetch margin
   const fetchMargin = async () => {
     setIsLoading(true);
     try {
@@ -60,6 +62,7 @@ export default function Margin() {
         storeData = await resStore.json();
 
       setData(resData.list || []);
+      setTopProducts(resData.topProducts || []);
       setPagination(resData.pagination);
       setGlobalStats(resData.stats);
       setStores(storeData.stores || (Array.isArray(storeData) ? storeData : []));
@@ -96,7 +99,7 @@ export default function Margin() {
       </div>
 
       {/* STATS CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="border-l-4 border-l-blue-500 shadow-sm">
           <CardContent className="flex items-center gap-4 pt-6">
             <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><Receipt size={20} /></div>
@@ -106,12 +109,16 @@ export default function Margin() {
             </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-green-500 shadow-sm">
+        <Card className={`border-l-4 shadow-sm transition-all duration-300 ${globalStats.totalNetProfit < 0 ? 'border-l-red-500' : 'border-l-green-500'}`}>
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-green-100 text-green-600 rounded-full"><Wallet size={20} /></div>
+            <div className={`p-2 rounded-full transition-colors ${globalStats.totalNetProfit < 0 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+              <Wallet size={20} />
+            </div>
             <div>
               <p className="text-sm font-medium text-slate-500">Profit Bersih (Netto)</p>
-              <h3 className="text-xl font-bold text-green-600">Rp {Number(globalStats.totalNetProfit).toLocaleString()}</h3>
+              <h3 className={`text-xl font-bold ${globalStats.totalNetProfit < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                Rp {Number(globalStats.totalNetProfit).toLocaleString()}
+              </h3>
             </div>
           </CardContent>
         </Card>
@@ -124,6 +131,28 @@ export default function Margin() {
             </div>
           </CardContent>
         </Card>
+        {/* TOP 3 BARANG PALING CUAN */}
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-xl" />)
+        ) : topProducts.map((p, i) => (
+          <Card key={i} className="overflow-hidden border-none shadow-md bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-white/20 text-[10px] font-black">
+                    #{i + 1}
+                  </span>
+                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Produk Ter-Cuan</p>
+                </div>
+                <h4 className="font-bold text-sm truncate max-w-[150px]">{p.product_name}</h4>
+                <p className="text-xl font-black">Rp {Number(p.total_net_profit).toLocaleString()}</p>
+              </div>
+              <div className="p-3 bg-white/10 rounded-2xl rotate-12 group-hover:rotate-0 transition-transform">
+                <TrendingUp size={32} className="opacity-50" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* SEARCH & FILTERS */}

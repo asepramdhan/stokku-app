@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { AlertTriangle, ArrowDownLeft, ArrowUpRight, Box, Edit2, Filter, History, Layers, Package, Plus, Search, Trash2, X } from "lucide-react";
+import { AlertTriangle, ArrowDownLeft, ArrowUpRight, Box, Edit2, Filter, History, Layers, Package, PackageCheck, Plus, Search, Trash2, X } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -63,6 +63,8 @@ export default function MasterProduct() {
     printRef = useRef<HTMLDivElement>(null),
     [productToPrint, setProductToPrint] = useState<any>(null),
     [isScannerOpen, setIsScannerOpen] = useState(false),
+    [isOpnameOpen, setIsOpnameOpen] = useState(false),
+    [opnameData, setOpnameData] = useState({ id: 0, name: "", current_qty: 0, new_qty: 0, reason: "" }),
     // 💡 Buat fungsi helper biar gak capek ngetik header terus
     getHeaders = () => ({
       "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -288,6 +290,25 @@ export default function MasterProduct() {
 
       } catch (error: any) {
         toast.error("Waduh, terjadi kesalahan: " + error.message);
+      }
+    },
+
+    // Fungsi Stock Opname
+    handleStockOpname = async () => {
+      try {
+        const res = await fetch(`${API_URL}/opname/${opnameData.id}`, {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ new_qty: opnameData.new_qty, reason: opnameData.reason }),
+        });
+
+        if (res.ok) {
+          setIsOpnameOpen(false);
+          fetchProducts(); // Refresh tabel
+          toast.success(`Stok ${opnameData.name} berhasil disesuaikan!`);
+        }
+      } catch (error) {
+        toast.error("Gagal melakukan stock opname.");
       }
     },
 
@@ -577,14 +598,35 @@ export default function MasterProduct() {
                           size="icon"
                           className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-900"
                           onClick={() => fetchHistory(product)}
+                          title="Riwayat Penyesuaian"
                         >
                           <History size={16} />
+                        </Button>
+                        {/* Tombol Opname */}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400"
+                          onClick={() => {
+                            setOpnameData({
+                              id: product.id,
+                              name: product.name,
+                              current_qty: product.quantity,
+                              new_qty: product.quantity,
+                              reason: "Penyesuaian Rutin"
+                            });
+                            setIsOpnameOpen(true);
+                          }}
+                          title="Stock Opname"
+                        >
+                          <Layers size={16} />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900"
                           onClick={() => { setEditingProduct(product); setIsEditOpen(true); setErrors({}) }}
+                          title="Edit Produk"
                         >
                           <Edit2 size={16} />
                         </Button>
@@ -602,6 +644,7 @@ export default function MasterProduct() {
                           size="icon"
                           className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900"
                           onClick={() => { setEditingProduct(product); setIsDeleteOpen(true); }}
+                          title="Hapus Produk"
                         >
                           <Trash2 size={16} />
                         </Button>
@@ -833,6 +876,66 @@ export default function MasterProduct() {
         </DialogContent>
       </Dialog>
 
+      {/* DIALOG STOCK OPNAME */}
+      <Dialog open={isOpnameOpen} onOpenChange={setIsOpnameOpen}>
+        <DialogContent className="sm:max-w-[400px] dark:bg-slate-800">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <PackageCheck className="text-indigo-600" /> Stock Opname
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-3 bg-slate-50 rounded-lg border dark:bg-slate-700">
+              <p className="text-[10px] font-bold text-slate-400 uppercase">Produk</p>
+              <p className="text-sm font-bold">{opnameData.name}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div className="p-2 border rounded-lg">
+                <p className="text-[10px] font-bold text-slate-400 uppercase">Stok Sistem</p>
+                <p className="text-lg font-black">{opnameData.current_qty}</p>
+              </div>
+              <div className="p-2 border border-indigo-200 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                <p className="text-[10px] font-bold text-indigo-600 uppercase">Selisih</p>
+                <p className={`text-lg font-black ${opnameData.new_qty - opnameData.current_qty < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  {opnameData.new_qty - opnameData.current_qty > 0 ? '+' : ''}
+                  {opnameData.new_qty - opnameData.current_qty}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase">Stok Fisik Sebenarnya</Label>
+              <Input
+                type="number"
+                value={opnameData.new_qty}
+                onChange={e => setOpnameData({ ...opnameData, new_qty: Number(e.target.value) })}
+                className="text-center text-xl font-black h-12 border-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase">Alasan Penyesuaian</Label>
+              <select
+                className="w-full p-2 border rounded-md text-sm dark:bg-slate-800"
+                value={opnameData.reason}
+                onChange={e => setOpnameData({ ...opnameData, reason: e.target.value })}
+              >
+                <option value="Penyesuaian Rutin">Penyesuaian Rutin</option>
+                <option value="Barang Rusak / Kadaluarsa">Barang Rusak / Kadaluarsa</option>
+                <option value="Barang Hilang">Barang Hilang</option>
+                <option value="Salah Input Sebelumnya">Salah Input Sebelumnya</option>
+                <option value="Bonus dari Supplier">Bonus dari Supplier</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setIsOpnameOpen(false)}>Batal</Button>
+            <Button onClick={handleStockOpname} className="bg-indigo-600 hover:bg-indigo-700">Update Stok Fisik</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Dialog Edit */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="sm:max-w-[425px] dark:bg-slate-800">
@@ -938,16 +1041,26 @@ export default function MasterProduct() {
                 {history.map((log, i) => (
                   <div key={i} className="relative flex items-center justify-between group">
                     <div className="flex items-center gap-4">
-                      {/* ICON STATUS */}
-                      <div className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-4 border-white shadow-sm transition-transform group-hover:scale-110 dark:border-slate-800 ${log.type === 'MASUK' ? 'bg-emerald-500 text-white dark:bg-emerald-400' : 'bg-blue-600 text-white dark:bg-blue-500 dark:text-white'
+                      {/* ICON STATUS - Warna Ungu (Indigo) kalau ada kata 'Opname' */}
+                      <div className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-4 border-white shadow-sm transition-transform group-hover:scale-110 dark:border-slate-800 ${log.note.includes('Opname')
+                        ? 'bg-indigo-600 text-white'
+                        : log.type === 'MASUK'
+                          ? 'bg-emerald-500 text-white dark:bg-emerald-400'
+                          : 'bg-blue-600 text-white dark:bg-blue-500'
                         }`}>
-                        {log.type === 'MASUK' ? <ArrowDownLeft size={18} /> : <ArrowUpRight size={18} />}
+                        {/* Ganti Icon juga kalau mau, biar makin keren */}
+                        {log.note.includes('Opname') ? <Box size={18} /> : (log.type === 'MASUK' ? <ArrowDownLeft size={18} /> : <ArrowUpRight size={18} />)}
                       </div>
 
                       {/* INFO TEXT */}
                       <div className="flex flex-col">
                         <span className="text-xs font-bold text-slate-800 dark:text-white">
-                          {log.type === 'MASUK' ? 'Stok Masuk' : 'Terjual'}
+                          {/* Label Teks juga pakai kondisi yang sama */}
+                          {log.note.includes('Opname')
+                            ? 'Stock Opname'
+                            : log.type === 'MASUK'
+                              ? 'Stok Masuk'
+                              : 'Terjual'}
                         </span>
                         <span className="text-[10px] text-slate-400 dark:text-slate-300">{log.note}</span>
                       </div>
@@ -955,11 +1068,20 @@ export default function MasterProduct() {
 
                     {/* HARGA & QTY */}
                     <div className="text-right">
-                      <p className={`text-sm font-black ${log.type === 'MASUK' ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                      <p className={`text-sm font-black ${log.note.includes('Opname')
+                          ? 'text-indigo-600 dark:text-indigo-400'
+                          : log.type === 'MASUK'
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-blue-600 dark:text-blue-400'
+                        }`}>
                         {log.type === 'MASUK' ? '+' : '-'}{log.qty}
                       </p>
+
                       <p className="text-[9px] font-medium text-slate-400 dark:text-slate-300">
-                        @ Rp {Number(log.price).toLocaleString()}
+                        {/* Logika tambahan: Kalau Opname kan harganya 0, lebih bagus tulis 'Penyesuaian' aja */}
+                        {log.note.includes('Opname')
+                          ? 'Penyesuaian'
+                          : `@ Rp ${Number(log.price).toLocaleString()}`}
                       </p>
                     </div>
 
