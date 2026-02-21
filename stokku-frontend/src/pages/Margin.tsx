@@ -99,7 +99,7 @@ export default function Margin() {
       </div>
 
       {/* STATS CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="border-l-4 border-l-blue-500 shadow-sm">
           <CardContent className="flex items-center gap-4 pt-6">
             <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><Receipt size={20} /></div>
@@ -131,7 +131,10 @@ export default function Margin() {
             </div>
           </CardContent>
         </Card>
-        {/* TOP 3 BARANG PALING CUAN */}
+      </div>
+
+      {/* TOP 3 BARANG PALING CUAN */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-xl" />)
         ) : topProducts.map((p, i) => (
