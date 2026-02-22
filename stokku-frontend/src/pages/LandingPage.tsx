@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, BarChart3, Package, ShieldCheck, Zap } from "lucide-react";
+import { useTitle } from "@/hooks/useTitle";
 
 export default function LandingPage() {
+  useTitle("Solusi Inventaris Juragan");
   // Cek apakah ada token di localStorage
   const isLoggedIn = !!localStorage.getItem("token");
 

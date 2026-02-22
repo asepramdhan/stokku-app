@@ -26,6 +26,7 @@ import { Printer } from "lucide-react";
 import { SKULabel } from "@/components/SKULabel";
 import { Scan } from "lucide-react";
 import QRScanner from "../components/QRScanner";
+import { useTitle } from "@/hooks/useTitle";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/products`,
   API_SHOPPING = `${import.meta.env.VITE_API_URL}/shopping`; // Pastikan ini ada
@@ -38,13 +39,17 @@ type Product = {
   quantity: number;
   price: number;
   avg_cost: number;
+  incoming_stock: number;
+  daysLeft: number;
 };
 
 export default function MasterProduct() {
+  useTitle("Master Produk");
   // Initial State
   const [products, setProducts] = useState<Product[]>([]),
     [search, setSearch] = useState(localStorage.getItem("mp_search") || ""),
     [filterCategory, setFilterCategory] = useState(localStorage.getItem("mp_category") || "All"),
+    [filterIncoming, setFilterIncoming] = useState(localStorage.getItem("mp_incoming") === "true"),
     [page, setPage] = useState(Number(localStorage.getItem("mp_page")) || 1),
     [pagination, setPagination] = useState<any>({ totalPages: 1, totalData: 0 }),
     [globalStats, setGlobalStats] = useState<any>({ totalItems: 0, totalStock: 0, lowStock: 0 }),
@@ -78,14 +83,15 @@ export default function MasterProduct() {
   // Re-fetch data saat page, search, atau category berubah
   useEffect(() => {
     fetchProducts();
-  }, [page, search, filterCategory]);
+  }, [page, search, filterCategory, filterIncoming]);
 
   // Simpan filter ke localStorage tiap kali ada perubahan
   useEffect(() => {
     localStorage.setItem("mp_search", search);
     localStorage.setItem("mp_category", filterCategory);
     localStorage.setItem("mp_page", page.toString());
-  }, [search, filterCategory, page]);
+    localStorage.setItem("mp_incoming", filterIncoming.toString());
+  }, [search, filterCategory, page, filterIncoming]);
 
   // AMBIL DAFTAR KATEGORI UNIK DARI DATA
   const categories = ["All", ...new Set(products.map(p => p.category || "Umum"))],
@@ -110,7 +116,7 @@ export default function MasterProduct() {
     fetchProducts = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`${API_URL}?page=${page}&search=${search}&category=${filterCategory}&limit=10`,
+        const res = await fetch(`${API_URL}?page=${page}&search=${search}&category=${filterCategory}&incoming=${filterIncoming}&limit=10`,
           { headers: getHeaders() });
 
         // 💡 CEK: Jika salah satu return 401 (Unauthorized), tendang ke login
@@ -365,6 +371,7 @@ export default function MasterProduct() {
         if (res.ok) {
           setIsAddToShoppingOpen(false);
           toast.success(`${shoppingFormData.name} berhasil masuk daftar belanja!`);
+          fetchProducts();
         } else {
           const err = await res.json();
           toast.error(err.error || "Gagal menambahkan ke daftar belanja.");
@@ -507,6 +514,38 @@ export default function MasterProduct() {
         </div>
       </div>
 
+      {/* QUICK FILTERS */}
+      <div className="flex flex-wrap gap-2 justify-end mb-4">
+        <Button
+          variant={!filterIncoming ? "default" : "outline"}
+          size="sm"
+          onClick={() => { setFilterIncoming(false); setPage(1); }}
+          className="rounded-full text-xs"
+        >
+          Semua Produk
+        </Button>
+
+        <Button
+          variant={filterIncoming ? "default" : "outline"}
+          size="sm"
+          onClick={() => { setFilterIncoming(true); setPage(1); }}
+          className={`rounded-full text-xs gap-2 ${filterIncoming ? 'bg-orange-600 hover:bg-orange-700' : 'text-orange-600 border-orange-200'}`}
+        >
+          <Package size={14} />
+          Lagi di Jalan ({products.filter(p => p.incoming_stock > 0).length})
+        </Button>
+
+        {/* Opsi Tambahan: Filter Stok Kritis */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => { setSearch(""); setFilterCategory("All"); setFilterIncoming(false); }} // Reset semua
+          className="rounded-full text-xs text-slate-500"
+        >
+          Reset Filter
+        </Button>
+      </div>
+
       {/* TABLE */}
       <div className="bg-white border rounded-lg shadow-sm overflow-hidden dark:bg-slate-800 dark:border-none">
         <div className="overflow-x-auto">
@@ -550,11 +589,21 @@ export default function MasterProduct() {
                       <div className="flex flex-col gap-2 py-1">
                         {/* Info Angka & Label */}
                         <div className="flex justify-between items-end">
-                          <div className="flex items-baseline gap-1">
-                            <span className={`text-base font-black ${product.quantity < 10 ? 'text-red-600 dark:text-red-400' : 'text-slate-800 dark:text-white'}`}>
-                              {product.quantity}
-                            </span>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase dark:text-slate-500">Pcs</span>
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-baseline gap-1">
+                              <span className={`text-base font-black ${product.quantity < 10 ? 'text-red-600 dark:text-red-400' : 'text-slate-800 dark:text-white'}`}>
+                                {product.quantity}
+                              </span>
+                              <span className="text-[10px] font-bold text-slate-400 uppercase dark:text-slate-500">Pcs</span>
+                            </div>
+
+                            {/* INFO STOK AKAN DATANG (IN TRANSIT) */}
+                            {product.incoming_stock > 0 && (
+                              <div className="flex items-center gap-1 text-orange-600 dark:text-orange-400 animate-pulse">
+                                <Package size={10} />
+                                <span className="text-[9px] font-bold">+{product.incoming_stock} Akan Datang</span>
+                              </div>
+                            )}
                           </div>
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${product.daysLeft > 14 ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900 dark:text-emerald-400 dark:border-emerald-800' :
                             product.daysLeft > 7 ? 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900 dark:text-blue-400 dark:border-blue-800' :
@@ -1069,10 +1118,10 @@ export default function MasterProduct() {
                     {/* HARGA & QTY */}
                     <div className="text-right">
                       <p className={`text-sm font-black ${log.note.includes('Opname')
-                          ? 'text-indigo-600 dark:text-indigo-400'
-                          : log.type === 'MASUK'
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : 'text-blue-600 dark:text-blue-400'
+                        ? 'text-indigo-600 dark:text-indigo-400'
+                        : log.type === 'MASUK'
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-blue-600 dark:text-blue-400'
                         }`}>
                         {log.type === 'MASUK' ? '+' : '-'}{log.qty}
                       </p>

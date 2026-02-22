@@ -12,11 +12,13 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useTitle } from "@/hooks/useTitle";
 
 const API_SHOPPING = `${import.meta.env.VITE_API_URL}/shopping`,
   API_PRODUCTS = `${import.meta.env.VITE_API_URL}/products`;
 
 export default function Shopping() {
+  useTitle("Daftar Belanja");
   const [list, setList] = useState<any[]>([]),
     [products, setProducts] = useState<any[]>([]),
     [search, setSearch] = useState(localStorage.getItem("shop_search") || ""),

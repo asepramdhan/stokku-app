@@ -9,11 +9,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { useTitle } from "@/hooks/useTitle";
 
 const API_MARGIN = `${import.meta.env.VITE_API_URL}/margin`,
   API_STORES = `${import.meta.env.VITE_API_URL}/stores`;
 
 export default function Margin() {
+  useTitle("Analisa Margin");
   const [data, setData] = useState<any[]>([]),
     [stores, setStores] = useState<any[]>([]),
     [search, setSearch] = useState(localStorage.getItem("mg_search") || ""),

@@ -12,12 +12,14 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useTitle } from "@/hooks/useTitle";
 
 const API_SALES = `${import.meta.env.VITE_API_URL}/sales`,
   API_PRODUCTS = `${import.meta.env.VITE_API_URL}/products`,
   API_STORES = `${import.meta.env.VITE_API_URL}/stores`;
 
 export default function Sales() {
+  useTitle("Transaksi");
   const [sales, setSales] = useState<any[]>([]),
     [products, setProducts] = useState<any[]>([]),
     [stores, setStores] = useState<any[]>([]),

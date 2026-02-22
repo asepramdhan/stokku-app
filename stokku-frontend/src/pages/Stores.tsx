@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { useTitle } from "@/hooks/useTitle";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/stores`;
 
@@ -25,6 +26,7 @@ type Store = {
 };
 
 export default function Stores() {
+  useTitle("Toko / Channel / Toko Online");
   // Initial State
   const [stores, setStores] = useState<Store[]>([]),
     [search, setSearch] = useState(localStorage.getItem("st_search") || ""),

@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useTitle } from "@/hooks/useTitle";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
 export default function Login() {
+  useTitle("Login");
   const [form, setForm] = useState({ email: '', password: '' }),
     [loading, setLoading] = useState(false),
 

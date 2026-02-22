@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { User, ShieldCheck, KeyRound, Save } from "lucide-react";
 import { toast } from "sonner";
+import { useTitle } from "@/hooks/useTitle";
 
 export default function Settings() {
+  useTitle("Pengaturan");
   const [profile, setProfile] = useState({
     name: JSON.parse(localStorage.getItem("user") || "{}").name || "",
     email: JSON.parse(localStorage.getItem("user") || "{}").email || "",

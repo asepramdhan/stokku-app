@@ -24,10 +24,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { toPng } from 'html-to-image';
+import { useTitle } from "@/hooks/useTitle";
 
 const API_RECORDS = `${import.meta.env.VITE_API_URL}/records`;
 
 export default function StoreRecords() {
+  useTitle("Pencatatan Toko");
   const [data, setData] = useState<any[]>([]),
     [search, setSearch] = useState(localStorage.getItem("sr_search") || ""),
     [filterStatus, setFilterStatus] = useState(localStorage.getItem("sr_status") || "all"),

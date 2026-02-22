@@ -7,11 +7,13 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useTitle } from "@/hooks/useTitle";
 
 const API_DASHBOARD = `${import.meta.env.VITE_API_URL}/dashboard/stats`,
   COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 export default function Dashboard() {
+  useTitle("Dashboard");
   const [stats, setStats] = useState<any>(null),
     [isLoading, setIsLoading] = useState(true),
     [range, setRange] = useState(localStorage.getItem("dashboard_range") || "all"),

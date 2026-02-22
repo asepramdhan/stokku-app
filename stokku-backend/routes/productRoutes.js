@@ -9,6 +9,7 @@ router.get("/", async (req, res) => {
 			limit = parseInt(req.query.limit) || 10,
 			search = req.query.search || "",
 			category = req.query.category || "All",
+			incoming = req.query.incoming === "true",
 			offset = (page - 1) * limit;
 
 		// Build Query Filter
@@ -20,11 +21,17 @@ router.get("/", async (req, res) => {
 			params.push(category);
 		}
 
+		if (incoming) {
+			whereClause +=
+				" AND i.id IN (SELECT product_id FROM shopping_list WHERE status = 'pending')";
+		}
+
 		// 1. Ambil Data Paginated + Hitung ADS (Average Daily Sales) 30 Hari Terakhir
 		const dataQuery = `
       SELECT 
         i.*, 
-        COALESCE(s.total_sales, 0) / 30 as ads
+        COALESCE(s.total_sales, 0) / 30 as ads,
+				COALESCE(sl.total_incoming, 0) as incoming_stock
       FROM inventory i
       LEFT JOIN (
         SELECT product_id, SUM(qty) as total_sales 
@@ -32,6 +39,14 @@ router.get("/", async (req, res) => {
         WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
         GROUP BY product_id
       ) s ON i.id = s.product_id
+			 	/* --- SUBQUERY UNTUK STOK AKAN DATANG --- */
+				LEFT JOIN (
+					SELECT product_id, SUM(qty) as total_incoming
+					FROM shopping_list
+					WHERE status = 'pending'
+					GROUP BY product_id
+				) sl ON i.id = sl.product_id
+				/* --------------------------------------- */
       ${whereClause} 
       ORDER BY i.name ASC 
       LIMIT ? OFFSET ?`,
