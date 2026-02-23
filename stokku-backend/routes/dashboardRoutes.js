@@ -75,6 +75,7 @@ router.get("/stats", async (req, res) => {
 			revenue: Number(salesStats[0].total_revenue),
 			revenueGrowth: revenueGrowth.toFixed(1),
 			orders: Number(salesStats[0].total_orders),
+			totalQty: Number(salesStats[0].total_qty_sold),
 			stockValue: Number(stockStats[0].total_stock_value),
 			turnover: turnoverRate.toFixed(1),
 			chart: chartData || [],
