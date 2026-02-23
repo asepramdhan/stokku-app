@@ -104,16 +104,16 @@ export default function PinGuard({ children }: { children: React.ReactNode }) {
 
   if (isLocked) {
     return (
-      <div className="fixed inset-0 z-[9999] bg-slate-900 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center w-full max-w-sm text-slate-900">
-          <div className={`p-4 rounded-full mb-4 ${hasPin ? "bg-blue-100 text-blue-600" : "bg-green-100 text-green-600"}`}>
+      <div className="fixed inset-0 z-[9999] bg-slate-900 flex items-center justify-center p-4 dark:bg-slate-800">
+        <div className="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center w-full max-w-sm text-slate-900 dark:bg-slate-800 dark:text-white">
+          <div className={`p-4 rounded-full mb-4 ${hasPin ? "bg-blue-100 text-blue-600 dark:bg-blue-600" : "bg-green-100 text-green-600 dark:bg-green-600"}`}>
             {hasPin ? <Lock size={32} /> : <ShieldCheck size={32} />}
           </div>
 
           <h2 className="text-xl font-black mb-1">
             {hasPin ? "Aplikasi Terkunci" : "Setel PIN Keamanan"}
           </h2>
-          <p className="text-xs text-slate-400 mb-6 text-center">
+          <p className="text-xs text-slate-400 mb-6 text-center dark:text-slate-400">
             {hasPin
               ? "Masukkan PIN 6 digit Anda untuk melanjutkan."
               : "Buat 6 digit PIN untuk mengunci aplikasi saat Anda pergi."}
@@ -123,13 +123,13 @@ export default function PinGuard({ children }: { children: React.ReactNode }) {
             type="password"
             maxLength={6}
             placeholder="******"
-            className="text-center text-2xl tracking-[0.5em] mb-4 h-14 font-black border-2 focus:border-blue-500"
+            className="text-center text-2xl tracking-[0.5em] mb-4 h-14 font-black border-2 focus:border-blue-500 dark:bg-slate-800 dark:text-white dark:border-slate-600"
             value={pin}
             onChange={(e) => setPin(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAction()}
           />
 
-          <Button onClick={handleAction} className={`w-full h-12 font-bold ${hasPin ? "bg-blue-600" : "bg-green-600"}`}>
+          <Button onClick={handleAction} className={`w-full h-12 font-bold ${hasPin ? "bg-blue-600 dark:bg-blue-500" : "bg-green-600 dark:bg-green-500"}`}>
             {hasPin ? "Buka Kunci" : "Simpan & Buka Aplikasi"}
           </Button>
         </div>

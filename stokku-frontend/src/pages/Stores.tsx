@@ -264,7 +264,7 @@ export default function Stores() {
 
       {/* STATS CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-blue-500 shadow-sm dark:border-t-0 dark:border-r-0 dark:border-b dark:bg-slate-800">
+        <Card className="border-l-4 border-l-blue-500 shadow-sm dark:border-t-0 dark:border-r-0 dark:border-b-0 dark:bg-slate-800">
           <CardContent className="flex items-center gap-4 pt-6">
             <div className="p-2 bg-blue-100 text-blue-600 rounded-full dark:bg-slate-700 dark:text-slate-200">
               <Store size={20} />
@@ -276,7 +276,7 @@ export default function Stores() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-green-500 shadow-sm dark:border-t-0 dark:border-r-0 dark:border-b dark:bg-slate-800">
+        <Card className="border-l-4 border-l-green-500 shadow-sm dark:border-t-0 dark:border-r-0 dark:border-b-0 dark:bg-slate-800">
           <CardContent className="flex items-center gap-4 pt-6">
             <div className="p-2 bg-green-100 text-green-600 rounded-full dark:bg-green-600 dark:text-white">
               <Globe size={20} />
@@ -288,7 +288,7 @@ export default function Stores() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-orange-500 shadow-sm dark:border-t-0 dark:border-r-0 dark:border-b dark:bg-slate-800">
+        <Card className="border-l-4 border-l-orange-500 shadow-sm dark:border-t-0 dark:border-r-0 dark:border-b-0 dark:bg-slate-800">
           <CardContent className="flex items-center gap-4 pt-6">
             <div className="p-2 bg-orange-100 text-orange-600 rounded-full dark:bg-orange-600 dark:text-white">
               <Building2 size={20} />
@@ -310,6 +310,7 @@ export default function Stores() {
               placeholder="Cari toko..."
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
+              className="dark:bg-slate-800 dark:text-white"
             />
             <InputGroupAddon>
               <Search />
@@ -347,10 +348,10 @@ export default function Stores() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white border rounded-lg shadow-sm overflow-hidden dark:bg-slate-800">
+      <div className="bg-white border rounded-lg shadow-sm overflow-hidden dark:bg-slate-800 dark:border-slate-700">
         <div className="overflow-x-auto"> {/* Memastikan tabel bisa di-scroll di HP jika kolom terlalu panjang */}
           <Table>
-            <TableHeader className="bg-slate-50/50">
+            <TableHeader className="bg-slate-50/50 dark:bg-slate-800">
               <TableRow>
                 <TableHead className="w-[200px] font-semibold">Platform</TableHead>
                 <TableHead className="font-semibold">Nama Toko</TableHead>
@@ -370,15 +371,15 @@ export default function Stores() {
                 ))
               ) : stores.length > 0 ? (
                 stores.map((store: any) => (
-                  <TableRow key={store.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <TableRow key={store.id} className="hover:bg-slate-50/50 transition-colors group dark:hover:bg-slate-700">
                     <TableCell className="truncate">
                       <Badge
                         variant="secondary"
-                        className={`font-medium shadow-sm ${store.platform === 'Shopee' ? 'bg-orange-100 text-orange-700 border-orange-200' :
-                          store.platform === 'Tokopedia' ? 'bg-green-100 text-green-700 border-green-200' :
-                            store.platform === 'TikTok Shop' ? 'bg-slate-900 text-white' :
-                              store.platform === 'Lazada' ? 'bg-blue-100 text-blue-700 border-blue-200' :
-                                'bg-slate-100 text-slate-600'
+                        className={`font-medium shadow-sm ${store.platform === 'Shopee' ? 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-slate-900 dark:text-white dark:border-slate-700' :
+                          store.platform === 'Tokopedia' ? 'bg-green-100 text-green-700 border-green-200 dark:bg-slate-900 dark:text-white dark:border-slate-700' :
+                            store.platform === 'TikTok Shop' ? 'bg-slate-900 text-white dark:bg-slate-900 dark:text-white dark:border-slate-700' :
+                              store.platform === 'Lazada' ? 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-slate-900 dark:text-white dark:border-slate-700' :
+                                'bg-slate-100 text-slate-600 dark:bg-slate-900 dark:text-white dark:border-slate-700'
                           }`}
                       >
                         {store.platform || 'General'}
@@ -386,18 +387,18 @@ export default function Stores() {
                     </TableCell>
                     <TableCell className="truncate">
                       <div className="flex flex-col">
-                        <span className="font-bold text-slate-800">{store.name}</span>
+                        <span className="font-bold text-slate-800 dark:text-white">{store.name}</span>
                       </div>
                     </TableCell>
                     <TableCell className="truncate">
                       <div className="flex gap-2 text-[11px] font-medium">
-                        <span className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100">
+                        <span className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100 dark:bg-blue-900 dark:text-blue-400 dark:border-blue-800">
                           Adm: {Number(store.admin_fee)}%
                         </span>
-                        <span className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-100">
+                        <span className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-100 dark:bg-purple-900 dark:text-purple-400 dark:border-purple-800">
                           Ext: {Number(store.extra_promo_fee)}%
                         </span>
-                        <span className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">
+                        <span className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-700">
                           Fix: Rp {Number(store.handling_fee).toLocaleString()}
                         </span>
                       </div>
@@ -407,7 +408,7 @@ export default function Stores() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                          className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:text-purple-400 dark:hover:text-purple-500 dark:hover:bg-slate-900"
                           onClick={() => {
                             setCalcStore(store);
                             setIsCalcOpen(true);
@@ -421,7 +422,7 @@ export default function Stores() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-500 dark:hover:bg-slate-900"
                           onClick={() => { setEditingStore(store); setIsEditOpen(true); setErrors({}) }}
                         >
                           <Edit2 size={16} />
@@ -429,7 +430,7 @@ export default function Stores() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-500 dark:hover:bg-slate-900"
                           onClick={() => { setEditingStore(store); setIsDeleteOpen(true); }}
                         >
                           <Trash2 size={16} />
@@ -442,7 +443,7 @@ export default function Stores() {
                 <TableRow>
                   <TableCell colSpan={4} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="p-3 bg-slate-50 rounded-full text-slate-300">
+                      <div className="p-3 bg-slate-50 rounded-full text-slate-300 dark:bg-slate-800">
                         {!search ?
                           <Store size={32} />
                           :
@@ -452,13 +453,13 @@ export default function Stores() {
                       <div className="space-y-1">
                         {!search ?
                           <>
-                            <p className="font-medium text-slate-900">Daftar Toko Kosong</p>
-                            <p className="text-sm text-slate-500">Coba daftarkan toko terlebih dahulu.</p>
+                            <p className="font-medium text-slate-900 dark:text-white">Daftar Toko Kosong</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Coba daftarkan toko terlebih dahulu.</p>
                           </>
                           :
                           <>
-                            <p className="font-medium text-slate-900">Toko tidak ditemukan</p>
-                            <p className="text-sm text-slate-500">Coba gunakan kata kunci pencarian lain.</p>
+                            <p className="font-medium text-slate-900 dark:text-white">Toko tidak ditemukan</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Coba gunakan kata kunci pencarian lain.</p>
                           </>
                         }
                       </div>
@@ -469,9 +470,9 @@ export default function Stores() {
             </TableBody>
           </Table>
           {/* --- UI PAGINATION (TAMBAHKAN DI BAWAH TABLE) --- */}
-          <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50 font-sans">
-            <p className="text-xs text-slate-500 font-medium hidden md:block">
-              Menampilkan <span className="text-slate-900">{stores.length}</span> dari <span className="text-slate-900">{pagination.totalData}</span> toko
+          <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50 font-sans dark:bg-slate-800">
+            <p className="text-xs text-slate-500 font-medium hidden md:block dark:text-slate-400">
+              Menampilkan <span className="text-slate-900 dark:text-white">{stores.length}</span> dari <span className="text-slate-900 dark:text-white">{pagination.totalData}</span> toko
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -479,23 +480,23 @@ export default function Stores() {
                 size="sm"
                 disabled={page === 1}
                 onClick={() => setPage(p => p - 1)}
-                className="h-8 px-3 text-xs font-bold"
+                className="h-8 px-3 text-xs font-bold dark:text-slate-400"
               >
                 Sebelumnya
               </Button>
               <div className="flex items-center gap-2 px-2">
-                <span className="text-xs font-bold text-blue-600 bg-blue-50 h-8 w-8 flex items-center justify-center rounded-lg border border-blue-100">
+                <span className="text-xs font-bold text-blue-600 bg-blue-50 h-8 w-8 flex items-center justify-center rounded-lg border border-blue-100 dark:bg-slate-900 dark:text-slate-400">
                   {page}
                 </span>
-                <span className="text-xs text-slate-400">/</span>
-                <span className="text-xs font-medium text-slate-600">{pagination.totalPages}</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">/</span>
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{pagination.totalPages}</span>
               </div>
               <Button
                 variant="outline"
                 size="sm"
                 disabled={page === pagination.totalPages}
                 onClick={() => setPage(p => p + 1)}
-                className="h-8 px-3 text-xs font-bold"
+                className="h-8 px-3 text-xs font-bold dark:text-slate-400"
               >
                 Selanjutnya
               </Button>
@@ -506,13 +507,13 @@ export default function Stores() {
 
       {/* Dialog Add */}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent>
+        <DialogContent className="dark:bg-slate-900 dark:border-slate-800">
           <DialogHeader><DialogTitle>Daftarkan Toko Baru</DialogTitle></DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-1">
               <Input
                 placeholder="Nama Toko (e.g. Meowmeal Official)"
-                className={`${errors.name ? 'border-pink-500' : ''} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500`}
+                className={`${errors.name ? 'border-pink-500' : ''} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:invalid:border-pink-500 dark:invalid:text-pink-600 dark:focus:invalid:border-pink-500 dark:focus:invalid:ring-pink-500`}
                 value={newStore.name}
                 onChange={e => {
                   setNewStore({ ...newStore, name: e.target.value });
@@ -523,7 +524,7 @@ export default function Stores() {
             </div>
             <div className="space-y-1">
               <select
-                className={`w-full border p-2 rounded-md text-sm ${errors.platform ? 'border-pink-500' : ''}`}
+                className={`w-full border p-2 rounded-md text-sm ${errors.platform ? 'border-pink-500 dark:border-pink-500' : ''} dark:bg-slate-800 dark:border-slate-600 dark:text-slate-400 focus:invalid:border-pink-500 focus:invalid:ring-pink-500`}
                 value={newStore.platform}
                 onChange={e => {
                   setNewStore({ ...newStore, platform: e.target.value });
@@ -578,10 +579,10 @@ export default function Stores() {
 
       {/* Dialog Calculator */}
       <Dialog open={isCalcOpen} onOpenChange={setIsCalcOpen}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-[400px] dark:bg-slate-900 dark:border-slate-800">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Calculator className="text-purple-600" size={20} />
+              <Calculator className="text-purple-600 dark:text-purple-400" size={20} />
               Hitung Harga Jual - {calcStore?.name}
             </DialogTitle>
             <DialogDescription>
@@ -619,27 +620,27 @@ export default function Stores() {
               </div>
             </div>
 
-            <div className="bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200 space-y-3">
-              <div className="flex justify-between text-xs text-slate-500 font-medium">
+            <div className="bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200 space-y-3 dark:bg-slate-800">
+              <div className="flex justify-between text-xs text-slate-500 font-medium dark:text-slate-400">
                 <span>Potongan Fee ({calcStore?.admin_fee + calcStore?.extra_promo_fee}% + Rp {calcStore?.handling_fee.toLocaleString()})</span>
-                <span className="text-red-500">-Rp {calcResult.totalFees.toLocaleString()}</span>
+                <span className="text-red-500 dark:text-red-400">-Rp {calcResult.totalFees.toLocaleString()}</span>
               </div>
               <div className="pt-2 border-t flex justify-between items-center">
-                <span className="text-sm font-bold text-slate-700">Rekomendasi Harga Jual:</span>
-                <span className="text-xl font-black text-purple-600">
+                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Rekomendasi Harga Jual:</span>
+                <span className="text-xl font-black text-purple-600 dark:text-purple-400">
                   Rp {calcResult.sellingPrice.toLocaleString()}
                 </span>
               </div>
             </div>
 
-            <p className="text-[10px] text-slate-400 italic">
+            <p className="text-[10px] text-slate-400 italic dark:text-slate-500">
               *Harga jual ini sudah menutup modal, biaya admin marketplace, dan target profit bersih kamu.
             </p>
           </div>
 
           <DialogFooter>
             <Button
-              className="w-full bg-purple-600 hover:bg-purple-700 gap-2"
+              className="w-full bg-purple-600 hover:bg-purple-700 gap-2 dark:bg-purple-400 dark:hover:bg-purple-500"
               onClick={() => {
                 // Salin angka ke clipboard (tanpa titik/koma agar mudah dipaste)
                 navigator.clipboard.writeText(calcResult.sellingPrice.toString());
@@ -659,7 +660,7 @@ export default function Stores() {
 
       {/* Dialog Edit */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[400px] dark:bg-slate-900 dark:border-slate-800">
           <DialogHeader><DialogTitle>Edit Toko</DialogTitle></DialogHeader>
 
           {editingStore && (
@@ -678,7 +679,7 @@ export default function Stores() {
               </div>
               <div className="space-y-1">
                 <select
-                  className={`w-full border p-2 rounded-md text-sm ${errors.platform ? 'border-pink-500' : ''}`}
+                  className={`w-full border p-2 rounded-md text-sm ${errors.platform ? 'border-pink-500 dark:border-pink-500' : ''} dark:bg-slate-800 dark:text-slate-300`}
                   value={editingStore.platform}
                   onChange={e => {
                     setEditingStore({ ...editingStore, platform: e.target.value });
@@ -735,7 +736,7 @@ export default function Stores() {
 
       {/* Alert Dialog */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent className="max-w-sm">
+        <AlertDialogContent className="max-w-sm dark:bg-slate-900 dark:border-slate-800">
           <AlertDialogHeader>
             <AlertDialogTitle>Apakah kamu yakin?</AlertDialogTitle>
             <AlertDialogDescription>

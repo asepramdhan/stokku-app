@@ -86,55 +86,82 @@ export default function Settings() {
     <div className="max-w-4xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Pengaturan Akun</h1>
-        <p className="text-slate-500 text-sm">Kelola identitas profil dan keamanan PIN Anda.</p>
+        <p className="text-slate-500 text-sm dark:text-slate-400">Kelola identitas profil dan keamanan PIN Anda.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* KARTU PROFIL */}
-        <Card className="shadow-sm">
+        <Card className="shadow-sm dark:bg-slate-800 dark:border-slate-600">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <User size={18} className="text-blue-600" /> Profil Pengguna
+              <User size={18} className="text-blue-600 dark:text-blue-400" /> Profil Pengguna
             </CardTitle>
             <CardDescription className="text-xs">Informasi dasar akun Anda.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1">
               <p className="text-[10px] font-bold text-slate-500 uppercase">Nama Lengkap</p>
-              <Input value={profile.name} onChange={e => setProfile({ ...profile, name: e.target.value })} />
+              <Input
+                value={profile.name}
+                onChange={e => setProfile({ ...profile, name: e.target.value })}
+                className="dark:bg-slate-900 dark:text-slate-50 dark:border-slate-600"
+              />
             </div>
             <div className="space-y-1">
               <p className="text-[10px] font-bold text-slate-500 uppercase">Alamat Email</p>
-              <Input type="email" value={profile.email} onChange={e => setProfile({ ...profile, email: e.target.value })} />
+              <Input
+                type="email"
+                value={profile.email}
+                onChange={e => setProfile({ ...profile, email: e.target.value })}
+                className="dark:bg-slate-900 dark:text-slate-50 dark:border-slate-600"
+              />
             </div>
-            <Button disabled={loading} onClick={handleUpdateProfile} className="w-full bg-blue-600 hover:bg-blue-700 gap-2">
+            <Button disabled={loading} onClick={handleUpdateProfile} className="w-full bg-blue-600 hover:bg-blue-700 gap-2 dark:bg-blue-500 dark:hover:bg-blue-400">
               <Save size={16} /> {loading ? "Sabar ya..." : "Simpan Perubahan"}
             </Button>
           </CardContent>
         </Card>
 
         {/* KARTU KEAMANAN PIN */}
-        <Card className="shadow-sm">
+        <Card className="shadow-sm dark:bg-slate-800 dark:border-slate-600">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <ShieldCheck size={18} className="text-green-600" /> Keamanan PIN
+              <ShieldCheck size={18} className="text-green-600 dark:text-green-400" /> Keamanan PIN
             </CardTitle>
             <CardDescription className="text-xs">Ganti 6 digit PIN keamanan Anda secara berkala.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1">
               <p className="text-[10px] font-bold text-slate-500 uppercase">PIN Lama</p>
-              <Input type="password" maxLength={6} value={pinData.oldPin} onChange={e => setPinData({ ...pinData, oldPin: e.target.value })} />
+              <Input
+                type="password"
+                maxLength={6}
+                value={pinData.oldPin}
+                onChange={e => setPinData({ ...pinData, oldPin: e.target.value })}
+                className="dark:bg-slate-900 dark:text-slate-50 dark:border-slate-600"
+              />
             </div>
             <div className="space-y-1">
               <p className="text-[10px] font-bold text-slate-500 uppercase">PIN Baru (6 Digit)</p>
-              <Input type="password" maxLength={6} value={pinData.newPin} onChange={e => setPinData({ ...pinData, newPin: e.target.value })} />
+              <Input
+                type="password"
+                maxLength={6}
+                value={pinData.newPin}
+                onChange={e => setPinData({ ...pinData, newPin: e.target.value })}
+                className="dark:bg-slate-900 dark:text-slate-50 dark:border-slate-600"
+              />
             </div>
             <div className="space-y-1">
               <p className="text-[10px] font-bold text-slate-500 uppercase">Konfirmasi PIN Baru</p>
-              <Input type="password" maxLength={6} value={pinData.confirmPin} onChange={e => setPinData({ ...pinData, confirmPin: e.target.value })} />
+              <Input
+                type="password"
+                maxLength={6}
+                value={pinData.confirmPin}
+                onChange={e => setPinData({ ...pinData, confirmPin: e.target.value })}
+                className="dark:bg-slate-900 dark:text-slate-50 dark:border-slate-600"
+              />
             </div>
-            <Button onClick={handleUpdatePin} variant="outline" className="w-full border-green-200 text-green-600 hover:bg-green-50 gap-2">
+            <Button onClick={handleUpdatePin} variant="outline" className="w-full border-green-200 text-green-600 hover:bg-green-50 gap-2 dark:border-green-600 dark:text-green-400 dark:hover:bg-green-500 dark:hover:text-white">
               <KeyRound size={16} /> Ganti PIN Sekarang
             </Button>
           </CardContent>

@@ -106,7 +106,7 @@ export default function Dashboard() {
       {/* HEADER DENGAN FILTER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Ringkasan Bisnis</h1>
+          <h1 className="text-2xl font-bold tracking-tight dark:text-white">Ringkasan Bisnis</h1>
           <p className="text-slate-500 text-sm dark:text-slate-400">Update terakhir: {isLoading ? "..." : new Date().toLocaleString('id-ID')}</p>
         </div>
         {/* DROPDOWN FILTER */}
@@ -115,12 +115,12 @@ export default function Dashboard() {
           <select
             value={range}
             onChange={(e) => setRange(e.target.value)}
-            className="text-sm w-full font-bold bg-transparent outline-none pr-4 cursor-pointer dark:bg-slate-800"
+            className="text-sm w-full font-bold bg-transparent outline-none pr-4 cursor-pointer dark:bg-slate-800 dark:border-slate-700"
           >
-            <option value="all">Semua Waktu</option>
-            <option value="today">Hari Ini</option>
-            <option value="week">Minggu Ini</option>
-            <option value="month">Bulan Ini</option>
+            <option value="all" className="dark:bg-slate-800 dark:text-slate-100">Semua Waktu</option>
+            <option value="today" className="dark:bg-slate-800 dark:text-slate-100">Hari Ini</option>
+            <option value="week" className="dark:bg-slate-800 dark:text-slate-100">Minggu Ini</option>
+            <option value="month" className="dark:bg-slate-800 dark:text-slate-100">Bulan Ini</option>
           </select>
         </div>
       </div>
@@ -133,8 +133,10 @@ export default function Dashboard() {
             <Landmark size={18} className="opacity-80" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Rp {isLoading ? "..." : Number(stats?.revenue || 0).toLocaleString()}</div>
-            <p className="text-xs opacity-70 mt-1">+12% dari bulan lalu</p>
+            <div className="text-2xl font-bold dark:text-white">Rp {isLoading ? "..." : Number(stats?.revenue || 0).toLocaleString()}</div>
+            <p className="text-xs opacity-70 mt-1 dark:text-blue-200">
+              {isLoading ? "..." : (stats?.revenueGrowth || 0)}% dari bulan lalu
+            </p>
           </CardContent>
         </Card>
 
@@ -144,7 +146,7 @@ export default function Dashboard() {
             <ShoppingBag size={18} className="text-slate-400 dark:text-slate-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{isLoading ? "..." : stats?.orders}</div>
+            <div className="text-2xl font-bold dark:text-white">{isLoading ? "..." : stats?.orders}</div>
             <p className="text-xs text-green-600 mt-1 flex items-center gap-1 dark:text-green-400"><ArrowUpRight size={12} /> 5 hari ini</p>
           </CardContent>
         </Card>
@@ -155,7 +157,7 @@ export default function Dashboard() {
             <Package size={18} className="text-slate-400 dark:text-slate-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Rp {isLoading ? "..." : Number(stats?.stockValue || 0).toLocaleString()}</div>
+            <div className="text-2xl font-bold dark:text-white">Rp {isLoading ? "..." : Number(stats?.stockValue || 0).toLocaleString()}</div>
             <p className="text-xs text-slate-400 mt-1 dark:text-slate-500">Nilai barang di gudang</p>
           </CardContent>
         </Card>
@@ -166,7 +168,7 @@ export default function Dashboard() {
             <TrendingUp size={18} className="text-slate-400 dark:text-slate-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{isLoading ? "..." : (stats?.turnover || 0)}%</div>
+            <div className="text-2xl font-bold dark:text-white">{isLoading ? "..." : (stats?.turnover || 0)}%</div>
             <p className="text-xs text-slate-400 mt-1 dark:text-slate-500">Perputaran stok</p>
           </CardContent>
         </Card>
@@ -181,18 +183,19 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height="100%">
               {isLoading ? <Skeleton className="h-full w-full" /> :
                 <BarChart data={stats.chart}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} tickFormatter={(value: number) => `${Number(value || 0).toLocaleString()}`} />
-                  <Tooltip cursor={false} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '10px 14px' }}
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-slate-200 dark:text-slate-700" />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} tickFormatter={(value: number) => `${Number(value || 0).toLocaleString()}`} />
+                  <Tooltip cursor={false} contentStyle={{ borderRadius: '12px', border: 'dashed 0.5px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '10px 14px', backgroundColor: '#1f2937', color: '#f8fafc' }}
                     // --- INI BAGIAN KUNCINYA ---
                     formatter={(value: number) => [
                       `Rp ${Number(value || 0).toLocaleString()}`,
                       "Omset"
                     ]}
-                    labelStyle={{ fontWeight: 'bold', color: '#64748b', marginBottom: '4px' }}
+                    labelStyle={{ fontWeight: 'bold', color: '#f8fafc', marginBottom: '4px' }}
+                    itemStyle={{ color: '#3b82f6' }}
                   />
-                  <Bar dataKey="amount" fill="#2563eb" radius={[4, 4, 0, 0]} barSize={30} />
+                  <Bar dataKey="amount" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={30} />
                 </BarChart>
               }
             </ResponsiveContainer>
@@ -227,7 +230,9 @@ export default function Dashboard() {
                         {/* Pakai format Rp juga di sini biar seragam! */}
                         <Tooltip
                           formatter={(value: number) => `Rp ${Number(value).toLocaleString('id-ID')}`}
-                          contentStyle={{ borderRadius: '10px', border: 'none' }}
+                          contentStyle={{ borderRadius: '10px', border: 'dashed 0.5px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '10px 14px', backgroundColor: '#1f2937', color: '#f8fafc' }}
+                          labelStyle={{ fontWeight: 'bold', color: '#f8fafc', marginBottom: '4px' }}
+                          itemStyle={{ color: '#3b82f6' }}
                         />
                       </PieChart>
                     </ResponsiveContainer>
@@ -259,7 +264,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* TOP PRODUCTS */}
         <Card className="shadow-sm lg:col-span-2 dark:border-none dark:bg-slate-800">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 dark:text-white">
             <CardTitle className="text-lg font-bold">Top 8 Produk</CardTitle>
             <TrendingUp size={18} className="text-green-500 dark:text-green-400" />
           </CardHeader>
@@ -334,7 +339,7 @@ export default function Dashboard() {
                     <div
                       key={i}
                       onClick={() => handleQuickAdd(item.id, item.name)}
-                      className="group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-blue-50 transition-all active:scale-95 dark:hover:bg-slate-700"
+                      className="group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-blue-50 transition-all active:scale-95 dark:hover:bg-slate-800/50"
                     >
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex flex-col gap-0.5">
@@ -369,7 +374,7 @@ export default function Dashboard() {
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <div className="h-12 w-12 rounded-full bg-green-50 flex items-center justify-center mb-2 dark:bg-slate-700">
-                    <CheckCircle2 size={24} className="text-green-500 dark:text-green-400" />
+                    <CheckCircle2 size={24} className="text-emerald-500 dark:text-emerald-400" />
                   </div>
                   <p className="text-xs font-bold text-slate-600 dark:text-slate-200">Gudang Aman!</p>
                   <p className="text-[10px] text-slate-400 dark:text-slate-500">Semua stok di atas ambang batas.</p>
@@ -382,7 +387,7 @@ export default function Dashboard() {
           <div className="p-4 pt-0">
             <Link
               to="/shopping"
-              className="flex items-center justify-center gap-2 w-full py-2 bg-slate-50 hover:bg-blue-50 text-blue-600 rounded-lg text-[11px] font-bold transition-all border border-dashed border-slate-200 hover:border-blue-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 dark:border-slate-600 dark:hover:border-slate-500"
+              className="flex items-center justify-center gap-2 w-full py-2 bg-slate-50 hover:bg-blue-50 text-blue-600 rounded-lg text-[11px] font-bold transition-all border border-dashed border-slate-200 hover:border-blue-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-800/50 dark:border-slate-600 dark:hover:border-slate-500"
             >
               <ShoppingCart size={14} />
               Buka Daftar Belanja

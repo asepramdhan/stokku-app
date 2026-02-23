@@ -28,8 +28,8 @@ export default function QRScanner({ onScanSuccess }: { onScanSuccess: (text: str
 
   return (
     <div className="flex flex-col gap-4">
-      <div id="reader" className="overflow-hidden rounded-xl border-2 border-dashed dark:border-slate-800"></div>
-      <p className="text-[10px] text-center text-slate-400 uppercase font-black">Arahkan kamera ke QR Code Produk</p>
+      <div id="reader" className="overflow-hidden rounded-xl border-2 border-dashed dark:border-slate-800 dark:bg-slate-800"></div>
+      <p className="text-[10px] text-center text-slate-400 uppercase font-black dark:text-slate-500">Arahkan kamera ke QR Code Produk</p>
     </div>
   );
 }

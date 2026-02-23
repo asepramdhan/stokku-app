@@ -57,6 +57,13 @@ router.get("/stats", async (req, res) => {
       ${dateFilter} 
       GROUP BY st.platform
     `),
+			// 7. Hitung Revenue Growth
+			revenueGrowth =
+				salesStats[0].total_revenue > 0
+					? ((salesStats[0].total_revenue - stockStats[0].total_stock_value) /
+							stockStats[0].total_stock_value) *
+						100
+					: 0,
 			// --- LOGIKA PERHITUNGAN TURNOVER ---
 			qtySold = Number(salesStats[0].total_qty_sold),
 			qtyInStock = Number(stockStats[0].total_stock_pcs),
@@ -66,6 +73,7 @@ router.get("/stats", async (req, res) => {
 
 		res.json({
 			revenue: Number(salesStats[0].total_revenue),
+			revenueGrowth: revenueGrowth.toFixed(1),
 			orders: Number(salesStats[0].total_orders),
 			stockValue: Number(stockStats[0].total_stock_value),
 			turnover: turnoverRate.toFixed(1),

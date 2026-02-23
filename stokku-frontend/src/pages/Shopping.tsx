@@ -409,7 +409,7 @@ export default function Shopping() {
       {/* STATS CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Card Rencana Menunggu */}
-        <Card className="border-l-4 border-l-orange-500 shadow-sm dark:bg-slate-800">
+        <Card className="border-l-4 border-l-orange-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-b-0 dark:border-r-0">
           <CardContent className="flex items-center gap-4 pt-6">
             <div className="p-2 bg-orange-100 text-orange-600 rounded-full"><Clock size={20} /></div>
             <div>
@@ -420,7 +420,7 @@ export default function Shopping() {
         </Card>
 
         {/* Card Total Belanja (Otomatis Menyesuaikan) */}
-        <Card className="border-l-4 border-l-blue-500 shadow-sm dark:bg-slate-800">
+        <Card className="border-l-4 border-l-blue-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-b-0 dark:border-r-0">
           <CardContent className="flex items-center gap-4 pt-6">
             <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><ShoppingCart size={20} /></div>
             <div>
@@ -508,10 +508,11 @@ export default function Shopping() {
           </select>
         </div>
 
+        {/* FILTER PEMBAYARAN */}
         <div className="flex items-center gap-2 bg-white border px-3 py-2 rounded-xl shadow-sm w-full lg:w-auto dark:bg-slate-800 dark:border-slate-700">
-          <BadgeDollarSign size={14} className="text-slate-400" />
+          <BadgeDollarSign size={14} className="text-slate-400 dark:text-slate-500" />
           <select
-            className="w-full text-xs font-bold bg-transparent outline-none min-w-[120px] cursor-pointer dark:text-white"
+            className="w-full text-xs font-bold bg-transparent outline-none min-w-[120px] cursor-pointer dark:text-white dark:bg-slate-800"
             value={filterPayment}
             onChange={(e) => { setFilterPayment(e.target.value); setPage(1); }}
           >
@@ -622,19 +623,19 @@ export default function Shopping() {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={`text-[10px] font-bold ${item.payment_type === 'cash'
-                        ? "text-green-600 border-green-200 bg-green-50"
-                        : "text-purple-600 border-purple-200 bg-purple-50"
+                        ? "text-green-600 border-green-200 bg-green-50 dark:text-white dark:border-green-600 dark:bg-green-600"
+                        : "text-purple-600 border-purple-200 bg-purple-50 dark:text-white dark:border-purple-600 dark:bg-purple-600"
                         }`}>
                         {item.payment_type === 'cash' ? 'CASH' : 'MINGGUAN'}
                       </Badge>
                     </TableCell>
                     <TableCell className="truncate">
                       {item.status === 'pending' ? (
-                        <Badge variant="outline" className="text-orange-500 bg-orange-50 border-orange-200 gap-1 font-medium dark:text-orange-400">
+                        <Badge variant="outline" className="text-orange-500 bg-orange-50 border-orange-200 gap-1 font-medium dark:bg-orange-600 dark:border-orange-600 dark:text-white">
                           <Clock size={12} /> Pending
                         </Badge>
                       ) : (
-                        <Badge className="bg-green-500 gap-1 font-medium shadow-sm dark:bg-green-600">
+                        <Badge className="bg-green-500 gap-1 font-medium shadow-sm dark:bg-green-600 dark:text-white">
                           <CheckCircle2 size={12} /> Selesai
                         </Badge>
                       )}
@@ -694,7 +695,7 @@ export default function Shopping() {
         {/* UI PAGINATION */}
         <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50 dark:bg-slate-800">
           <p className="text-xs text-slate-500 font-medium hidden md:block dark:text-slate-400">
-            Menampilkan <span className="text-slate-900 dark:text-white">{list.length}</span> dari <span className="text-slate-900 dark:text-white">{pagination.totalData}</span> rencana
+            Menampilkan <span className="text-slate-900 dark:text-white">{list.length}</span> dari <span className="text-slate-900 dark:text-blue-400">{pagination.totalData}</span> rencana
           </p>
           <div className="flex items-center gap-2">
             <Button

@@ -411,7 +411,7 @@ export default function MasterProduct() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Pengaturan Master Produk</h1>
+          <h1 className="text-2xl font-bold tracking-tight dark:text-white">Pengaturan Master Produk</h1>
           <p className="text-slate-500 text-sm font-medium dark:text-slate-400">
             Kelola daftar master produk di Stokku
           </p>
@@ -471,7 +471,7 @@ export default function MasterProduct() {
               placeholder="Cari berdasarkan Nama atau SKU..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }} // Reset ke hal 1 saat cari
-              className="dark:bg-slate-800 dark:text-slate-100"
+              className="dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
             />
             <InputGroupAddon>
               <Search />
@@ -503,7 +503,7 @@ export default function MasterProduct() {
         <div className="flex items-center gap-2 bg-white border px-3 py-1 rounded-lg shadow-sm dark:bg-slate-800 dark:border-none">
           <Filter size={14} className="text-slate-400 dark:text-slate-500" />
           <select
-            className="w-full text-sm font-bold bg-transparent outline-none min-w-[140px] cursor-pointer dark:text-slate-100 dark:bg-slate-800"
+            className="w-full text-sm font-bold bg-transparent outline-none min-w-[140px] cursor-pointer dark:text-slate-100 dark:bg-slate-800 dark:border-slate-700"
             value={filterCategory}
             onChange={(e) => { setFilterCategory(e.target.value); setPage(1); }}
           >
@@ -580,7 +580,7 @@ export default function MasterProduct() {
                 filtered.map((product: any) => (
                   <TableRow key={product.id} className="hover:bg-slate-50/50 transition-colors group dark:hover:bg-slate-700">
                     <TableCell className="font-mono text-xs text-slate-500 truncate dark:text-slate-400">{product.sku || '-'}</TableCell>
-                    <TableCell className="font-medium truncate max-w-[200px]">{product.name}</TableCell>
+                    <TableCell className="font-medium truncate max-w-[200px] dark:text-slate-200">{product.name}</TableCell>
                     <TableCell className="font-mono text-xs text-slate-500 truncate dark:text-slate-400">{product.category || 'Umum'}</TableCell>
                     <TableCell className="font-mono text-slate-500 truncate max-w-[100px] dark:text-slate-400">
                       Rp {Number(product.price).toLocaleString()}
@@ -705,7 +705,7 @@ export default function MasterProduct() {
                 <TableRow>
                   <TableCell colSpan={6} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="p-3 bg-slate-50 rounded-full text-slate-300 dark:bg-slate-800">
+                      <div className="p-3 bg-slate-50 rounded-full text-slate-300 dark:bg-slate-800 dark:text-slate-200">
                         {!search ?
                           <Box size={32} />
                           :
@@ -735,7 +735,7 @@ export default function MasterProduct() {
         {/* --- UI PAGINATION (TAMBAHKAN INI) --- */}
         <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50 dark:bg-slate-900/50">
           <p className="text-xs text-slate-500 font-medium hidden md:block dark:text-slate-400">
-            Menampilkan <span className="text-slate-900 dark:text-white">{products.length}</span> dari <span className="text-slate-900">{pagination.totalData}</span> produk
+            Menampilkan <span className="text-slate-900 dark:text-slate-400">{products.length}</span> dari <span className="text-slate-900 dark:border-slate-700 dark:text-blue-400">{pagination.totalData}</span> produk
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -778,7 +778,7 @@ export default function MasterProduct() {
               <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">SKU / Kode Barang</p>
               <Input
                 value={newProduct.sku}
-                className={`${errors.sku ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800`}
+                className={`${errors.sku ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800 dark:text-slate-100`}
                 onChange={e => {
                   setNewProduct({ ...newProduct, sku: e.target.value });
                   if (errors.sku) setErrors({ ...errors, sku: "" });
@@ -792,7 +792,7 @@ export default function MasterProduct() {
               <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">Nama Produk</p>
               <Input
                 value={newProduct.name}
-                className={`${errors.name ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800`}
+                className={`${errors.name ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800 dark:text-slate-100`}
                 onChange={e => {
                   setNewProduct({ ...newProduct, name: e.target.value });
                   if (errors.name) setErrors({ ...errors, name: "" });
@@ -805,7 +805,7 @@ export default function MasterProduct() {
               <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">Kategori</p>
               <Input
                 value={newProduct.category}
-                className={`${errors.category ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800`}
+                className={`${errors.category ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800 dark:text-slate-100`}
                 onChange={e => {
                   setNewProduct({ ...newProduct, category: e.target.value });
                   if (errors.category) setErrors({ ...errors, category: "" });
@@ -821,7 +821,7 @@ export default function MasterProduct() {
                   type="number"
                   value={newProduct.price}
                   onChange={e => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
-                  className="dark:bg-slate-800 dark:border-slate-600"
+                  className="dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
                 />
               </div>
               <div className="space-y-1">
@@ -830,7 +830,7 @@ export default function MasterProduct() {
                   type="number"
                   value={newProduct.quantity}
                   onChange={e => setNewProduct({ ...newProduct, quantity: Number(e.target.value) })}
-                  className="dark:bg-slate-800 dark:border-slate-600"
+                  className="dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
                 />
               </div>
             </div>
@@ -850,10 +850,10 @@ export default function MasterProduct() {
 
       {/* DIALOG SCANNER */}
       <Dialog open={isScannerOpen} onOpenChange={setIsScannerOpen}>
-        <DialogContent className="sm:max-w-[400px] dark:bg-slate-950 dark:border-slate-800">
+        <DialogContent className="sm:max-w-[400px] dark:bg-slate-800 dark:border-slate-700">
           <DialogHeader>
             <DialogTitle className="dark:text-slate-100 italic font-black uppercase tracking-tighter flex items-center gap-2">
-              <Scan size={20} className="text-blue-600" /> Scanner Stokku.id
+              <Scan size={20} className="text-blue-600 dark:text-blue-400" /> Scanner Stokku.id
             </DialogTitle>
           </DialogHeader>
 
@@ -867,7 +867,7 @@ export default function MasterProduct() {
             onClose={() => setIsScannerOpen(false)}
           />
 
-          <Button variant="outline" className="w-full dark:border-slate-800 dark:text-slate-400" onClick={() => setIsScannerOpen(false)}>
+          <Button variant="outline" className="w-full dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-700" onClick={() => setIsScannerOpen(false)}>
             Batal
           </Button>
         </DialogContent>
@@ -894,7 +894,7 @@ export default function MasterProduct() {
                   type="number"
                   value={shoppingFormData.qty}
                   onChange={e => setShoppingFormData({ ...shoppingFormData, qty: Number(e.target.value) })}
-                  className="dark:bg-slate-800 dark:border-slate-600"
+                  className="dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
                 />
               </div>
               <div className="space-y-1">
@@ -903,7 +903,7 @@ export default function MasterProduct() {
                   type="number"
                   value={shoppingFormData.buy_price}
                   onChange={e => setShoppingFormData({ ...shoppingFormData, buy_price: Number(e.target.value) })}
-                  className="dark:bg-slate-800 dark:border-slate-600"
+                  className="dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
                 />
               </div>
             </div>
@@ -954,19 +954,19 @@ export default function MasterProduct() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase">Stok Fisik Sebenarnya</Label>
+              <Label className="text-xs font-bold uppercase dark:text-slate-400">Stok Fisik Sebenarnya</Label>
               <Input
                 type="number"
                 value={opnameData.new_qty}
                 onChange={e => setOpnameData({ ...opnameData, new_qty: Number(e.target.value) })}
-                className="text-center text-xl font-black h-12 border-2 focus:ring-indigo-500"
+                className="text-center text-xl font-black h-12 border-2 focus:ring-indigo-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase">Alasan Penyesuaian</Label>
+              <Label className="text-xs font-bold uppercase dark:text-slate-400">Alasan Penyesuaian</Label>
               <select
-                className="w-full p-2 border rounded-md text-sm dark:bg-slate-800"
+                className="w-full p-2 border rounded-md text-sm dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
                 value={opnameData.reason}
                 onChange={e => setOpnameData({ ...opnameData, reason: e.target.value })}
               >
@@ -998,7 +998,7 @@ export default function MasterProduct() {
                 <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">SKU / Kode Barang</p>
                 <Input
                   value={editingProduct.sku}
-                  className={`${errors.sku ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800`}
+                  className={`${errors.sku ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800 dark:text-slate-100`}
                   onChange={e => {
                     setEditingProduct({ ...editingProduct, sku: e.target.value });
                     if (errors.sku) setErrors({ ...errors, sku: "" })
@@ -1012,7 +1012,7 @@ export default function MasterProduct() {
                 <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">Nama Produk</p>
                 <Input
                   value={editingProduct.name}
-                  className={`${errors.name ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800`}
+                  className={`${errors.name ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800 dark:text-slate-100`}
                   onChange={e => {
                     setEditingProduct({ ...editingProduct, name: e.target.value });
                     if (errors.name) setErrors({ ...errors, name: "" })
@@ -1025,7 +1025,7 @@ export default function MasterProduct() {
                 <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">Kategori</p>
                 <Input
                   value={editingProduct.category}
-                  className={`${errors.category ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800`}
+                  className={`${errors.category ? 'border-pink-500' : 'dark:border-slate-600'} invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 dark:bg-slate-800 dark:text-slate-100`}
                   onChange={e => {
                     setEditingProduct({ ...editingProduct, category: e.target.value });
                     if (errors.category) setErrors({ ...errors, category: "" })
@@ -1040,7 +1040,7 @@ export default function MasterProduct() {
                     type="number"
                     value={editingProduct.price}
                     onChange={e => setEditingProduct({ ...editingProduct, price: Number(e.target.value) })}
-                    className="dark:border-slate-600"
+                    className="dark:border-slate-600 dark:text-slate-100"
                   />
                 </div>
                 <div className="space-y-1">
@@ -1049,7 +1049,7 @@ export default function MasterProduct() {
                     type="number"
                     value={editingProduct.quantity}
                     onChange={e => setEditingProduct({ ...editingProduct, quantity: Number(e.target.value) })}
-                    className="dark:border-slate-600"
+                    className="dark:border-slate-600 dark:text-slate-100"
                   />
                 </div>
               </div>

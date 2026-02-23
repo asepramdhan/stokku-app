@@ -310,19 +310,19 @@ export default function Sales() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Transaksi Penjualan</h1>
-          <p className="text-slate-500 text-sm font-medium">Catat penjualan online dan offline harian kamu.</p>
+          <p className="text-slate-500 text-sm font-medium dark:text-slate-400">Catat penjualan online dan offline harian kamu.</p>
         </div>
         <div className="flex gap-2 w-full md:w-auto">
           <Button
             onClick={() => { setIsAddOpen(true); setErrors({}); }}
-            className="gap-2 w-full md:w-auto shadow-md"
+            className="gap-2 w-full md:w-auto shadow-md dark:shadow-none dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white"
           >
             <Plus size={18} /> Input Penjualan
           </Button>
           <Button
             variant="outline"
             onClick={() => setIsBulkOpen(true)}
-            className="gap-2 w-full md:w-auto border-dashed border-blue-400 text-blue-600 hover:bg-blue-50"
+            className="gap-2 w-full md:w-auto border-dashed border-blue-400 text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-700 dark:text-white"
           >
             <Layers size={18} /> Input Massal
           </Button>
@@ -331,29 +331,29 @@ export default function Sales() {
 
       {/* STATS CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-green-500 shadow-sm">
+        <Card className="border-l-4 border-l-green-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-green-100 text-green-600 rounded-full"><BadgeDollarSign size={20} /></div>
+            <div className="p-2 bg-green-100 text-green-600 rounded-full dark:bg-slate-700"><BadgeDollarSign size={20} /></div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Total Omset</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Omset</p>
               <h3 className="text-xl font-bold">Rp {Number(globalStats.totalRevenue).toLocaleString()}</h3>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-blue-500 shadow-sm">
+        <Card className="border-l-4 border-l-blue-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><ShoppingCart size={20} /></div>
+            <div className="p-2 bg-blue-100 text-blue-600 rounded-full dark:bg-slate-700"><ShoppingCart size={20} /></div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Barang Terjual</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Barang Terjual</p>
               <h3 className="text-xl font-bold">{globalStats.totalQty} Pcs</h3>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-purple-500 shadow-sm">
+        <Card className="border-l-4 border-l-purple-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-purple-100 text-purple-600 rounded-full"><Store size={20} /></div>
+            <div className="p-2 bg-purple-100 text-purple-600 rounded-full dark:bg-slate-700"><Store size={20} /></div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Total Transaksi</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Transaksi</p>
               <h3 className="text-xl font-bold">{globalStats.transactionCount} Pesanan</h3>
             </div>
           </CardContent>
@@ -362,9 +362,9 @@ export default function Sales() {
 
       {/* SEARCH & FILTER BAR */}
       <div className="flex flex-col lg:flex-row gap-3">
-        <div className="flex-1 bg-white border rounded-lg shadow-sm">
+        <div className="flex-1 bg-white border rounded-lg shadow-sm dark:bg-slate-800 dark:border-slate-600">
           <InputGroup>
-            <InputGroupInput placeholder="Cari nama barang atau toko..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            <InputGroupInput placeholder="Cari nama barang atau toko..." value={search} onChange={(e) => setSearch(e.target.value)} className="dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-400 dark:border-slate-600" />
             <InputGroupAddon><Search /></InputGroupAddon>
             <InputGroupAddon align="inline-end">
               {search && <InputGroupButton variant="ghost" onClick={() => setSearch("")}><X size={16} /></InputGroupButton>}
@@ -374,10 +374,10 @@ export default function Sales() {
         </div>
         <div className="flex flex-row gap-2">
           {/* FILTER WAKTU */}
-          <div className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg shadow-sm">
-            <Calendar size={14} className="text-slate-400" />
+          <div className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg shadow-sm dark:bg-slate-800 dark:border-slate-600">
+            <Calendar size={14} className="text-slate-400 dark:text-slate-300" />
             <select
-              className="text-xs font-bold bg-transparent outline-none cursor-pointer"
+              className="text-xs font-bold bg-transparent outline-none cursor-pointer dark:text-white dark:bg-slate-800"
               value={range}
               onChange={(e) => setRange(e.target.value)}
             >
@@ -389,10 +389,10 @@ export default function Sales() {
           </div>
 
           {/* FILTER TOKO */}
-          <div className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg shadow-sm">
-            <Filter size={14} className="text-slate-400" />
+          <div className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg shadow-sm dark:bg-slate-800 dark:border-slate-600">
+            <Filter size={14} className="text-slate-400 dark:text-slate-300" />
             <select
-              className="text-xs font-bold bg-transparent outline-none min-w-[100px] cursor-pointer"
+              className="text-xs font-bold bg-transparent outline-none min-w-[100px] cursor-pointer dark:text-white dark:bg-slate-800"
               value={filterStore}
               onChange={(e) => setFilterStore(e.target.value)}
             >
@@ -404,10 +404,10 @@ export default function Sales() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-white border rounded-lg shadow-sm overflow-hidden dark:bg-slate-800 dark:border-slate-600">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-slate-50/50">
+            <TableHeader className="bg-slate-50/50 dark:bg-slate-700">
               <TableRow>
                 <TableHead className="truncate w-[150px]">Tanggal & Waktu</TableHead>
                 <TableHead className="w-[250px]">Produk</TableHead>
@@ -431,20 +431,20 @@ export default function Sales() {
                 ))
               ) : sales.length > 0 ? (
                 sales.map((sale: any) => (
-                  <TableRow key={sale.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <TableCell className="text-slate-400 text-xs truncate w-[150px]">{new Date(sale.created_at).toLocaleString()}</TableCell>
+                  <TableRow key={sale.id} className="hover:bg-slate-50/50 transition-colors group dark:hover:bg-slate-700">
+                    <TableCell className="text-slate-400 text-xs truncate w-[150px] dark:text-slate-400">{new Date(sale.created_at).toLocaleString()}</TableCell>
                     <TableCell className="font-medium truncate max-w-[200px]">{sale.product_name}</TableCell>
                     <TableCell className="truncate w-[150px]"><Badge variant="outline">{sale.store_name}</Badge></TableCell>
                     <TableCell className="text-sm font-black tracking-tight truncate w-[100px]">
-                      {sale.qty} <span className="text-[10px] font-medium text-slate-400">Pcs</span>
+                      {sale.qty} <span className="text-[10px] font-medium text-slate-400 dark:text-slate-400">Pcs</span>
                     </TableCell>
-                    <TableCell className="font-bold text-green-600 truncate w-[150px]">Rp {Number(sale.total_price).toLocaleString()}</TableCell>
+                    <TableCell className="font-bold text-green-600 truncate w-[150px] dark:text-green-400">Rp {Number(sale.total_price).toLocaleString()}</TableCell>
                     <TableCell className="text-right w-[100px]">
                       <div className="flex justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600" onClick={() => { setEditingSale(sale); setIsEditOpen(true); }}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 dark:text-blue-400" onClick={() => { setEditingSale(sale); setIsEditOpen(true); }}>
                           <Edit2 size={16} />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600" onClick={() => { setEditingSale(sale); setIsDeleteOpen(true); }}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 dark:text-red-400" onClick={() => { setEditingSale(sale); setIsDeleteOpen(true); }}>
                           <Trash2 size={16} />
                         </Button>
                       </div>
@@ -454,7 +454,7 @@ export default function Sales() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} className="h-48 text-center py-10">
-                    <div className="flex flex-col items-center gap-2 text-slate-400">
+                    <div className="flex flex-col items-center gap-2 text-slate-400 dark:text-slate-400">
                       <Box size={32} className="opacity-20" />
                       <p>Belum ada transaksi.</p>
                     </div>
@@ -465,53 +465,53 @@ export default function Sales() {
           </Table>
         </div>
         {/* --- UI PAGINATION (TAMBAHKAN DI BAWAH TABLE) --- */}
-        <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50">
-          <p className="text-xs text-slate-500 font-medium hidden md:block">
-            Menampilkan <span className="text-slate-900">{sales.length}</span> dari <span className="text-slate-900">{pagination.totalData}</span> transaksi
+        <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50 dark:bg-slate-700">
+          <p className="text-xs text-slate-500 font-medium hidden md:block dark:text-slate-400">
+            Menampilkan <span className="text-slate-900 dark:text-white">{sales.length}</span> dari <span className="text-slate-900 dark:text-blue-400">{pagination.totalData}</span> transaksi
           </p>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(p => p - 1)} className="h-8 px-3 text-xs font-bold">Sebelumnya</Button>
+            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(p => p - 1)} className="h-8 px-3 text-xs font-bold dark:text-white dark:bg-slate-600 dark:border-slate-600">Sebelumnya</Button>
             <div className="flex items-center gap-2 px-2">
-              <span className="text-xs font-bold text-blue-600 bg-blue-50 h-8 w-8 flex items-center justify-center rounded-lg border border-blue-100">{page}</span>
-              <span className="text-xs text-slate-400">/</span>
-              <span className="text-xs font-medium text-slate-600">{pagination.totalPages}</span>
+              <span className="text-xs font-bold text-blue-600 bg-blue-50 h-8 w-8 flex items-center justify-center rounded-lg border border-blue-100 dark:bg-slate-600 dark:border-slate-600 dark:text-white">{page}</span>
+              <span className="text-xs text-slate-400 dark:text-slate-400">/</span>
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{pagination.totalPages}</span>
             </div>
-            <Button variant="outline" size="sm" disabled={page === pagination.totalPages} onClick={() => setPage(p => p + 1)} className="h-8 px-3 text-xs font-bold">Selanjutnya</Button>
+            <Button variant="outline" size="sm" disabled={page === pagination.totalPages} onClick={() => setPage(p => p + 1)} className="h-8 px-3 text-xs font-bold dark:text-white dark:bg-slate-600 dark:border-slate-600">Selanjutnya</Button>
           </div>
         </div>
       </div>
 
       {/* Dialog Add Sale */}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg dark:bg-slate-800 dark:border-slate-600">
           <DialogHeader><DialogTitle>Input Penjualan Baru</DialogTitle></DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-1 relative">
-              <p className="text-[10px] font-bold uppercase text-slate-500">Cari Produk</p>
+              <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Cari Produk</p>
               <div className="relative flex items-center">
                 <Input
                   placeholder="Ketik nama produk atau SKU..."
                   value={newSale.product_name || ""}
                   onChange={(e) => handleSearchSingle(e.target.value)}
-                  className={errors.product ? "border-pink-500 pr-8" : "pr-8"}
+                  className={errors.product ? "border-pink-500 pr-8 dark:bg-slate-700" : "pr-8 dark:bg-slate-700 dark:border-slate-600"}
                 />
                 {isSearchingSingle && (
-                  <Loader2 size={16} className="absolute right-2 animate-spin text-slate-400" />
+                  <Loader2 size={16} className="absolute right-2 animate-spin text-slate-400 dark:text-slate-500" />
                 )}
               </div>
 
               {/* DROPDOWN SARAN (Sama seperti fungsi massal) */}
               {activeSingleSearch && singleSuggestions.length > 0 && (
-                <div className="absolute z-[110] w-full mt-1 bg-white border rounded-lg shadow-xl max-h-60 overflow-y-auto border-slate-200">
+                <div className="absolute z-[110] w-full mt-1 bg-white border rounded-lg shadow-xl max-h-60 overflow-y-auto border-slate-200 dark:bg-slate-800 dark:border-slate-600">
                   {singleSuggestions.map((p) => (
                     <div
                       key={p.id}
                       onClick={() => selectProductSingle(p)}
-                      className="p-3 hover:bg-blue-50 cursor-pointer border-b last:border-0 flex justify-between items-center transition-colors"
+                      className="p-3 hover:bg-blue-50 cursor-pointer border-b last:border-0 flex justify-between items-center transition-colors dark:hover:bg-slate-700 dark:border-slate-600"
                     >
                       <div className="flex flex-col">
-                        <span className="text-sm font-bold text-slate-700">{p.name}</span>
-                        <span className="text-[10px] text-slate-400 uppercase font-mono">{p.sku}</span>
+                        <span className="text-sm font-bold text-slate-700 dark:text-white">{p.name}</span>
+                        <span className="text-[10px] text-slate-400 uppercase font-mono dark:text-slate-400">{p.sku}</span>
                       </div>
                       <Badge variant="secondary" className="text-[10px]">Stok: {p.quantity}</Badge>
                     </div>
@@ -522,8 +522,8 @@ export default function Sales() {
             </div>
 
             <div className="space-y-1">
-              <p className="text-[10px] font-bold uppercase text-slate-500">Pilih Toko</p>
-              <select className="w-full border p-2 rounded-md text-sm" onChange={e => {
+              <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Pilih Toko</p>
+              <select className="w-full border p-2 rounded-md text-sm dark:bg-slate-700 dark:border-slate-600" onChange={e => {
                 setNewSale({ ...newSale, store_id: e.target.value });
                 setErrors({ ...errors, store: "" });
               }}>
@@ -535,16 +535,16 @@ export default function Sales() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <p className="text-[10px] font-bold uppercase text-slate-500">Jumlah (Qty)</p>
-                <Input type="number" value={newSale.qty} onChange={e => setNewSale({ ...newSale, qty: Number(e.target.value) })} />
+                <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Jumlah (Qty)</p>
+                <Input type="number" value={newSale.qty} onChange={e => setNewSale({ ...newSale, qty: Number(e.target.value) })} className={errors.qty ? "border-pink-500 dark:bg-slate-700" : "dark:bg-slate-700 dark:border-slate-600"} />
                 {errors.qty && <FieldError>{errors.qty}</FieldError>}
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] font-bold uppercase text-slate-500">Harga Jual (Satuan)</p>
-                <Input type="number" value={newSale.selling_price} onChange={e => setNewSale({ ...newSale, selling_price: Number(e.target.value) })} />
+                <p className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Harga Jual (Satuan)</p>
+                <Input type="number" value={newSale.selling_price} onChange={e => setNewSale({ ...newSale, selling_price: Number(e.target.value) })} className={errors.selling_price ? "border-pink-500 dark:bg-slate-700" : "dark:bg-slate-700 dark:border-slate-600"} />
               </div>
             </div>
-            <p className="text-right font-bold text-blue-600 italic">Total: Rp {(newSale.qty * newSale.selling_price).toLocaleString()}</p>
+            <p className="text-right font-bold text-blue-600 italic dark:text-blue-400">Total: Rp {(newSale.qty * newSale.selling_price).toLocaleString()}</p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddOpen(false)}>Batal</Button>
@@ -555,27 +555,27 @@ export default function Sales() {
 
       {/* DIALOG BULK INPUT */}
       <Dialog open={isBulkOpen} onOpenChange={setIsBulkOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 overflow-hidden dark:bg-slate-800 dark:border-slate-600">
           <DialogHeader className="px-6 pt-6">
             <DialogTitle>Input Penjualan Massal</DialogTitle>
           </DialogHeader>
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4">
             {/* Pilih Toko Global */}
-            <div className="bg-slate-50 p-3 rounded-lg flex items-center gap-4">
-              <p className="text-xs font-bold uppercase text-slate-500">Target Toko:</p>
-              <select className="flex-1 border p-1.5 rounded-md text-sm" value={bulkStoreId} onChange={e => setBulkStoreId(e.target.value)}>
+            <div className="bg-slate-50 p-3 rounded-lg flex items-center gap-4 dark:bg-slate-700">
+              <p className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Target Toko:</p>
+              <select className="flex-1 border p-1.5 rounded-md text-sm dark:bg-slate-700 dark:border-slate-600" value={bulkStoreId} onChange={e => setBulkStoreId(e.target.value)}>
                 <option value="">-- Pilih Toko --</option>
                 {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
 
             {/* 1. Container Utama: overflow-hidden buat ngerapiin pojok, overflow-x-auto buat scroll */}
-            <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-white border rounded-lg shadow-sm overflow-hidden dark:bg-slate-800 dark:border-slate-600">
               <div className="overflow-x-auto">
                 {/* 2. Paksa Tabel punya lebar minimal 800px supaya di HP dia nggak ciut */}
                 <Table className="min-w-[800px] w-full overflow-visible">
-                  <TableHeader className="bg-slate-50">
+                  <TableHeader className="bg-slate-50 dark:bg-slate-700">
                     <TableRow>
                       {/* 3. Atur lebar kolom yang pas: Produk 40% (320px), Sisanya bagi rata */}
                       <TableHead className="w-[350px]">Produk</TableHead>
@@ -614,11 +614,11 @@ export default function Sales() {
                                   updateBulkItem(idx, "product_name", e.target.value);
                                   handleSearchProductBulk(e.target.value, idx);
                                 }}
-                                className="h-9 text-sm pr-8 bg-white w-full"
+                                className="h-9 text-sm pr-8 bg-white w-full dark:bg-slate-700 dark:text-white dark:border-slate-600"
                               />
 
                               {isSearchingBulk && activeSearchIdx === idx && (
-                                <div className="absolute right-2 top-2.5 text-slate-400">
+                                <div className="absolute right-2 top-2.5 text-slate-400 dark:text-slate-500">
                                   <Loader2 size={14} className="animate-spin" />
                                 </div>
                               )}
@@ -626,20 +626,20 @@ export default function Sales() {
                               {/* --- DROPDOWN DENGAN SMART FLIP --- */}
                               {activeSearchIdx === idx && bulkSuggestions.length > 0 && (
                                 <div
-                                  className={`fixed z-[9999] w-[330px] bg-white border border-slate-200 rounded-lg shadow-2xl max-h-60 overflow-y-auto 
+                                  className={`fixed z-[9999] w-[330px] bg-white border border-slate-200 rounded-lg shadow-2xl max-h-60 overflow-y-auto dark:bg-slate-800 dark:border-slate-600 
                   ${isLastItems ? "bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full top-auto" : "top-1/2 transform -translate-y-1/2"}`}
                                 >
                                   {bulkSuggestions.map((p) => (
                                     <div
                                       key={p.id}
                                       onClick={() => selectProductBulk(p, idx)}
-                                      className="p-3 hover:bg-blue-600 hover:text-white cursor-pointer border-b last:border-0 flex justify-between items-center text-xs"
+                                      className="p-3 hover:bg-blue-600 hover:text-white cursor-pointer border-b last:border-0 flex justify-between items-center text-xs dark:border-slate-600"
                                     >
                                       <div className="flex flex-col text-left">
                                         <span className="font-bold">{p.name}</span>
                                         <span className="text-[10px] opacity-70 uppercase">{p.sku}</span>
                                       </div>
-                                      <Badge variant="secondary" className="text-[10px] shrink-0">Stok: {p.quantity}</Badge>
+                                      <Badge variant="secondary" className="text-[10px] shrink-0 dark:bg-slate-600">Stok: {p.quantity}</Badge>
                                     </div>
                                   ))}
                                 </div>
@@ -654,10 +654,10 @@ export default function Sales() {
                                 value={item.qty}
                                 onChange={e => updateBulkItem(idx, "qty", Number(e.target.value))}
                                 className={`h-9 text-center transition-colors ${isOverStock
-                                  ? "border-red-500 bg-red-50 text-red-700 focus-visible:ring-red-500"
+                                  ? "border-red-500 bg-red-50 text-red-700 focus-visible:ring-red-500 dark:bg-red-500 dark:text-white"
                                   : isLowStock
-                                    ? "border-orange-400 bg-orange-50 text-orange-700"
-                                    : ""
+                                    ? "border-orange-400 bg-orange-50 text-orange-700 dark:bg-orange-500 dark:text-white"
+                                    : "dark:bg-slate-700 dark:text-white dark:border-slate-600"
                                   }`}
                                 onKeyDown={(e) => {
                                   if (e.key === 'Enter') {
@@ -668,7 +668,7 @@ export default function Sales() {
                               />
                               {/* Label kecil bantuan biar tahu sisa stoknya berapa tanpa perlu cek menu produk */}
                               {isLowStock && (
-                                <span className={`text-[9px] font-bold truncate w-[60px] ${isLowStock ? "text-red-500" : "text-slate-400"}`}>
+                                <span className={`text-[9px] font-bold truncate w-[60px] ${isLowStock ? "text-red-500 dark:text-red-400" : "text-slate-400 dark:text-slate-500"}`}>
                                   Sisa: {currentStock}
                                 </span>
                               )}
@@ -676,12 +676,12 @@ export default function Sales() {
                           </TableCell>
                           <TableCell className="p-2">
                             <div className="relative flex items-center">
-                              <span className="absolute left-3 text-slate-400 text-xs font-bold">Rp</span>
+                              <span className="absolute left-3 text-slate-400 text-xs font-bold dark:text-slate-500">Rp</span>
                               <Input
                                 type="number"
                                 value={item.selling_price}
                                 onChange={e => updateBulkItem(idx, "selling_price", Number(e.target.value))}
-                                className="h-9 pl-8 font-bold text-blue-600 border-blue-200 focus:ring-blue-500"
+                                className="h-9 pl-8 font-bold text-blue-600 border-blue-200 focus:ring-blue-500 dark:bg-slate-700 dark:text-blue-400 dark:border-slate-600"
                                 onKeyDown={(e) => {
                                   if (e.key === 'Enter') {
                                     e.preventDefault(); // Mencegah form submit gak sengaja
@@ -696,7 +696,7 @@ export default function Sales() {
                               variant="ghost"
                               size="icon"
                               onClick={() => removeBulkRow(idx)}
-                              className="text-red-400 hover:text-red-600 hover:bg-red-50 h-9 w-9"
+                              className="text-red-400 hover:text-red-600 hover:bg-red-50 h-9 w-9 dark:hover:bg-red-500 dark:hover:text-white"
                             >
                               <Trash2 size={16} />
                             </Button>
@@ -709,13 +709,13 @@ export default function Sales() {
               </div>
             </div>
 
-            <Button variant="ghost" onClick={addBulkRow} className="w-full border-2 border-dashed gap-2 text-slate-500 hover:text-blue-500">
+            <Button variant="ghost" onClick={addBulkRow} className="w-full border-2 border-dashed gap-2 text-slate-500 hover:text-blue-500 dark:text-slate-400 dark:hover:text-blue-400 dark:border-slate-600 dark:hover:border-blue-400 dark:hover:bg-slate-800">
               <Plus size={16} /> Tambah Baris Transaksi
             </Button>
           </div>
           {/* FOOTER: Sekarang akan selalu nempel di bawah (Sticky) */}
-          <DialogFooter className="p-6 border-t bg-slate-50/50 flex justify-between items-center gap-2">
-            <div className="text-left text-sm font-bold text-blue-600">
+          <DialogFooter className="p-6 border-t bg-slate-50/50 flex justify-between items-center gap-2 dark:bg-slate-800">
+            <div className="text-left text-sm font-bold text-blue-600 dark:text-blue-400">
               Total {bulkItems.length} Baris | Estimasi Omset: Rp {bulkItems.reduce((acc, curr) => acc + (curr.qty * curr.selling_price), 0).toLocaleString()}
             </div>
             <div className="flex gap-2">
@@ -728,17 +728,17 @@ export default function Sales() {
 
       {/* DIALOG EDIT */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px] dark:bg-slate-800 dark:border-slate-600">
           <DialogHeader><DialogTitle>Edit Penjualan</DialogTitle></DialogHeader>
           {editingSale && (
             <div className="space-y-4 py-4">
               <div className="space-y-1">
                 <p className="text-[10px] font-bold uppercase text-slate-500">Qty</p>
-                <Input type="number" value={editingSale.qty} onChange={e => setEditingSale({ ...editingSale, qty: Number(e.target.value) })} />
+                <Input type="number" value={editingSale.qty} onChange={e => setEditingSale({ ...editingSale, qty: Number(e.target.value) })} className="dark:bg-slate-700 dark:text-white dark:placeholder:text-slate-400 dark:border-slate-600" />
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-bold uppercase text-slate-500">Harga Jual</p>
-                <Input type="number" value={editingSale.selling_price} onChange={e => setEditingSale({ ...editingSale, selling_price: Number(e.target.value) })} />
+                <Input type="number" value={editingSale.selling_price} onChange={e => setEditingSale({ ...editingSale, selling_price: Number(e.target.value) })} className="dark:bg-slate-700 dark:text-white dark:placeholder:text-slate-400 dark:border-slate-600" />
               </div>
             </div>
           )}

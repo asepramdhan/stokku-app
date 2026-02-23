@@ -316,40 +316,40 @@ export default function StoreRecords() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Pencatatan Toko</h1>
-          <p className="text-slate-500 text-sm font-medium">Kelola piutang marketplace dan pembayaran mingguan toko Anda.</p>
+          <p className="text-slate-500 text-sm font-medium dark:text-slate-400">Kelola piutang marketplace dan pembayaran mingguan toko Anda.</p>
         </div>
         {/* TOMBOL TAMBAH */}
-        <Button onClick={() => { setSelectedRecord(null); setFormData({ toko_name: "", customer_name: "", total_price: "", paid_amount: "", payment_type: "weekly", due_date: "", notes: "" }); setIsAddModalOpen(true); }} className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto">
+        <Button onClick={() => { setSelectedRecord(null); setFormData({ toko_name: "", customer_name: "", total_price: "", paid_amount: "", payment_type: "weekly", due_date: "", notes: "" }); setIsAddModalOpen(true); }} className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white">
           <Plus size={18} /> Tambah Catatan
         </Button>
       </div>
 
       {/* STATS CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-blue-500 shadow-sm">
+        <Card className="border-l-4 border-l-blue-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><Receipt size={20} /></div>
+            <div className="p-2 bg-blue-100 text-blue-600 rounded-full dark:bg-slate-700"><Receipt size={20} /></div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Total Tagihan</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Tagihan</p>
               <h3 className="text-xl font-bold">{toRp(summary.totalBill)}</h3>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-green-500 shadow-sm">
+        <Card className="border-l-4 border-l-green-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-green-100 text-green-600 rounded-full"><Wallet size={20} /></div>
+            <div className="p-2 bg-green-100 text-green-600 rounded-full dark:bg-slate-700"><Wallet size={20} /></div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Total Cair/Dibayar</p>
-              <h3 className="text-xl font-bold text-green-600">{toRp(summary.totalPaid)}</h3>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Cair/Dibayar</p>
+              <h3 className="text-xl font-bold text-green-600 dark:text-green-600">{toRp(summary.totalPaid)}</h3>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-red-500 shadow-sm">
+        <Card className="border-l-4 border-l-red-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-red-100 text-red-600 rounded-full"><ArrowUpRight size={20} /></div>
+            <div className="p-2 bg-red-100 text-red-600 rounded-full dark:bg-slate-700"><ArrowUpRight size={20} /></div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Sisa Piutang</p>
-              <h3 className="text-xl font-bold text-red-600">{toRp(summary.totalDebt)}</h3>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Sisa Piutang</p>
+              <h3 className="text-xl font-bold text-red-600 dark:text-red-600">{toRp(summary.totalDebt)}</h3>
             </div>
           </CardContent>
         </Card>
@@ -357,26 +357,27 @@ export default function StoreRecords() {
 
       {/* SEARCH & FILTERS */}
       <div className="flex flex-col lg:flex-row gap-3">
-        <div className="flex-1 bg-white border rounded-lg shadow-sm">
+        <div className="flex-1 bg-white border rounded-lg shadow-sm dark:bg-slate-800 dark:border-slate-600">
           <InputGroup>
             <InputGroupInput
               placeholder="Cari toko atau pelanggan..."
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
+              className="text-xs font-bold dark:bg-slate-800 dark:text-white"
             />
             <InputGroupAddon><Search /></InputGroupAddon>
             <InputGroupAddon align="inline-end">
-              {search && <InputGroupButton variant="ghost" onClick={() => handleSearch("")}><X size={16} /></InputGroupButton>}
-              <span className="text-xs text-slate-400 mr-2">{pagination.totalData} data</span>
+              {search && <InputGroupButton variant="ghost" onClick={() => handleSearch("")} className="dark:bg-slate-800"><X size={16} /></InputGroupButton>}
+              <span className="text-xs text-slate-400 mr-2 dark:text-slate-500">{pagination.totalData} data</span>
             </InputGroupAddon>
           </InputGroup>
         </div>
 
         <div className="flex flex-row gap-2">
-          <div className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg shadow-sm">
-            <Filter size={14} className="text-slate-400" />
+          <div className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg shadow-sm dark:bg-slate-800 dark:border-slate-600">
+            <Filter size={14} className="text-slate-400 dark:text-slate-500" />
             <select
-              className="w-full text-xs font-bold bg-transparent outline-none cursor-pointer"
+              className="w-full text-xs font-bold bg-transparent outline-none cursor-pointer dark:text-white dark:bg-slate-800"
               value={filterStatus}
               onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
             >
@@ -387,10 +388,10 @@ export default function StoreRecords() {
             </select>
           </div>
 
-          <div className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg shadow-sm">
-            <Calendar size={14} className="text-slate-400" />
+          <div className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg shadow-sm dark:bg-slate-800 dark:border-slate-600">
+            <Calendar size={14} className="text-slate-400 dark:text-slate-500" />
             <select
-              className="w-full text-xs font-bold bg-transparent outline-none cursor-pointer"
+              className="w-full text-xs font-bold bg-transparent outline-none cursor-pointer dark:text-white dark:bg-slate-800"
               value={filterType}
               onChange={(e) => { setFilterType(e.target.value); setPage(1); }}
             >
@@ -403,16 +404,16 @@ export default function StoreRecords() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-white border rounded-lg shadow-sm overflow-hidden dark:bg-slate-800 dark:border-slate-600">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-slate-50/50">
+            <TableHeader className="bg-slate-50/50 dark:bg-slate-800">
               <TableRow>
                 <TableHead className="w-[200px] truncate">Toko & Pelanggan</TableHead>
                 <TableHead>Metode</TableHead>
-                <TableHead className="text-green-600 font-bold truncate">Total Tagihan</TableHead>
+                <TableHead className="text-green-600 font-bold truncate dark:text-green-600">Total Tagihan</TableHead>
                 <TableHead>Dibayar</TableHead>
-                <TableHead className="text-red-600 font-bold">Sisa</TableHead>
+                <TableHead className="text-red-600 font-bold dark:text-red-500">Sisa</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-[150px] truncate">Jatuh Tempo</TableHead>
                 <TableHead className="w-[150px]">Aksi</TableHead>
@@ -429,33 +430,33 @@ export default function StoreRecords() {
                 data.map((item: any) => {
                   const sisa = item.total_price - item.paid_amount;
                   return (
-                    <TableRow key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                    <TableRow key={item.id} className="hover:bg-slate-50/50 transition-colors dark:hover:bg-slate-700">
                       <TableCell className="truncate">
                         <div className="flex flex-col">
-                          <span className="font-bold text-slate-800">{item.toko_name}</span>
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider">{item.customer_name}</span>
+                          <span className="font-bold text-slate-800 dark:text-white">{item.toko_name}</span>
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider dark:text-slate-500">{item.customer_name}</span>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="text-[10px] font-bold uppercase">{item.payment_type === 'weekly' ? 'Mingguan' : 'Cash'}</Badge>
+                        <Badge variant="outline" className="text-[10px] font-bold uppercase dark:text-slate-400 dark:bg-slate-800 dark:border-slate-600">{item.payment_type === 'weekly' ? 'Mingguan' : 'Cash'}</Badge>
                       </TableCell>
                       <TableCell className="text-sm font-medium">{toRp(item.total_price)}</TableCell>
-                      <TableCell className="text-sm text-green-600 font-medium">{toRp(item.paid_amount)}</TableCell>
-                      <TableCell className="text-sm text-red-600 font-bold">
-                        {sisa > 0 ? toRp(sisa) : <span className="text-slate-300">-</span>}
+                      <TableCell className="text-sm text-green-600 font-medium dark:text-green-600">{toRp(item.paid_amount)}</TableCell>
+                      <TableCell className="text-sm text-red-600 font-bold dark:text-red-500">
+                        {sisa > 0 ? toRp(sisa) : <span className="text-slate-300 dark:text-slate-600">-</span>}
                       </TableCell>
                       <TableCell>
                         {item.status === "paid" ? (
-                          <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none shadow-none"><CheckCircle2 className="w-3 h-3 mr-1" /> Lunas</Badge>
+                          <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none shadow-none dark:text-green-600 dark:bg-green-100"><CheckCircle2 className="w-3 h-3 mr-1" /> Lunas</Badge>
                         ) : item.status === "partial" ? (
-                          <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 border-none shadow-none"><Wallet className="w-3 h-3 mr-1" /> Dicicil</Badge>
+                          <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 border-none shadow-none dark:text-orange-600 dark:bg-orange-100"><Wallet className="w-3 h-3 mr-1" /> Dicicil</Badge>
                         ) : (
-                          <Badge className="bg-red-100 text-red-700 hover:bg-red-100 border-none shadow-none"><AlertCircle className="w-3 h-3 mr-1" /> Pending</Badge>
+                          <Badge className="bg-red-100 text-red-700 hover:bg-red-100 border-none shadow-none dark:text-red-600 dark:bg-red-100"><AlertCircle className="w-3 h-3 mr-1" /> Pending</Badge>
                         )}
                       </TableCell>
-                      <TableCell className={`text-[11px] font-medium ${isOverdue(item.due_date, item.status) ? "text-red-600 font-bold" : "text-slate-500"}`}>
+                      <TableCell className={`text-[11px] font-medium ${isOverdue(item.due_date, item.status) ? "text-red-600 font-bold dark:text-red-600" : "text-slate-500 dark:text-slate-400"}`}>
                         <div className="flex items-center gap-1">
-                          {isOverdue(item.due_date, item.status) && <AlertCircle size={12} className="text-red-600 animate-pulse" />}
+                          {isOverdue(item.due_date, item.status) && <AlertCircle size={12} className="text-red-600 animate-pulse dark:text-red-500" />}
                           {item.due_date ? new Date(item.due_date).toLocaleDateString("id-ID", { weekday: 'short', day: 'numeric', month: 'short' }) : "-"}
                         </div>
                       </TableCell>
@@ -464,7 +465,7 @@ export default function StoreRecords() {
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-8 w-8 text-orange-600 border-orange-200 hover:bg-orange-50"
+                            className="h-8 w-8 text-orange-600 border-orange-200 hover:bg-orange-50 dark:text-orange-600 dark:border-orange-200 dark:hover:bg-orange-50 dark:hover:text-orange-600 dark:hover:border-orange-200 dark:bg-slate-800"
                             onClick={() => { setSelectedRecord(item); setIsSpendModalOpen(true); }}
                             title="Pengeluaran"
                           >
@@ -473,7 +474,7 @@ export default function StoreRecords() {
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-8 w-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                            className="h-8 w-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50 dark:text-indigo-600 dark:border-indigo-200 dark:hover:bg-indigo-50 dark:hover:text-indigo-600 dark:hover:border-indigo-200 dark:bg-slate-800"
                             onClick={() => {
                               setSelectedRecord(item);
                               fetchHistory(item); // Kita pakai history yang sudah ada
@@ -483,46 +484,63 @@ export default function StoreRecords() {
                           >
                             <FileText size={14} />
                           </Button>
-                          <Button variant="outline" size="sm" disabled={item.status === 'paid'} onClick={() => { setSelectedRecord(item); setIsPayModalOpen(true); }} className="h-8 text-xs font-bold bg-green-50 text-green-700 border-green-200 hover:bg-green-100" title="Bayar">
-                            <Wallet className="w-3 h-3 mr-1" /> Bayar
+                          <Button variant="outline" size="sm" disabled={item.status === 'paid'} onClick={() => { setSelectedRecord(item); setIsPayModalOpen(true); }} className="h-8 text-xs font-bold bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:text-green-600 dark:border-green-200 dark:hover:bg-green-50 dark:hover:text-green-600 dark:hover:border-green-200 dark:bg-slate-800" title="Bayar">
+                            <Wallet className="w-3 h-3" /> Bayar
                           </Button>
-                          <Button variant="outline" size="icon" className="h-8 w-8 text-blue-600" onClick={() => openEdit(item)} title="Edit"><Edit size={14} /></Button>
-                          <Button variant="outline" size="icon" className="h-8 w-8 text-red-600" onClick={() => handleDelete(item.id)} title="Hapus"><Trash2 size={14} /></Button>
+                          <Button variant="outline" size="icon" className="h-8 w-8 text-blue-600 dark:text-blue-600 dark:bg-slate-800 dark:border-blue-200 dark:hover:bg-slate-200" onClick={() => openEdit(item)} title="Edit"><Edit size={14} /></Button>
+                          <Button variant="outline" size="icon" className="h-8 w-8 text-red-600 dark:text-red-600 dark:bg-slate-800 dark:border-red-200 dark:hover:bg-slate-200" onClick={() => handleDelete(item.id)} title="Hapus"><Trash2 size={14} /></Button>
                         </div>
                       </TableCell>
                     </TableRow>
                   );
                 })
               ) : (
-                <TableRow><TableCell colSpan={8} className="h-48 text-center"><div className="flex flex-col items-center justify-center space-y-2"><BookOpen size={32} className="text-slate-300" /><p className="font-medium text-slate-900">Data tidak ditemukan</p></div></TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={8} className="h-48 text-center dark:text-slate-400 dark:bg-slate-800">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <BookOpen size={32} className="text-slate-300 dark:text-slate-500" />
+                      <p className="font-medium text-slate-900 dark:text-slate-300">Data tidak ditemukan</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>
         </div>
 
         {/* PAGINATION */}
-        <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50">
-          <p className="text-xs text-slate-500 font-medium">Halaman {page} dari {pagination.totalPages}</p>
+        <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50 dark:bg-slate-800">
+          <p className="text-xs text-slate-500 font-medium dark:text-slate-400">Halaman {page} dari <span className="font-bold dark:text-blue-400">{pagination.totalPages}</span></p>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)} className="text-xs font-bold">Sebelumnya</Button>
-            <Button variant="outline" size="sm" disabled={page === pagination.totalPages} onClick={() => setPage(page + 1)} className="text-xs font-bold">Selanjutnya</Button>
+            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)} className="text-xs font-bold dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-300 dark:border-slate-600">Sebelumnya</Button>
+            <Button variant="outline" size="sm" disabled={page === pagination.totalPages} onClick={() => setPage(page + 1)} className="text-xs font-bold dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-300 dark:border-slate-600">Selanjutnya</Button>
           </div>
         </div>
       </div>
 
       {/* MODAL TAMBAH / EDIT */}
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg dark:bg-slate-800 dark:border-slate-600">
           <DialogHeader><DialogTitle>{selectedRecord ? "Edit Catatan" : "Tambah Catatan Baru"}</DialogTitle></DialogHeader>
           <form onSubmit={handleSave} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <Label className="text-xs">Nama Toko</Label>
-                <Input required value={formData.toko_name} onChange={e => setFormData({ ...formData, toko_name: e.target.value })} />
+                <Input
+                  required
+                  value={formData.toko_name}
+                  onChange={e => setFormData({ ...formData, toko_name: e.target.value })}
+                  className="dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600"
+                />
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Nama Pelanggan</Label>
-                <Input required value={formData.customer_name} onChange={e => setFormData({ ...formData, customer_name: e.target.value })} />
+                <Input
+                  required
+                  value={formData.customer_name}
+                  onChange={e => setFormData({ ...formData, customer_name: e.target.value })}
+                  className="dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600"
+                />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -533,7 +551,7 @@ export default function StoreRecords() {
                   <button
                     type="button"
                     onClick={() => { setCalcTarget('main'); setIsCalcOpen(true); }}
-                    className="text-blue-600 hover:underline flex items-center gap-1 text-[10px]"
+                    className="text-blue-600 hover:underline flex items-center gap-1 text-[10px] dark:text-blue-400"
                   >
                     <Calculator size={10} /> Buka Kalkulator
                   </button>
@@ -543,6 +561,7 @@ export default function StoreRecords() {
                   required
                   value={formData.total_price}
                   onChange={e => setFormData({ ...formData, total_price: e.target.value })}
+                  className="dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600"
                 />
               </div>
 
@@ -556,30 +575,37 @@ export default function StoreRecords() {
                   required
                   value={formData.paid_amount}
                   onChange={e => setFormData({ ...formData, paid_amount: e.target.value })}
+                  className="dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600"
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <Label className="text-xs">Tipe Pembayaran</Label>
-                <select className="w-full border rounded-md h-9 px-3 text-sm" value={formData.payment_type} onChange={e => setFormData({ ...formData, payment_type: e.target.value })}>
+                <select className="w-full border rounded-md h-9 px-3 text-sm dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600" value={formData.payment_type} onChange={e => setFormData({ ...formData, payment_type: e.target.value })}>
                   <option value="weekly">Mingguan</option>
                   <option value="cash">Tunai (Cash)</option>
                 </select>
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Jatuh Tempo</Label>
-                <Input type="date" className="block w-full appearance-none bg-white" value={formData.due_date} onChange={e => setFormData({ ...formData, due_date: e.target.value })} />
+                <Input type="date" className="block w-full appearance-none bg-white dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600" value={formData.due_date} onChange={e => setFormData({ ...formData, due_date: e.target.value })} />
               </div>
             </div>
-            <DialogFooter><Button type="submit" className="w-full">{selectedRecord ? "Simpan Perubahan" : "Simpan Catatan"}</Button></DialogFooter>
+            <DialogFooter>
+              <Button
+                type="submit"
+                className="w-full dark:bg-slate-700 dark:border-slate-600 dark:text-slate-400 dark:hover:bg-slate-600 dark:hover:text-slate-300">
+                {selectedRecord ? "Simpan Perubahan" : "Simpan Catatan"}
+              </Button>
+            </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
       {/* MODAL BELANJA */}
       <Dialog open={isSpendModalOpen} onOpenChange={setIsSpendModalOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px] dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600">
           <DialogHeader>
             <DialogTitle>Tambah Belanja: {selectedRecord?.toko_name}</DialogTitle>
             <DialogDescription className="text-xs">
@@ -594,7 +620,7 @@ export default function StoreRecords() {
                 <button
                   type="button"
                   onClick={() => { setCalcTarget('spending'); setIsCalcOpen(true); }}
-                  className="text-orange-600 hover:underline flex items-center gap-1"
+                  className="text-orange-600 hover:underline flex items-center gap-1 dark:text-orange-400"
                 >
                   <Calculator size={12} /> Kalkulator
                 </button>
@@ -604,12 +630,18 @@ export default function StoreRecords() {
                 placeholder="Contoh: 50000"
                 value={spendAmount}
                 onChange={e => setSpendAmount(e.target.value)}
+                className="dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600"
                 autoFocus
               />
             </div>
             <div className="space-y-2">
               <Label>Catatan Barang (Opsional)</Label>
-              <Input placeholder="Misal: Beli pakan burung 2 dus" value={spendNote} onChange={e => setSpendNote(e.target.value)} />
+              <Input
+                placeholder="Misal: Beli pakan burung 2 dus"
+                value={spendNote}
+                onChange={e => setSpendNote(e.target.value)}
+                className="dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600"
+              />
             </div>
           </div>
           <DialogFooter>
@@ -620,7 +652,7 @@ export default function StoreRecords() {
 
       {/* MODAL BAYAR */}
       <Dialog open={isPayModalOpen} onOpenChange={setIsPayModalOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px] dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600">
           <DialogHeader>
             <DialogTitle>Bayar Cicilan: {selectedRecord?.toko_name}</DialogTitle>
             {/* Tambahkan baris ini di bawah DialogTitle agar warning hilang */}
@@ -629,23 +661,38 @@ export default function StoreRecords() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
-            <div className="bg-slate-50 p-3 rounded-lg"><p className="text-xs text-slate-500 italic">Sisa Hutang: <span className="font-bold text-red-600">{toRp(selectedRecord?.total_price - selectedRecord?.paid_amount)}</span></p></div>
+            <div className="bg-slate-50 p-3 rounded-lg dark:bg-slate-700">
+              <p className="text-xs text-slate-500 italic dark:text-slate-400">
+                Sisa Hutang: <span className="font-bold text-red-600 dark:text-red-400">{toRp(selectedRecord?.total_price - selectedRecord?.paid_amount)}</span>
+              </p>
+            </div>
             <div className="space-y-2">
               <Label>Nominal Pembayaran (Rp)</Label>
-              <Input type="number" placeholder="Masukkan angka..." value={payAmount} onChange={e => setPayAmount(e.target.value)} autoFocus />
+              <Input
+                type="number"
+                placeholder="Masukkan angka..."
+                value={payAmount} onChange={e => setPayAmount(e.target.value)}
+                className="dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600"
+                autoFocus
+              />
             </div>
           </div>
-          <DialogFooter><Button onClick={handlePayment} className="w-full bg-green-600 hover:bg-green-700">Konfirmasi Bayar</Button></DialogFooter>
+          <DialogFooter>
+            <Button onClick={handlePayment}
+              className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600">
+              Konfirmasi Bayar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* MODAL LAPORAN IKHTISAR PIUTANG */}
       <Dialog open={isReportOpen} onOpenChange={setIsReportOpen}>
-        <DialogContent className="sm:max-w-2xl w-[95vw] max-h-[96vh] p-0 overflow-hidden flex flex-col shadow-2xl border-none">
+        <DialogContent className="sm:max-w-2xl w-[95vw] max-h-[96vh] p-0 overflow-hidden flex flex-col shadow-2xl border-none dark:bg-slate-800 dark:border-slate-600">
           <div className="flex-1 overflow-y-auto custom-scrollbar">
-            <div ref={reportRef} className="bg-white p-4 md:p-8">
+            <div ref={reportRef} className="bg-white p-4 md:p-8 dark:bg-slate-800 dark:border-slate-600">
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 text-indigo-700">
+                <DialogTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
                   <BarChart3 size={22} />
                   Laporan Ikhtisar Piutang
                 </DialogTitle>
@@ -658,33 +705,33 @@ export default function StoreRecords() {
                 {/* 1. KARTU RINGKASAN */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {/* Total Belanja */}
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Belanja</p>
-                    <p className="text-sm font-black text-slate-700">{toRp(selectedRecord?.total_price)}</p>
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 dark:bg-slate-700">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider dark:text-slate-500">Total Belanja</p>
+                    <p className="text-sm font-black text-slate-700 dark:text-slate-300">{toRp(selectedRecord?.total_price)}</p>
                   </div>
                   {/* Sudah Dibayar */}
-                  <div className="p-3 rounded-xl bg-green-50 border border-green-100">
-                    <p className="text-[10px] font-bold text-green-600 uppercase tracking-wider">Sudah Dibayar</p>
-                    <p className="text-sm font-black text-green-700">{toRp(selectedRecord?.paid_amount)}</p>
+                  <div className="p-3 rounded-xl bg-green-50 border border-green-100 dark:bg-green-700">
+                    <p className="text-[10px] font-bold text-green-600 uppercase tracking-wider dark:text-green-400">Sudah Dibayar</p>
+                    <p className="text-sm font-black text-green-700 dark:text-green-300">{toRp(selectedRecord?.paid_amount)}</p>
                   </div>
                   {/* Sisa Piutang */}
-                  <div className="p-3 rounded-xl bg-red-50 border border-red-100">
-                    <p className="text-[10px] font-bold text-red-600 uppercase tracking-wider">Sisa Piutang</p>
-                    <p className="text-sm font-black text-red-700">{toRp(selectedRecord?.total_price - selectedRecord?.paid_amount)}</p>
+                  <div className="p-3 rounded-xl bg-red-50 border border-red-100 dark:bg-red-700">
+                    <p className="text-[10px] font-bold text-red-600 uppercase tracking-wider dark:text-red-400">Sisa Piutang</p>
+                    <p className="text-sm font-black text-red-700 dark:text-red-300">{toRp(selectedRecord?.total_price - selectedRecord?.paid_amount)}</p>
                   </div>
                 </div>
 
                 {/* 2. PROGRESS BAR */}
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs font-bold">
-                    <span className="text-slate-500 font-medium">Status Pelunasan</span>
-                    <span className="text-indigo-600">
+                    <span className="text-slate-500 font-medium dark:text-slate-400">Status Pelunasan</span>
+                    <span className="text-indigo-600 dark:text-indigo-400">
                       {Math.round((selectedRecord?.paid_amount / selectedRecord?.total_price) * 100)}%
                     </span>
                   </div>
-                  <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden border">
+                  <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden border dark:border-slate-600">
                     <div
-                      className="h-full bg-indigo-500 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                      className="h-full bg-indigo-500 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(99,102,241,0.5)] dark:bg-indigo-400"
                       style={{ width: `${(selectedRecord?.paid_amount / selectedRecord?.total_price) * 100}%` }}
                     />
                   </div>
@@ -692,12 +739,12 @@ export default function StoreRecords() {
 
                 {/* 3. DAFTAR RIWAYAT (DENGAN LOGIKA LOADING) */}
                 <div className="space-y-3">
-                  <h4 className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+                  <h4 className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2 dark:text-slate-400">
                     <BookOpen size={14} /> Riwayat Transaksi Lengkap
                   </h4>
 
-                  <div className="border rounded-lg overflow-hidden max-h-[250px] overflow-y-auto shadow-inner bg-white">
-                    <div className="divide-y divide-slate-100">
+                  <div className="border rounded-lg overflow-hidden max-h-[250px] overflow-y-auto shadow-inner bg-white dark:bg-slate-700 dark:border-slate-600">
+                    <div className="divide-y divide-slate-100 dark:divide-slate-600">
                       {/* LOGIKA LOADING SKELETON */}
                       {historyLoading ? (
                         <div className="p-4 space-y-4">
@@ -713,20 +760,20 @@ export default function StoreRecords() {
                         </div>
                       ) : paymentHistory.length > 0 ? (
                         paymentHistory.map((h, i) => (
-                          <div key={i} className="p-3 flex justify-between items-center hover:bg-slate-50 transition-colors">
+                          <div key={i} className="p-3 flex justify-between items-center hover:bg-slate-50 transition-colors dark:hover:bg-slate-600">
                             <div className="space-y-0.5">
-                              <p className="text-xs font-bold text-slate-700">{h.notes || "Transaksi Toko"}</p>
-                              <p className="text-[10px] text-slate-400 font-medium">
+                              <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{h.notes || "Transaksi Toko"}</p>
+                              <p className="text-[10px] text-slate-400 font-medium dark:text-slate-500">
                                 {new Date(h.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                               </p>
                             </div>
-                            <div className={`text-xs font-black ${h.type === 'spending' ? "text-red-600" : "text-green-600"}`}>
+                            <div className={`text-xs font-black ${h.type === 'spending' ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
                               {h.type === 'spending' ? "+" : "-"}{toRp(h.amount)}
                             </div>
                           </div>
                         ))
                       ) : (
-                        <div className="p-10 text-center text-xs text-slate-400 italic font-medium">
+                        <div className="p-10 text-center text-xs text-slate-400 italic font-medium dark:text-slate-500">
                           Belum ada aktivitas transaksi.
                         </div>
                       )}
@@ -735,19 +782,19 @@ export default function StoreRecords() {
                 </div>
               </div>
 
-              <p className="text-[8px] text-slate-300 text-right uppercase tracking-widest mt-4">
+              <p className="text-[8px] text-slate-300 text-right uppercase tracking-widest mt-4 dark:text-slate-500">
                 Generated by Stokku App - {new Date().toLocaleDateString('id-ID')}
               </p>
             </div>
           </div>
 
-          <DialogFooter className="p-4 md:p-6 bg-slate-50 border-t flex flex-row gap-3">
-            <Button variant="outline" className="flex-1" onClick={() => setIsReportOpen(false)}>
+          <DialogFooter className="p-4 md:p-6 bg-slate-50 border-t flex flex-row gap-3 dark:bg-slate-800">
+            <Button variant="outline" className="flex-1 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600" onClick={() => setIsReportOpen(false)}>
               Tutup
             </Button>
             <Button
               onClick={handleExportImage}
-              className="flex-1 bg-indigo-600 hover:bg-indigo-700 gap-2 font-bold"
+              className="flex-1 bg-indigo-600 hover:bg-indigo-700 gap-2 font-bold dark:bg-indigo-400 dark:hover:bg-indigo-500"
             >
               <Download size={16} /> Download Gambar
             </Button>
@@ -757,10 +804,10 @@ export default function StoreRecords() {
 
       {/* KALKULATOR */}
       <Dialog open={isCalcOpen} onOpenChange={setIsCalcOpen}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-[400px] dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Calculator className="text-blue-600" size={20} />
+              <Calculator className="text-blue-600 dark:text-blue-400" size={20} />
               Kalkulator Piutang Toko
             </DialogTitle>
             <DialogDescription>
@@ -771,28 +818,28 @@ export default function StoreRecords() {
           <div className="space-y-4 py-4">
             {/* Input Label Baru */}
             <div className="space-y-1">
-              <Label className="text-[10px] font-bold uppercase text-slate-500">Nama Barang / Keterangan</Label>
+              <Label className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Nama Barang / Keterangan</Label>
               <Input
                 placeholder="Contoh: Pakan Burung & Aksesoris"
                 value={calcLabel}
                 onChange={(e) => setCalcLabel(e.target.value)}
-                className="bg-slate-50"
+                className="bg-slate-50 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100"
               />
             </div>
 
             <div className="space-y-1">
-              <Label className="text-[10px] font-bold uppercase text-slate-500">Input Perhitungan</Label>
+              <Label className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Input Perhitungan</Label>
               <Input
                 placeholder="0"
                 value={calcInput}
                 onChange={(e) => evaluateMath(e.target.value)}
-                className="text-lg font-mono tracking-widest"
+                className="text-lg font-mono tracking-widest dark:bg-slate-700 dark:border-slate-600"
               />
             </div>
 
-            <div className="bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200">
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Hasil Perhitungan</p>
-              <p className="text-2xl font-black text-blue-700">
+            <div className="bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200 dark:bg-slate-700">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 dark:text-slate-400">Hasil Perhitungan</p>
+              <p className="text-2xl font-black text-blue-700 dark:text-blue-400">
                 {toRp(calcTotal)}
               </p>
             </div>
@@ -803,7 +850,7 @@ export default function StoreRecords() {
                   key={op}
                   variant="outline"
                   onClick={() => evaluateMath(calcInput + op)}
-                  className="font-bold"
+                  className="font-bold dark:text-slate-400 dark:hover:text-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 dark:border-slate-600"
                 >
                   {op === '*' ? '×' : op === '/' ? '÷' : op}
                 </Button>
@@ -813,7 +860,7 @@ export default function StoreRecords() {
 
           <DialogFooter className="flex flex-col gap-2">
             <Button
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
               onClick={() => {
                 const fullNote = calcLabel
                   ? `${calcLabel} (${calcInput})`
@@ -840,7 +887,7 @@ export default function StoreRecords() {
             >
               Terapkan ke Modal
             </Button>
-            <Button variant="ghost" className="w-full" onClick={() => setIsCalcOpen(false)}>
+            <Button variant="ghost" className="w-full dark:text-slate-400 dark:hover:bg-slate-700" onClick={() => setIsCalcOpen(false)}>
               Batal
             </Button>
           </DialogFooter>

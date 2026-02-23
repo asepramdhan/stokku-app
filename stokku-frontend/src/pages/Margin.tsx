@@ -96,39 +96,39 @@ export default function Margin() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Analisa Margin</h1>
-          <p className="text-slate-500 text-sm font-medium">Pantau keuntungan bersih setelah dipotong biaya operasional.</p>
+          <p className="text-slate-500 text-sm font-medium dark:text-slate-400">Pantau keuntungan bersih setelah dipotong biaya operasional.</p>
         </div>
       </div>
 
       {/* STATS CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-blue-500 shadow-sm">
+        <Card className="border-l-4 border-l-blue-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><Receipt size={20} /></div>
+            <div className="p-2 bg-blue-100 text-blue-600 rounded-full dark:bg-slate-700"><Receipt size={20} /></div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Omset (Bruto)</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Omset (Bruto)</p>
               <h3 className="text-xl font-bold">Rp {Number(globalStats.totalRevenue).toLocaleString()}</h3>
             </div>
           </CardContent>
         </Card>
-        <Card className={`border-l-4 shadow-sm transition-all duration-300 ${globalStats.totalNetProfit < 0 ? 'border-l-red-500' : 'border-l-green-500'}`}>
+        <Card className={`border-l-4 shadow-sm transition-all duration-300 dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0 ${globalStats.totalNetProfit < 0 ? 'border-l-red-500 dark:border-l-red-600' : 'border-l-green-500 dark:border-l-green-600'}`}>
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className={`p-2 rounded-full transition-colors ${globalStats.totalNetProfit < 0 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+            <div className={`p-2 rounded-full transition-colors ${globalStats.totalNetProfit < 0 ? 'bg-red-100 text-red-600 dark:bg-slate-700' : 'bg-green-100 text-green-600 dark:bg-slate-700'}`}>
               <Wallet size={20} />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Profit Bersih (Netto)</p>
-              <h3 className={`text-xl font-bold ${globalStats.totalNetProfit < 0 ? 'text-red-600' : 'text-green-600'}`}>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Profit Bersih (Netto)</p>
+              <h3 className={`text-xl font-bold ${globalStats.totalNetProfit < 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
                 Rp {Number(globalStats.totalNetProfit).toLocaleString()}
               </h3>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-purple-500 shadow-sm">
+        <Card className="border-l-4 border-l-purple-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-purple-100 text-purple-600 rounded-full"><TrendingUp size={20} /></div>
+            <div className="p-2 bg-purple-100 text-purple-600 rounded-full dark:bg-slate-700"><TrendingUp size={20} /></div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Persentase Margin</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Persentase Margin</p>
               <h3 className="text-xl font-bold">{globalStats.avgMargin.toFixed(1)}%</h3>
             </div>
           </CardContent>
@@ -140,11 +140,11 @@ export default function Margin() {
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-xl" />)
         ) : topProducts.map((p, i) => (
-          <Card key={i} className="overflow-hidden border-none shadow-md bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+          <Card key={i} className="overflow-hidden border-none shadow-md bg-gradient-to-br from-emerald-500 to-teal-600 text-white dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0 dark:from-slate-700 dark:to-slate-800">
             <CardContent className="p-4 flex items-center justify-between">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-white/20 text-[10px] font-black">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-white/20 text-[10px] font-black dark:bg-slate-700">
                     #{i + 1}
                   </span>
                   <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Produk Ter-Cuan</p>
@@ -152,7 +152,7 @@ export default function Margin() {
                 <h4 className="font-bold text-sm truncate max-w-[150px]">{p.product_name}</h4>
                 <p className="text-xl font-black">Rp {Number(p.total_net_profit).toLocaleString()}</p>
               </div>
-              <div className="p-3 bg-white/10 rounded-2xl rotate-12 group-hover:rotate-0 transition-transform">
+              <div className="p-3 bg-white/10 rounded-2xl rotate-12 group-hover:rotate-0 transition-transform dark:bg-slate-700">
                 <TrendingUp size={32} className="opacity-50" />
               </div>
             </CardContent>
@@ -162,21 +162,21 @@ export default function Margin() {
 
       {/* SEARCH & FILTERS */}
       <div className="flex flex-col lg:flex-row gap-3">
-        <div className="flex-1 bg-white border rounded-lg shadow-sm">
+        <div className="flex-1 bg-white border rounded-lg shadow-sm dark:bg-slate-800 dark:border-slate-700">
           <InputGroup>
-            <InputGroupInput placeholder="Cari transaksi..." value={search} onChange={(e) => handleSearch(e.target.value)} />
+            <InputGroupInput placeholder="Cari transaksi..." value={search} onChange={(e) => handleSearch(e.target.value)} className="dark:bg-slate-800" />
             <InputGroupAddon><Search /></InputGroupAddon>
             <InputGroupAddon align="inline-end">
-              {search && <InputGroupButton variant="ghost" onClick={() => handleSearch("")}><X size={16} /></InputGroupButton>}
+              {search && <InputGroupButton variant="ghost" onClick={() => handleSearch("")} className="dark:bg-slate-800"><X size={16} /></InputGroupButton>}
               {data.length} results
             </InputGroupAddon>
           </InputGroup>
         </div>
         <div className="flex flex-row gap-2">
           {/* FILTER WAKTU */}
-          <div className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg shadow-sm">
-            <Calendar size={14} className="text-slate-400" />
-            <select className="w-full text-xs font-bold bg-transparent outline-none cursor-pointer" value={range} onChange={(e) => handleRangeFilter(e.target.value)}>
+          <div className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg shadow-sm dark:bg-slate-800 dark:border-slate-700">
+            <Calendar size={14} className="text-slate-400 dark:text-slate-300" />
+            <select className="w-full text-xs font-bold bg-transparent outline-none cursor-pointer dark:text-slate-300 dark:bg-slate-800" value={range} onChange={(e) => handleRangeFilter(e.target.value)}>
               <option value="all">Semua Waktu</option>
               <option value="today">Hari Ini</option>
               <option value="week">Minggu Ini</option>
@@ -185,9 +185,9 @@ export default function Margin() {
           </div>
 
           {/* FILTER TOKO */}
-          <div className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg shadow-sm">
-            <Filter size={14} className="text-slate-400" />
-            <select className="w-full text-xs font-bold bg-transparent outline-none min-w-[100px] cursor-pointer" value={filterStore} onChange={(e) => handleStoreFilter(e.target.value)}>
+          <div className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg shadow-sm dark:bg-slate-800 dark:border-slate-700">
+            <Filter size={14} className="text-slate-400 dark:text-slate-300" />
+            <select className="w-full text-xs font-bold bg-transparent outline-none min-w-[100px] cursor-pointer dark:text-slate-300 dark:bg-slate-800" value={filterStore} onChange={(e) => handleStoreFilter(e.target.value)}>
               <option value="All">Semua Toko</option>
               {stores.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
             </select>
@@ -196,10 +196,10 @@ export default function Margin() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-white border rounded-lg shadow-sm overflow-hidden dark:bg-slate-800 dark:border-slate-700">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-slate-50/50">
+            <TableHeader className="bg-slate-50/50 dark:bg-slate-800">
               <TableRow>
                 <TableHead className="truncate w-[100px]">Produk & Toko</TableHead>
                 <TableHead className="truncate w-[100px]">Modal vs Jual</TableHead>
@@ -221,26 +221,26 @@ export default function Margin() {
                 data.map((item: any) => {
                   const profit = calculateProfit(item), fees = calculateFees(item);
                   return (
-                    <TableRow key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                    <TableRow key={item.id} className="hover:bg-slate-50/50 transition-colors dark:hover:bg-slate-700">
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="font-bold text-slate-800 truncate">{item.product_name}</span>
-                          <span className="text-[10px] text-slate-400">{item.store_name} ({item.platform})</span>
+                          <span className="font-bold text-slate-800 truncate dark:text-white">{item.product_name}</span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500">{item.store_name} ({item.platform})</span>
                         </div>
                       </TableCell>
                       <TableCell className="truncate w-[100px]">
                         <div className="text-xs">
-                          <p className="text-slate-400 italic text-[10px]">C: Rp {Number(item.qty * item.capital).toLocaleString()}</p>
+                          <p className="text-slate-400 italic text-[10px] dark:text-slate-500">C: Rp {Number(item.qty * item.capital).toLocaleString()}</p>
                           <p className="font-semibold">S: Rp {Number(item.total_price).toLocaleString()}</p>
                         </div>
                       </TableCell>
                       <TableCell className="truncate w-[100px]">
-                        <div className="flex items-center gap-1 text-red-500 font-medium text-xs">
+                        <div className="flex items-center gap-1 text-red-500 font-medium text-xs dark:text-red-400">
                           -Rp {Number(fees).toLocaleString()}
                           <TooltipProvider>
                             <Tooltip>
-                              <TooltipTrigger><Info size={12} className="text-slate-300" /></TooltipTrigger>
-                              <TooltipContent className="text-[10px]">
+                              <TooltipTrigger><Info size={12} className="text-slate-300 dark:text-slate-400" /></TooltipTrigger>
+                              <TooltipContent className="text-[10px] dark:text-slate-300 dark:bg-slate-700 dark:shadow-md">
                                 Adm: {Number(item.admin_fee)}% | Ext: {Number(item.extra_promo_fee)}% | Proc: Rp {Number(item.handling_fee).toLocaleString()}
                               </TooltipContent>
                             </Tooltip>
@@ -248,7 +248,7 @@ export default function Margin() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right truncate w-[100px]">
-                        <Badge className={profit > 0 ? "bg-green-500" : "bg-red-500"}>
+                        <Badge className={profit > 0 ? "bg-green-500 dark:bg-green-400" : "bg-red-500 dark:bg-red-400"}>
                           Rp {Number(profit).toLocaleString()}
                         </Badge>
                       </TableCell>
@@ -259,7 +259,7 @@ export default function Margin() {
                 <TableRow>
                   <TableCell colSpan={4} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="p-3 bg-slate-50 rounded-full text-slate-300">
+                      <div className="p-3 bg-slate-50 rounded-full text-slate-300 dark:bg-slate-700">
                         {!search ?
                           <TrendingUp size={32} />
                           :
@@ -269,13 +269,13 @@ export default function Margin() {
                       <div className="space-y-1">
                         {!search ?
                           <>
-                            <p className="font-medium text-slate-900">Data masih kosong</p>
-                            <p className="text-sm text-slate-500">Coba buat transaksi baru, dihalaman penjualan</p>
+                            <p className="font-medium text-slate-900 dark:text-white">Data masih kosong</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Coba buat transaksi baru, dihalaman penjualan</p>
                           </>
                           :
                           <>
-                            <p className="font-medium text-slate-900">Data tidak ditemukan</p>
-                            <p className="text-sm text-slate-500">Coba gunakan kata kunci pencarian lain.</p>
+                            <p className="font-medium text-slate-900 dark:text-white">Data tidak ditemukan</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Coba gunakan kata kunci pencarian lain.</p>
                           </>
                         }
                       </div>
@@ -287,11 +287,11 @@ export default function Margin() {
           </Table>
         </div>
         {/* PAGINATION CONTROLS */}
-        <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50">
-          <p className="text-xs text-slate-500">Total {pagination.totalData} transaksi</p>
+        <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50 dark:bg-slate-800">
+          <p className="text-xs text-slate-500 dark:text-slate-400">Total <span className="font-semibold dark:text-blue-400">{pagination.totalData}</span> transaksi</p>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>Sebelumnya</Button>
-            <Button variant="outline" size="sm" disabled={page === pagination.totalPages} onClick={() => setPage(page + 1)}>Selanjutnya</Button>
+            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)} className="dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-700 dark:border-slate-700 dark:bg-slate-700">Sebelumnya</Button>
+            <Button variant="outline" size="sm" disabled={page === pagination.totalPages} onClick={() => setPage(page + 1)} className="dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-700 dark:border-slate-700 dark:bg-slate-700">Selanjutnya</Button>
           </div>
         </div>
       </div>

@@ -39,7 +39,7 @@ export default function Login() {
     };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4 dark:bg-slate-800">
       <Card className="w-full max-w-sm shadow-xl">
         <CardContent className="pt-6">
           <div className="text-center mb-6">
