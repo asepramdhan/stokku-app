@@ -106,7 +106,7 @@ export default function PinGuard({ children }: { children: React.ReactNode }) {
     return (
       <div className="fixed inset-0 z-[9999] bg-slate-900 flex items-center justify-center p-4 dark:bg-slate-800">
         <div className="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center w-full max-w-sm text-slate-900 dark:bg-slate-800 dark:text-white">
-          <div className={`p-4 rounded-full mb-4 ${hasPin ? "bg-blue-100 text-blue-600 dark:bg-blue-600" : "bg-green-100 text-green-600 dark:bg-green-600"}`}>
+          <div className={`p-4 rounded-full mb-4 ${hasPin ? "bg-blue-100 text-blue-600 dark:bg-blue-600 dark:text-white" : "bg-green-100 text-green-600 dark:bg-green-600 dark:text-white"}`}>
             {hasPin ? <Lock size={32} /> : <ShieldCheck size={32} />}
           </div>
 
