@@ -12,69 +12,31 @@ const express = require("express"),
 	salesRoutes = require("./routes/salesRoutes"),
 	marginRoutes = require("./routes/marginRoutes"),
 	recordRoutes = require("./routes/recordRoutes"),
-	// Port Server
 	PORT = process.env.PORT || 5001;
 
-// Middleware Global
+// --- 1. MIDDLEWARE CORS (DI TARUH PALING ATAS) ---
 app.use(
 	cors({
-		origin: ["http://localhost:5173", "https://stokku.portoku.id"], // Izinkan local dan hosting
-		methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], // <--- PASTIKAN PATCH ADA DI SINI
+		origin: ["http://localhost:5173", "https://stokku.portoku.id"],
+		// FIX: Tambahkan OPTIONS di methods
+		methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+		// FIX: Tambahkan allowedHeaders secara eksplisit
+		allowedHeaders: [
+			"Content-Type",
+			"Authorization",
+			"Accept",
+			"X-Requested-With",
+		],
 		credentials: true,
 	}),
 );
 
+// --- 2. JURUS PENJINAK OPTIONS (PENTING!) ---
+// Ini gunanya mencegat request OPTIONS sebelum kena cek express.json()
+app.options("*", cors());
+
+// --- 3. BARU BODY PARSER ---
 app.use(express.json());
-
-// app.get("/api/tes", (req, res) => {
-// 	res.json({
-// 		message: "Jalur API Aman!",
-// 		status: "Online",
-// 		time: new Date(),
-// 	});
-// });
-
-// // Rute Tes Koneksi Database
-// app.get("/api/debug-db", async (req, res) => {
-// 	const mysql = require("mysql2/promise");
-
-// 	const config = {
-// 		host: process.env.DB_HOST || "127.0.0.1",
-// 		user: process.env.DB_USER,
-// 		password: process.env.DB_PASS,
-// 		database: process.env.DB_NAME,
-// 		connectTimeout: 5000, // Berhenti mencoba setelah 5 detik (biar gak pending selamanya)
-// 	};
-
-// 	try {
-// 		const connection = await mysql.createConnection(config);
-// 		const [rows] = await connection.execute(
-// 			"SELECT 'Koneksi Berhasil!' as status",
-// 		);
-// 		await connection.end();
-
-// 		res.json({
-// 			success: true,
-// 			message: rows[0].status,
-// 			cek_variabel: {
-// 				host: config.host,
-// 				user: config.user,
-// 				database: config.database,
-// 				password_terisi: config.password
-// 					? "Ya (Sudah Terisi)"
-// 					: "Tidak (Kosong!)",
-// 			},
-// 		});
-// 	} catch (err) {
-// 		res.status(500).json({
-// 			success: false,
-// 			error_code: err.code,
-// 			error_message: err.message,
-// 			saran:
-// 				"Pastikan User sudah di-Add ke Database di menu MySQL Databases cPanel dan Privileges dicentang ALL.",
-// 		});
-// 	}
-// });
 
 // Pakai Routes
 app.use("/api/auth", authRoutes);
