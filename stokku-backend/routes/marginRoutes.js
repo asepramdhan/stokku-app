@@ -44,27 +44,51 @@ router.get("/", async (req, res) => {
       ${whereClause}
       ORDER BY s.created_at DESC
       LIMIT ? OFFSET ?`,
-			[rows] = await db.query(dataQuery, [...params, limit, offset]),
-			// 3. Global Stats (Seluruh data yang terfilter)
-			[stats] = await db.query(
-				`
-      SELECT 
-        SUM(s.total_price) as total_revenue,
-        SUM(s.total_price - (s.qty * i.avg_cost) - ((s.total_price * st.admin_fee / 100) + (s.total_price * st.extra_promo_fee / 100) + st.handling_fee)) as total_net_profit
-      FROM sales s
-      JOIN inventory i ON s.product_id = i.id
-      JOIN stores st ON s.store_id = st.id
-      ${whereClause}`,
-				params,
-			),
-			revenue = stats[0].total_revenue || 0,
-			netProfit = stats[0].total_net_profit || 0,
-			// 4. Count for Pagination
-			[countRows] = await db.query(
-				`
+			[rows] = await db.query(dataQuery, [...params, limit, offset]);
+		// ============================================================
+		// --- 3. MULAI MASUKKAN KODE BARU DI SINI (LOGIKA IKLAN) ---
+		// ============================================================
+		let adWhere = "WHERE 1=1",
+			adParams = [];
+		if (range === "today") adWhere += " AND DATE(date) = DATE(NOW())";
+		if (range === "week")
+			adWhere += " AND YEARWEEK(date, 1) = YEARWEEK(NOW(), 1)";
+		if (range === "month")
+			adWhere += " AND MONTH(date) = MONTH(NOW()) AND YEAR(date) = YEAR(NOW())";
+
+		if (store !== "All") {
+			// Cari ID toko untuk filter iklan
+			const [stRow] = await db.query("SELECT id FROM stores WHERE name = ?", [
+				store,
+			]);
+			if (stRow.length > 0) {
+				adWhere += " AND store_id = ?";
+				adParams.push(stRow[0].id);
+			}
+		}
+
+		const [adStats] = await db.query(
+			`SELECT SUM(amount) as total_ads FROM ads ${adWhere}`,
+			adParams,
+		);
+		const totalAds = adStats[0].total_ads || 0;
+
+		// --- 4. HITUNG STATS SALES ---
+		const [stats] = await db.query(
+			`SELECT SUM(s.total_price) as total_revenue, SUM(s.total_price - (s.qty * i.avg_cost) - ((s.total_price * st.admin_fee / 100) + (s.total_price * st.extra_promo_fee / 100) + st.handling_fee)) as total_net_profit FROM sales s JOIN inventory i ON s.product_id = i.id JOIN stores st ON s.store_id = st.id ${whereClause}`,
+			params,
+		);
+
+		const revenue = stats[0].total_revenue || 0;
+		// VARIABEL INI YANG PENTING: Profit Sales dikurangi Iklan
+		const netProfit = (stats[0].total_net_profit || 0) - totalAds;
+		// ============================================================
+		// 4. Count for Pagination
+		const [countRows] = await db.query(
+			`
       SELECT COUNT(*) as total FROM sales s JOIN inventory i ON s.product_id = i.id JOIN stores st ON s.store_id = st.id ${whereClause}`,
-				params,
-			);
+			params,
+		);
 
 		// 5. Ambil Top 3 Produk Paling Untung (Disesuaikan dengan filter)
 		const topQuery = `
@@ -95,6 +119,96 @@ router.get("/", async (req, res) => {
 				currentPage: page,
 			},
 		});
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
+// Update Riwayat Iklan dengan Pagination
+router.get("/ads-list", async (req, res) => {
+	try {
+		const page = parseInt(req.query.page) || 1,
+			limit = 5, // Tampilkan 5 data per halaman
+			offset = (page - 1) * limit,
+			{ range, store } = req.query;
+
+		let adWhere = "WHERE 1=1",
+			adParams = [];
+
+		if (range === "today") adWhere += " AND DATE(a.date) = DATE(NOW())";
+		if (range === "week")
+			adWhere += " AND YEARWEEK(a.date, 1) = YEARWEEK(NOW(), 1)";
+		if (range === "month")
+			adWhere +=
+				" AND MONTH(a.date) = MONTH(NOW()) AND YEAR(a.date) = YEAR(NOW())";
+
+		if (store !== "All") {
+			adWhere += " AND st.name = ?";
+			adParams.push(store);
+		}
+
+		// Ambil Data
+		const [ads] = await db.query(
+			`
+      SELECT a.*, st.name as store_name 
+      FROM ads a 
+      JOIN stores st ON a.store_id = st.id 
+      ${adWhere} 
+      ORDER BY a.date DESC LIMIT ? OFFSET ?`,
+			[...adParams, limit, offset],
+		);
+
+		// Hitung Total Data untuk Pagination
+		const [countRows] = await db.query(
+			`SELECT COUNT(*) as total FROM ads a JOIN stores st ON a.store_id = st.id ${adWhere}`,
+			adParams,
+		);
+
+		res.json({
+			list: ads,
+			totalPages: Math.ceil(countRows[0].total / limit),
+			totalData: countRows[0].total,
+		});
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
+// --- 1. SIMPAN BIAYA IKLAN (ADS) ---
+router.post("/ads", async (req, res) => {
+	try {
+		const { store_id, amount, date, note } = req.body;
+		await db.query(
+			"INSERT INTO ads (store_id, amount, date, notes) VALUES (?, ?, ?, ?)",
+			[store_id, amount, date, note],
+		);
+		res.json({ success: true, message: "Biaya iklan berhasil dicatat!" });
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
+// Update Data Iklan
+router.put("/ads/:id", async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { store_id, amount, date, notes } = req.body;
+		await db.query(
+			"UPDATE ads SET store_id = ?, amount = ?, date = ?, notes = ? WHERE id = ?",
+			[store_id, amount, date, notes, id],
+		);
+		res.json({ success: true, message: "Data iklan berhasil diperbarui!" });
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
+// Hapus Data Iklan
+router.delete("/ads/:id", async (req, res) => {
+	try {
+		const { id } = req.params;
+		await db.query("DELETE FROM ads WHERE id = ?", [id]);
+		res.json({ success: true, message: "Data iklan berhasil dihapus!" });
 	} catch (err) {
 		res.status(500).json({ error: err.message });
 	}

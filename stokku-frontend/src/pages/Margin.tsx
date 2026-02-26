@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, Wallet, Receipt, Search, X, Info, Filter, Calendar } from "lucide-react";
+import { TrendingUp, Wallet, Receipt, Search, X, Info, Filter, Calendar, Pencil } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,9 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useTitle } from "@/hooks/useTitle";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialogHeader } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
 
 const API_MARGIN = `${import.meta.env.VITE_API_URL}/margin`,
-  API_STORES = `${import.meta.env.VITE_API_URL}/stores`;
+  API_STORES = `${import.meta.env.VITE_API_URL}/stores`,
+  API_ADS = `${import.meta.env.VITE_API_URL}/margin/ads`;
 
 export default function Margin() {
   useTitle("Analisa Margin");
@@ -25,7 +29,15 @@ export default function Margin() {
     [pagination, setPagination] = useState<any>({ totalPages: 1, totalData: 0 }),
     [globalStats, setGlobalStats] = useState({ totalRevenue: 0, totalNetProfit: 0, avgMargin: 0 }),
     [topProducts, setTopProducts] = useState<any[]>([]),
-    [isLoading, setIsLoading] = useState(true);
+    [isLoading, setIsLoading] = useState(true),
+    [isAdOpen, setIsAdOpen] = useState(false),
+    [newAd, setNewAd] = useState({ store_id: "", amount: "", date: new Date().toISOString().split('T')[0], note: "" }),
+    [isSubmitting, setIsSubmitting] = useState(false),
+    [adsList, setAdsList] = useState<any[]>([]),
+    [isEditOpen, setIsEditOpen] = useState(false),
+    [editingAd, setEditingAd] = useState<any>(null),
+    [adPage, setAdPage] = useState(Number(localStorage.getItem("mg_ad_page")) || 1),
+    [adPagination, setAdPagination] = useState({ totalPages: 1, totalData: 0 });
 
   // Re-fetch data jika range tanggal berubah
   useEffect(() => { fetchMargin(); }, [page, range, search, filterStore]);
@@ -36,7 +48,11 @@ export default function Margin() {
     localStorage.setItem("mg_range", range);
     localStorage.setItem("mg_store", filterStore);
     localStorage.setItem("mg_page", page.toString());
-  }, [search, range, filterStore, page]);
+    localStorage.setItem("mg_ad_page", adPage.toString());
+  }, [search, range, filterStore, page, adPage]);
+
+  // Re-fetch ads
+  useEffect(() => { fetchAds(); }, [adPage]);
 
   // Fungsi fetch margin
   const fetchMargin = async () => {
@@ -68,10 +84,23 @@ export default function Margin() {
       setPagination(resData.pagination);
       setGlobalStats(resData.stats);
       setStores(storeData.stores || (Array.isArray(storeData) ? storeData : []));
+      fetchAds();
     } finally {
       setIsLoading(false);
     }
   },
+
+    // Fungsi fetch ads
+    fetchAds = async () => {
+      try {
+        const res = await fetch(`${API_ADS.replace('/ads', '/ads-list')}?page=${adPage}&range=${range}&store=${filterStore}`, {
+          headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+        });
+        const resData = await res.json();
+        setAdsList(resData.list || []);
+        setAdPagination({ totalPages: resData.totalPages, totalData: resData.totalData });
+      } catch (e) { console.error(e); }
+    },
 
     // LOGIKA PERHITUNGAN
     calculateFees = (item: any) => {
@@ -80,9 +109,65 @@ export default function Margin() {
       return admin + extra + Number(item.handling_fee);
     },
 
+    // Fungsi Perhitungan Profit
     calculateProfit = (item: any) => {
       const totalCapital = item.qty * item.capital;
       return item.total_price - totalCapital - calculateFees(item);
+    },
+
+    // 3. Fungsi Simpan Iklan
+    handleAddAd = async () => {
+      if (!newAd.store_id || !newAd.amount) return alert("Pilih toko dan isi nominal!");
+      setIsSubmitting(true);
+      try {
+        const res = await fetch(API_ADS, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newAd),
+        });
+        if (res.ok) {
+          setIsAdOpen(false);
+          setNewAd({ store_id: "", amount: "", date: new Date().toISOString().split('T')[0], note: "" });
+          fetchMargin(); // Refresh data
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+
+    handleUpdateAd = async () => {
+      if (!editingAd.store_id || !editingAd.amount) return alert("Pilih toko dan isi nominal!");
+      setIsSubmitting(true);
+      try {
+        const res = await fetch(`${API_ADS}/${editingAd.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token")}`
+          },
+          body: JSON.stringify(editingAd),
+        });
+        if (res.ok) {
+          setIsEditOpen(false);
+          fetchMargin(); // Refresh data biar profit & tabel update
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+
+    // 4. Fungsi Hapus Iklan
+    handleDeleteAd = async (id: number) => {
+      if (!window.confirm("Yakin mau hapus data iklan ini?")) return;
+      try {
+        const res = await fetch(`${API_ADS}/${id}`, {
+          method: "DELETE",
+          headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+        });
+        if (res.ok) {
+          fetchMargin(); // Refresh semua data biar profit balik normal
+        }
+      } catch (e) { console.error(e); }
     },
 
     // Fungsi Helper Penyelamat Filter
@@ -96,7 +181,76 @@ export default function Margin() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Analisa Margin</h1>
-          <p className="text-slate-500 text-sm font-medium dark:text-slate-400">Pantau keuntungan bersih setelah dipotong biaya operasional.</p>
+          <p className="text-slate-500 text-sm font-medium dark:text-slate-400">
+            Pantau keuntungan bersih setelah dipotong biaya operasional.
+          </p>
+        </div>
+
+        {/* TOMBOL: Ditambah w-full biar lebar di HP, md:w-auto biar normal di laptop */}
+        <div className="flex w-full md:w-auto gap-2">
+          <Dialog open={isAdOpen} onOpenChange={setIsAdOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full md:w-auto gap-2 border-dashed border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-700"
+              >
+                <TrendingUp size={16} /> Input Biaya Iklan
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md dark:bg-slate-800 dark:border-slate-700">
+              <AlertDialogHeader>
+                <DialogTitle>Catat Biaya Iklan (Ads)</DialogTitle>
+              </AlertDialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase text-slate-500">Pilih Toko</label>
+                  <select
+                    className="w-full border p-2 rounded-md text-sm dark:bg-slate-700 dark:border-slate-600"
+                    value={newAd.store_id}
+                    onChange={(e) => setNewAd({ ...newAd, store_id: e.target.value })}
+                  >
+                    <option value="">-- Pilih Toko --</option>
+                    {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase text-slate-500">Nominal (Rp)</label>
+                    <Input type="number" value={newAd.amount} onChange={(e) => setNewAd({ ...newAd, amount: e.target.value })} placeholder="0" className="dark:bg-slate-700" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase text-slate-500">Tanggal</label>
+                    <Input
+                      type="date"
+                      value={newAd.date}
+                      onChange={(e) => setNewAd({ ...newAd, date: e.target.value })}
+                      className="w-full block text-left dark:bg-slate-700 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:dark:invert"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase text-slate-500">Catatan (Optional)</label>
+                  <Input value={newAd.note} onChange={(e) => setNewAd({ ...newAd, note: e.target.value })} placeholder="Contoh: Iklan Flash Sale" className="dark:bg-slate-700" />
+                </div>
+              </div>
+              <DialogFooter className="flex flex-col-reverse gap-2 md:gap-0 md:flex-row">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsAdOpen(false)}
+                  className="w-full sm:w-auto"
+                >
+                  Batal
+                </Button>
+                <Button
+                  onClick={handleAddAd}
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700"
+                >
+                  {isSubmitting ? "Menyimpan..." : "Simpan Biaya"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -247,10 +401,29 @@ export default function Margin() {
                           </TooltipProvider>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right truncate w-[100px]">
-                        <Badge className={profit > 0 ? "bg-green-500 dark:bg-green-400" : "bg-red-500 dark:bg-red-400"}>
-                          Rp {Number(profit).toLocaleString()}
-                        </Badge>
+                      <TableCell className="text-right truncate w-[120px]">
+                        <div className="flex flex-col items-end gap-1">
+                          <Badge className={profit > 0 ? "bg-green-500 dark:bg-green-400" : "bg-red-500 dark:bg-red-400"}>
+                            Rp {Number(profit).toLocaleString()}
+                          </Badge>
+
+                          {/* INFO IKLAN (Hanya muncul jika ada info iklan di stats atau data) */}
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="text-[9px] text-slate-400 cursor-help hover:text-orange-500 transition-colors flex items-center gap-1">
+                                  <TrendingUp size={10} /> Estimasi Netto
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent className="dark:bg-slate-700">
+                                <p className="text-[10px] dark:text-slate-300">
+                                  Profit di atas belum dipotong biaya iklan toko harian.<br />
+                                  Cek "Profit Bersih (Netto)" di kartu atas untuk hasil akhir.
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
                       </TableCell>
                     </TableRow>
                   )
@@ -295,6 +468,142 @@ export default function Margin() {
           </div>
         </div>
       </div>
+
+      {/* TABEL RIWAYAT IKLAN TERBARU - VERSI ANTI MELEBER */}
+      <div className="mt-8">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold flex items-center gap-2">
+            <TrendingUp size={18} className="text-orange-500" /> Riwayat Iklan Terakhir
+          </h3>
+          {/* Info tambahan biar user gak bingung */}
+          <span className="text-[10px] text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">
+            Menampilkan {adsList.length} data terbaru
+          </span>
+        </div>
+
+        <div className="bg-white border rounded-lg shadow-sm dark:bg-slate-800 dark:border-slate-700">
+          {/* KUNCINYA: Tambahkan div pembungkus dengan max-h-80 dan overflow-auto */}
+          <div className="overflow-x-auto max-h-[350px] overflow-y-auto">
+            <Table>
+              <TableHeader className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-10 shadow-sm">
+                <TableRow>
+                  <TableHead>Toko</TableHead>
+                  <TableHead>Tanggal</TableHead>
+                  <TableHead>Catatan</TableHead>
+                  <TableHead className="text-right">Biaya</TableHead>
+                  <TableHead className="w-[80px] text-center">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {adsList.length > 0 ? adsList.map((ad) => (
+                  <TableRow key={ad.id} className="dark:hover:bg-slate-700">
+                    <TableCell className="font-medium">{ad.store_name}</TableCell>
+                    <TableCell className="text-xs text-slate-500 whitespace-nowrap">
+                      {new Date(ad.date).toLocaleDateString('id-ID')}
+                    </TableCell>
+                    <TableCell className="text-xs italic text-slate-400 max-w-[200px] truncate">
+                      {ad.notes || "-"}
+                    </TableCell>
+                    <TableCell className="text-right font-bold text-orange-600 whitespace-nowrap">
+                      -Rp {Number(ad.amount).toLocaleString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 justify-center">
+                        <Button variant="ghost" size="icon" onClick={() => { setEditingAd(ad); setIsEditOpen(true); }} className="h-7 w-7 text-blue-500"><Pencil size={12} /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteAd(ad.id)} className="h-7 w-7 text-red-500"><X size={12} /></Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-10 text-slate-400 italic">Belum ada data iklan yang tercatat.</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+            {/* PAGINATION RIWAYAT IKLAN */}
+            <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50 dark:bg-slate-800 rounded-b-lg">
+              <p className="text-[10px] text-slate-500">
+                Total <span className="font-bold">{adPagination.totalData}</span> iklan tercatat
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={adPage === 1}
+                  onClick={() => setAdPage(adPage - 1)}
+                  className="h-7 text-[10px] dark:bg-slate-700"
+                >
+                  Sebelumnya
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={adPage === adPagination.totalPages}
+                  onClick={() => setAdPage(adPage + 1)}
+                  className="h-7 text-[10px] dark:bg-slate-700"
+                >
+                  Selanjutnya
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MODAL EDIT */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="sm:max-w-md dark:bg-slate-800 dark:border-slate-700">
+          <DialogHeader>
+            <DialogTitle>Edit Biaya Iklan</DialogTitle>
+          </DialogHeader>
+          {editingAd && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase text-slate-500">Pilih Toko</label>
+                <select
+                  className="w-full border p-2 rounded-md text-sm dark:bg-slate-700 dark:border-slate-600"
+                  value={editingAd.store_id}
+                  onChange={(e) => setEditingAd({ ...editingAd, store_id: e.target.value })}
+                >
+                  {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase text-slate-500">Nominal (Rp)</label>
+                  <Input type="number" value={editingAd.amount} onChange={(e) => setEditingAd({ ...editingAd, amount: e.target.value })} className="dark:bg-slate-700" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase text-slate-500">Tanggal</label>
+                  <Input
+                    type="date"
+                    value={editingAd.date?.split('T')[0]}
+                    onChange={(e) => setEditingAd({ ...editingAd, date: e.target.value })}
+                    className="w-full block text-left dark:bg-slate-700 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:dark:invert"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase text-slate-500">Catatan</label>
+                <Input value={editingAd.notes} onChange={(e) => setEditingAd({ ...editingAd, notes: e.target.value })} className="dark:bg-slate-700" />
+              </div>
+            </div>
+          )}
+          <DialogFooter className="flex flex-col-reverse gap-2 md:gap-0 md:flex-row">
+            <Button
+              variant="outline"
+              onClick={() => setIsEditOpen(false)}
+              className="w-full sm:w-auto"
+            >
+              Batal
+            </Button>
+            <Button onClick={handleUpdateAd} disabled={isSubmitting} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
+              {isSubmitting ? "Menyimpan..." : "Update Biaya"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "./ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { useDarkMode } from "@/hooks/useDarkMode";
+import { Footer } from "./footer";
 
 export default function Layout() {
   const location = useLocation(),
@@ -370,6 +371,8 @@ export default function Layout() {
             <Outlet />
           </div>
         </div>
+
+        <Footer />
 
         {/* --- QUICK ACTION FAB (TOMBOL MELAYANG) --- */}
         <div className="fixed bottom-6 right-6 z-50 flex flex-col-reverse items-end gap-3">
