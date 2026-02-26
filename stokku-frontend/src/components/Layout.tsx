@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "./ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { useDarkMode } from "@/hooks/useDarkMode";
-import { Footer } from "./footer";
+import { Footer } from "./FooterTemp";
 
 export default function Layout() {
   const location = useLocation(),
