@@ -8,6 +8,8 @@ router.get("/stats", async (req, res) => {
 	// WAJIB: Tambahkan alias 's.' supaya tidak bentrok dengan tabel inventory/products
 	let dateFilter = "WHERE 1=1";
 	if (range === "today") dateFilter = "WHERE DATE(s.created_at) = DATE(NOW())";
+	if (range === "yesterday")
+		dateFilter = "WHERE DATE(s.created_at) = DATE(NOW() - INTERVAL 1 DAY)";
 	if (range === "week")
 		dateFilter = "WHERE YEARWEEK(s.created_at, 1) = YEARWEEK(NOW(), 1)";
 	if (range === "month")

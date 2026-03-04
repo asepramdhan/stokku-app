@@ -119,6 +119,7 @@ export default function Dashboard() {
           >
             <option value="all" className="dark:bg-slate-800 dark:text-slate-100">Semua Waktu</option>
             <option value="today" className="dark:bg-slate-800 dark:text-slate-100">Hari Ini</option>
+            <option value="yesterday" className="dark:bg-slate-800 dark:text-slate-100">Kemarin</option>
             <option value="week" className="dark:bg-slate-800 dark:text-slate-100">Minggu Ini</option>
             <option value="month" className="dark:bg-slate-800 dark:text-slate-100">Bulan Ini</option>
           </select>

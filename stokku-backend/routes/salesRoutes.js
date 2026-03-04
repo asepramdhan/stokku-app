@@ -18,6 +18,8 @@ router.get("/", async (req, res) => {
 
 		if (range === "today")
 			whereClause += " AND DATE(s.created_at) = DATE(NOW())";
+		if (range === "yesterday")
+			whereClause += " AND DATE(s.created_at) = DATE(NOW() - INTERVAL 1 DAY)";
 		if (range === "week")
 			whereClause += " AND YEARWEEK(s.created_at, 1) = YEARWEEK(NOW(), 1)";
 		if (range === "month")

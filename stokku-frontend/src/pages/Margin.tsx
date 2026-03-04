@@ -333,6 +333,7 @@ export default function Margin() {
             <select className="w-full text-xs font-bold bg-transparent outline-none cursor-pointer dark:text-slate-300 dark:bg-slate-800" value={range} onChange={(e) => handleRangeFilter(e.target.value)}>
               <option value="all">Semua Waktu</option>
               <option value="today">Hari Ini</option>
+              <option value="yesterday">Hari Kemarin</option>
               <option value="week">Minggu Ini</option>
               <option value="month">Bulan Ini</option>
             </select>

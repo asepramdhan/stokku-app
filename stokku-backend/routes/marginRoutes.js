@@ -18,6 +18,8 @@ router.get("/", async (req, res) => {
 
 		if (range === "today")
 			whereClause += " AND DATE(s.created_at) = DATE(NOW())";
+		if (range === "yesterday")
+			whereClause += " AND DATE(s.created_at) = DATE(NOW() - INTERVAL 1 DAY)";
 		if (range === "week")
 			whereClause += " AND YEARWEEK(s.created_at, 1) = YEARWEEK(NOW(), 1)";
 		if (range === "month")
@@ -51,6 +53,8 @@ router.get("/", async (req, res) => {
 		let adWhere = "WHERE 1=1",
 			adParams = [];
 		if (range === "today") adWhere += " AND DATE(date) = DATE(NOW())";
+		if (range === "yesterday")
+			adWhere += " AND DATE(date) = DATE(NOW() - INTERVAL 1 DAY)";
 		if (range === "week")
 			adWhere += " AND YEARWEEK(date, 1) = YEARWEEK(NOW(), 1)";
 		if (range === "month")
@@ -136,6 +140,8 @@ router.get("/ads-list", async (req, res) => {
 			adParams = [];
 
 		if (range === "today") adWhere += " AND DATE(a.date) = DATE(NOW())";
+		if (range === "yesterday")
+			adWhere += " AND DATE(a.date) = DATE(NOW() - INTERVAL 1 DAY)";
 		if (range === "week")
 			adWhere += " AND YEARWEEK(a.date, 1) = YEARWEEK(NOW(), 1)";
 		if (range === "month")

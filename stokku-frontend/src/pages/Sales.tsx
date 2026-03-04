@@ -383,6 +383,7 @@ export default function Sales() {
             >
               <option value="all">Semua Waktu</option>
               <option value="today">Hari Ini</option>
+              <option value="yesterday">Hari Kemarin</option>
               <option value="week">Minggu Ini</option>
               <option value="month">Bulan Ini</option>
             </select>
