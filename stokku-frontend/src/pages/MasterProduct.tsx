@@ -57,6 +57,7 @@ export default function MasterProduct() {
     [newProduct, setNewProduct] = useState({ sku: "", name: "", category: "", quantity: 0, price: 0, avg_cost: 0 }),
     [isEditOpen, setIsEditOpen] = useState(false),
     [editingProduct, setEditingProduct] = useState<any>(null),
+    [isSubmitting, setIsSubmitting] = useState(false),
     [isLoading, setIsLoading] = useState(true),
     [errors, setErrors] = useState<{ [key: string]: string }>({}),
     [isDeleteOpen, setIsDeleteOpen] = useState(false),
@@ -176,6 +177,7 @@ export default function MasterProduct() {
         return;
       }
 
+      setIsSubmitting(true);
       try {
         const res = await fetch(API_URL, {
           method: "POST",
@@ -195,6 +197,7 @@ export default function MasterProduct() {
           throw new Error(errorData.error || "Gagal menyimpan");
         }
 
+        setIsSubmitting(false);
         setIsAddOpen(false);
         setNewProduct({ sku: "", name: "", category: "", quantity: 0, price: 0, avg_cost: 0 });
         toast.promise<{ name: string }>(
@@ -221,6 +224,7 @@ export default function MasterProduct() {
 
     // Fungsi Tambah ke Rencana Belanja
     openAddToShopping = async (product: any) => {
+      setIsSubmitting(true);
       try {
         // Ambil harga beli terakhir dari API Shopping yang sudah kamu punya
         const res = await fetch(`${import.meta.env.VITE_API_URL}/shopping/last-price/${product.id}`, {
@@ -234,6 +238,7 @@ export default function MasterProduct() {
           qty: 1,
           buy_price: data.last_price || product.avg_cost || 0 // Default ke harga terakhir atau modal awal
         });
+        setIsSubmitting(false);
         setIsAddToShoppingOpen(true);
       } catch (error) {
         toast.error("Gagal mengambil data harga produk.");
@@ -256,6 +261,7 @@ export default function MasterProduct() {
         return;
       }
 
+      setIsSubmitting(true);
       try {
         const res = await fetch(`${API_URL}/${editingProduct.id}`, {
           method: "PUT",
@@ -275,6 +281,7 @@ export default function MasterProduct() {
           throw new Error(errorData.error || "Gagal menyimpan");
         }
 
+        setIsSubmitting(false);
         setIsEditOpen(false);
         setEditingProduct(null);
         toast.promise<{ name: string }>(
@@ -301,6 +308,7 @@ export default function MasterProduct() {
 
     // Fungsi Stock Opname
     handleStockOpname = async () => {
+      setIsSubmitting(true);
       try {
         const res = await fetch(`${API_URL}/opname/${opnameData.id}`, {
           method: "POST",
@@ -309,6 +317,7 @@ export default function MasterProduct() {
         });
 
         if (res.ok) {
+          setIsSubmitting(false);
           setIsOpnameOpen(false);
           fetchProducts(); // Refresh tabel
           toast.success(`Stok ${opnameData.name} berhasil disesuaikan!`);
@@ -357,6 +366,7 @@ export default function MasterProduct() {
 
     // Fungsi Tambah ke Rencana Belanja
     handleConfirmAddToShopping = async () => {
+      setIsSubmitting(true);
       try {
         const res = await fetch(API_SHOPPING, {
           method: "POST",
@@ -369,6 +379,7 @@ export default function MasterProduct() {
         });
 
         if (res.ok) {
+          setIsSubmitting(false);
           setIsAddToShoppingOpen(false);
           toast.success(`${shoppingFormData.name} berhasil masuk daftar belanja!`);
           fetchProducts();
@@ -843,7 +854,9 @@ export default function MasterProduct() {
             >
               Batal
             </Button>
-            <Button onClick={handleAdd}>Simpan Produk</Button>
+            <Button onClick={handleAdd} disabled={isSubmitting}>
+              {isSubmitting ? "Menyimpan..." : "Simpan Produk"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -918,8 +931,8 @@ export default function MasterProduct() {
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setIsAddToShoppingOpen(false)} className="dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-700">Batal</Button>
-            <Button onClick={handleConfirmAddToShopping} className="bg-orange-600 hover:bg-orange-700 dark:hover:bg-orange-500">
-              Tambah ke List Belanja
+            <Button onClick={handleConfirmAddToShopping} disabled={isSubmitting} className="bg-orange-600 hover:bg-orange-700 dark:hover:bg-orange-500">
+              {isSubmitting ? "Menambahkan..." : "Tambah ke List Belanja"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -980,7 +993,9 @@ export default function MasterProduct() {
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setIsOpnameOpen(false)}>Batal</Button>
-            <Button onClick={handleStockOpname} className="bg-indigo-600 hover:bg-indigo-700">Update Stok Fisik</Button>
+            <Button onClick={handleStockOpname} disabled={isSubmitting} className="bg-indigo-600 hover:bg-indigo-700">
+              {isSubmitting ? 'Updating...' : 'Update Stok Fisik'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1058,7 +1073,9 @@ export default function MasterProduct() {
 
           <DialogFooter>
             <Button variant="ghost" onClick={() => setIsEditOpen(false)} className="dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-700">Batal</Button>
-            <Button onClick={handleUpdate}>Simpan Perubahan</Button>
+            <Button onClick={handleUpdate} disabled={isSubmitting}>
+              {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

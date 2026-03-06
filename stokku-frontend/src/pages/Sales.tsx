@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useTitle } from "@/hooks/useTitle";
+import { Spinner } from "@/components/ui/spinner";
 
 const API_SALES = `${import.meta.env.VITE_API_URL}/sales`,
   API_PRODUCTS = `${import.meta.env.VITE_API_URL}/products`,
@@ -130,6 +131,7 @@ export default function Sales() {
         return;
       }
 
+      setIsLoading(true);
       try {
         const res = await fetch(API_SALES, {
           method: "POST",
@@ -139,6 +141,7 @@ export default function Sales() {
 
         if (!res.ok) throw new Error("Gagal simpan transaksi");
 
+        setIsLoading(false);
         setIsAddOpen(false);
         setNewSale({ product_id: "", store_id: "", qty: 1, selling_price: 0, product_name: "" });
         toast.promise(new Promise((resolve) => setTimeout(resolve, timer)), {
@@ -212,6 +215,7 @@ export default function Sales() {
     handleBulkSave = async () => {
       if (!bulkStoreId) return toast.error("Pilih Toko dulu!");
 
+      setIsLoading(true);
       try {
         const res = await fetch(`${API_SALES}/bulk`, {
           method: "POST",
@@ -221,6 +225,7 @@ export default function Sales() {
 
         if (!res.ok) throw new Error("Gagal proses massal");
 
+        setIsLoading(false);
         setIsBulkOpen(false);
         setBulkItems([{ product_id: "", qty: 1, selling_price: 0, product_name: "" }]);
         toast.success("Semua transaksi berhasil disimpan!");
@@ -274,6 +279,7 @@ export default function Sales() {
 
     // FUNGSI UPDATE
     handleUpdate = async () => {
+      setIsLoading(true);
       try {
         const res = await fetch(`${API_SALES}/${editingSale.id}`, {
           method: "PUT",
@@ -281,6 +287,7 @@ export default function Sales() {
           body: JSON.stringify(editingSale),
         });
         if (!res.ok) throw new Error("Gagal update");
+        setIsLoading(false);
         setIsEditOpen(false);
         toast.promise(new Promise((resolve) => setTimeout(resolve, timer)), {
           loading: "Memperbarui transaksi...",
@@ -549,7 +556,9 @@ export default function Sales() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddOpen(false)}>Batal</Button>
-            <Button onClick={handleAdd}>Simpan Transaksi</Button>
+            <Button onClick={handleAdd} disabled={isLoading}>
+              {isLoading ? <Loader2 size={16} className="animate-spin" /> : "Simpan Transaksi"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -721,7 +730,9 @@ export default function Sales() {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setIsBulkOpen(false)}>Batal</Button>
-              <Button onClick={handleBulkSave}>Simpan Semua Transaksi</Button>
+              <Button onClick={handleBulkSave} disabled={isLoading}>
+                {isLoading ? <Spinner /> : "Simpan Semua Transaksi"}
+              </Button>
             </div>
           </DialogFooter>
         </DialogContent>
@@ -745,7 +756,9 @@ export default function Sales() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>Batal</Button>
-            <Button onClick={handleUpdate}>Simpan Perubahan</Button>
+            <Button onClick={handleUpdate} disabled={isLoading}>
+              {isLoading ? <Spinner /> : "Simpan Perubahan"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

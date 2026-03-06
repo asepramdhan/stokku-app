@@ -11,7 +11,8 @@ import {
   Calculator,
   FileText,
   BarChart3,
-  Download
+  Download,
+  Loader2
 } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -132,6 +133,7 @@ export default function StoreRecords() {
       due_date: formData.due_date === "" ? null : formData.due_date
     };
 
+    setIsLoading(true);
     try {
       const res = await fetch(url, {
         method,
@@ -143,6 +145,7 @@ export default function StoreRecords() {
       });
 
       if (res.ok) {
+        setIsLoading(false);
         setIsAddModalOpen(false);
         fetchRecords(); // Refresh data & kartu stats
         // alert(isEdit ? "Data berhasil diubah!" : "Data berhasil ditambah!");
@@ -160,6 +163,7 @@ export default function StoreRecords() {
   // FUNGSI TAMBAH BELANJA
   const handleAddSpending = async () => {
     if (!selectedRecord || !spendAmount) return;
+    setIsLoading(true);
     try {
       const res = await fetch(`${API_RECORDS}/${selectedRecord.id}/add-spending`, {
         method: "PATCH",
@@ -174,6 +178,7 @@ export default function StoreRecords() {
       });
 
       if (res.ok) {
+        setIsLoading(false);
         setIsSpendModalOpen(false);
         setSpendAmount("");
         setSpendNote("");
@@ -208,6 +213,7 @@ export default function StoreRecords() {
     // const targetUrl = `${API_RECORDS}/${selectedRecord.id}/pay`;
     // console.log("Menghubungi URL:", targetUrl); // LIHAT DI KONSOL F12
 
+    setIsLoading(true);
     try {
       console.log("Mencoba membayar untuk ID:", selectedRecord.id); // Debugging
 
@@ -224,6 +230,7 @@ export default function StoreRecords() {
       const resData = await res.json();
 
       if (res.ok) {
+        setIsLoading(false);
         setIsPayModalOpen(false);
         setPayAmount("");
         fetchRecords(); // Refresh tabel dan kartu stats
@@ -595,7 +602,9 @@ export default function StoreRecords() {
             <DialogFooter>
               <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full dark:bg-slate-700 dark:border-slate-600 dark:text-slate-400 dark:hover:bg-slate-600 dark:hover:text-slate-300">
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {selectedRecord ? "Simpan Perubahan" : "Simpan Catatan"}
               </Button>
             </DialogFooter>
@@ -645,7 +654,9 @@ export default function StoreRecords() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleAddSpending} className="w-full bg-orange-600 hover:bg-orange-700">Simpan Belanja</Button>
+            <Button onClick={handleAddSpending} disabled={isLoading} className="w-full bg-orange-600 hover:bg-orange-700">
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Simpan Belanja"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -679,8 +690,9 @@ export default function StoreRecords() {
           </div>
           <DialogFooter>
             <Button onClick={handlePayment}
+              disabled={isLoading}
               className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600">
-              Konfirmasi Bayar
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Konfirmasi Bayar"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -884,8 +896,9 @@ export default function StoreRecords() {
                 setCalcTotal(0);
                 toast.success("Data belanja berhasil dipindahkan!");
               }}
+              disabled={isLoading}
             >
-              Terapkan ke Modal
+              {isLoading ? <Loader2 className="animate-spin" size={16} /> : "Terapkan ke Modal"}
             </Button>
             <Button variant="ghost" className="w-full dark:text-slate-400 dark:hover:bg-slate-700" onClick={() => setIsCalcOpen(false)}>
               Batal

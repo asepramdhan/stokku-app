@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Building2, Calculator, Copy, Edit2, Filter, Globe, Plus, Search, Store, Trash2, X } from "lucide-react";
+import { Building2, Calculator, Copy, Edit2, Filter, Globe, Loader2, Plus, Search, Store, Trash2, X } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
@@ -114,6 +114,7 @@ export default function Stores() {
         return;
       }
 
+      setIsLoading(true);
       try {
         const res = await fetch(API_URL, {
           method: "POST",
@@ -126,6 +127,7 @@ export default function Stores() {
           throw new Error(errorData.error || "Terjadi kesalahan saat menambahkan toko.");
         }
 
+        setIsLoading(false);
         setIsAddOpen(false);
         setNewStore({ name: "", platform: "", admin_fee: 0, extra_promo_fee: 0, handling_fee: 1250 });
         setErrors({}); // Bersihkan error
@@ -166,6 +168,7 @@ export default function Stores() {
         return;
       }
 
+      setIsLoading(true);
       try {
         const res = await fetch(`${API_URL}/${editingStore.id}`, {
           method: "PUT",
@@ -178,6 +181,7 @@ export default function Stores() {
           throw new Error(errorData.error || "Terjadi kesalahan saat mengubah toko.");
         }
 
+        setIsLoading(false);
         setIsEditOpen(false);
         setErrors({});
         toast.promise<{ name: string }>(
@@ -572,7 +576,9 @@ export default function Stores() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddOpen(false)}>Batal</Button>
-            <Button onClick={handleAdd}>Simpan Toko</Button>
+            <Button onClick={handleAdd} disabled={isLoading}>
+              {isLoading ? <Loader2 className="mr-2 animate-spin" /> : "Simpan Toko"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -729,7 +735,9 @@ export default function Stores() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>Batal</Button>
-            <Button onClick={handleUpdate}>Simpan Perubahan</Button>
+            <Button onClick={handleUpdate} disabled={isLoading}>
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Simpan Perubahan"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

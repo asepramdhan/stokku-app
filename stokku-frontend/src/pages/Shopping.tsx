@@ -26,6 +26,7 @@ export default function Shopping() {
     [filterCategory, setFilterCategory] = useState(localStorage.getItem("shop_category") || "All"),
     [filterPayment, setFilterPayment] = useState(localStorage.getItem("shop_payment") || "All"),
     [isLoading, setIsLoading] = useState(true),
+    [isSubmitting, setIsSubmitting] = useState(false),
     [isAddOpen, setIsAddOpen] = useState(false),
     [newOrder, setNewOrder] = useState({ product_id: "", qty: 1, buy_price: 0, payment_type: "cash" }),
     [isEditOpen, setIsEditOpen] = useState(false),
@@ -181,6 +182,7 @@ export default function Shopping() {
     // HANDLE ADD
     handleAdd = async () => {
       if (!newOrder.product_id) return setErrors({ product: "Cari dan Pilih produk dulu!" });
+      setIsSubmitting(true);
       try {
         const res = await fetch(API_SHOPPING, {
           method: "POST",
@@ -195,6 +197,7 @@ export default function Shopping() {
           return;
         }
 
+        setIsSubmitting(false);
         setIsAddOpen(false);
         setErrors({}); // Bersihkan error
         toast.promise<{ name: string }>(
@@ -218,6 +221,7 @@ export default function Shopping() {
 
     // HANDLE UPDATE
     handleUpdate = async () => {
+      setIsSubmitting(true);
       try {
         const res = await fetch(`${API_SHOPPING}/${editingOrder.id}`, {
           method: "PUT",
@@ -234,6 +238,7 @@ export default function Shopping() {
 
         if (!res.ok) throw new Error("Gagal update");
 
+        setIsSubmitting(false);
         setIsEditOpen(false);
         toast.promise<{ name: string }>(
           () =>
@@ -309,6 +314,7 @@ export default function Shopping() {
           return;
         }
 
+        setIsSubmitting(true);
         toast.promise<{ name: string }>(
           () =>
             new Promise((resolve) =>
@@ -318,6 +324,7 @@ export default function Shopping() {
             loading: "Mengupdate rencana belanja...",
             success: (data) => {
               return (
+                setIsSubmitting(false),
                 fetchData(),
                 `Produk ID ${data.name} berhasil diupdate!`
               );
@@ -350,6 +357,7 @@ export default function Shopping() {
     handleBulkComplete = async () => {
       if (selectedIds.length === 0) return;
 
+      setIsSubmitting(true);
       toast.promise(
         fetch(`${API_SHOPPING}/complete-bulk`, {
           method: "POST",
@@ -369,6 +377,7 @@ export default function Shopping() {
         {
           loading: `Memproses ${selectedIds.length} barang...`,
           success: () => {
+            setIsSubmitting(false);
             fetchData();
             setSelectedIds([]);
             return "Semua barang berhasil masuk gudang!";
@@ -532,8 +541,9 @@ export default function Shopping() {
             size="sm"
             className="bg-green-500 hover:bg-green-600 h-8 font-bold dark:bg-green-600 dark:hover:bg-green-700"
             onClick={handleBulkComplete}
+            disabled={isSubmitting}
           >
-            Terima Semua
+            {isSubmitting ? "Memproses..." : "Terima Semua"}
           </Button>
           <Button
             variant="ghost"
@@ -648,8 +658,9 @@ export default function Shopping() {
                               size="sm"
                               className="bg-blue-600 hover:bg-blue-700 h-8 px-3 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
                               onClick={() => handleComplete(item.id)}
+                              disabled={isSubmitting}
                             >
-                              Terima
+                              {isSubmitting ? <Loader2 className="animate-spin" /> : "Terima"}
                             </Button>
                             <Button
                               variant="ghost"
@@ -849,7 +860,9 @@ export default function Shopping() {
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setIsAddOpen(false)} className="dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-700 dark:bg-slate-800">Batal</Button>
-            <Button onClick={handleAdd}>Simpan Rencana</Button>
+            <Button onClick={handleAdd} disabled={isSubmitting}>
+              {isSubmitting ? "Menyimpan..." : "Simpan Rencana"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -924,7 +937,9 @@ export default function Shopping() {
           )}
           <DialogFooter>
             <Button variant="ghost" onClick={() => setIsEditOpen(false)} className="dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-700 dark:bg-slate-800">Batal</Button>
-            <Button onClick={handleUpdate}>Simpan Perubahan</Button>
+            <Button onClick={handleUpdate} disabled={isSubmitting}>
+              {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

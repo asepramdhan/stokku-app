@@ -39,7 +39,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 export default function App() {
   return (
     <BrowserRouter>
-      {/* <PinGuard> */}
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
@@ -56,7 +55,6 @@ export default function App() {
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
-      {/* </PinGuard> */}
     </BrowserRouter>
   );
 }
