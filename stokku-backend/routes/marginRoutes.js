@@ -153,27 +153,23 @@ router.get("/ads-list", async (req, res) => {
 			adParams.push(store);
 		}
 
-		// Ambil Data
+		// QUERY 1: Ambil Data Paginated
 		const [ads] = await db.query(
-			`
-      SELECT a.*, st.name as store_name 
-      FROM ads a 
-      JOIN stores st ON a.store_id = st.id 
-      ${adWhere} 
-      ORDER BY a.date DESC LIMIT ? OFFSET ?`,
+			`SELECT a.*, st.name as store_name FROM ads a JOIN stores st ON a.store_id = st.id ${adWhere} ORDER BY a.date DESC LIMIT ? OFFSET ?`,
 			[...adParams, limit, offset],
 		);
 
-		// Hitung Total Data untuk Pagination
-		const [countRows] = await db.query(
-			`SELECT COUNT(*) as total FROM ads a JOIN stores st ON a.store_id = st.id ${adWhere}`,
+		// QUERY 2: Hitung Total Baris & TOTAL NOMINAL (SUM)
+		const [stats] = await db.query(
+			`SELECT COUNT(*) as total, SUM(a.amount) as totalAmount FROM ads a JOIN stores st ON a.store_id = st.id ${adWhere}`,
 			adParams,
 		);
 
 		res.json({
 			list: ads,
-			totalPages: Math.ceil(countRows[0].total / limit),
-			totalData: countRows[0].total,
+			totalPages: Math.ceil(stats[0].total / limit),
+			totalData: stats[0].total,
+			totalAmount: stats[0].totalAmount || 0, // <--- Kirim ini ke Frontend
 		});
 	} catch (err) {
 		res.status(500).json({ error: err.message });

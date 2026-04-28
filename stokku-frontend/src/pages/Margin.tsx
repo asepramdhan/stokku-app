@@ -37,7 +37,8 @@ export default function Margin() {
     [isEditOpen, setIsEditOpen] = useState(false),
     [editingAd, setEditingAd] = useState<any>(null),
     [adPage, setAdPage] = useState(Number(localStorage.getItem("mg_ad_page")) || 1),
-    [adPagination, setAdPagination] = useState({ totalPages: 1, totalData: 0 });
+    [adPagination, setAdPagination] = useState({ totalPages: 1, totalData: 0 }),
+    [totalAllAds, setTotalAllAds] = useState(0);
 
   // Re-fetch data jika range tanggal berubah
   useEffect(() => { fetchMargin(); }, [page, range, search, filterStore]);
@@ -99,6 +100,8 @@ export default function Margin() {
         const resData = await res.json();
         setAdsList(resData.list || []);
         setAdPagination({ totalPages: resData.totalPages, totalData: resData.totalData });
+        // Gunakan fungsi yang Anda minta:
+        setTotalAllAds(resData.totalAmount);
       } catch (e) { console.error(e); }
     },
 
@@ -476,10 +479,23 @@ export default function Margin() {
           <h3 className="text-lg font-bold flex items-center gap-2">
             <TrendingUp size={18} className="text-orange-500" /> Riwayat Iklan Terakhir
           </h3>
-          {/* Info tambahan biar user gak bingung */}
-          <span className="text-[10px] text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">
-            Menampilkan {adsList.length} data terbaru
-          </span>
+          <div className="flex gap-2">
+            {/* Info tambahan biar user gak bingung */}
+            <span className="text-[10px] text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">
+              Menampilkan {adsList.length} data terbaru
+            </span>
+            {/* Info tambahan lain menampilkan total biaya keseluruhan berdasarkan filter */}
+            <span className="text-[10px] text-orange-600 bg-orange-50 dark:bg-slate-700 dark:text-orange-400 px-2 py-1 rounded font-bold border border-orange-100 dark:border-slate-600">
+              Total Biaya Iklan / Lainnya :
+              <span className="ml-1 font-bold dark:text-white">
+                {Number(totalAllAds).toLocaleString('id-ID', {
+                  style: 'currency',
+                  currency: 'IDR',
+                  maximumFractionDigits: 0
+                })}
+              </span>
+            </span>
+          </div>
         </div>
 
         <div className="bg-white border rounded-lg shadow-sm dark:bg-slate-800 dark:border-slate-700">
