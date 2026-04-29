@@ -77,13 +77,21 @@ router.get("/", async (req, res) => {
 		);
 		const totalAds = adStats[0].total_ads || 0;
 
-		// --- 4. HITUNG STATS SALES ---
+		// --- 4. HITUNG STATS SALES (Update query ini) ---
 		const [stats] = await db.query(
-			`SELECT SUM(s.total_price) as total_revenue, SUM(s.total_price - (s.qty * i.avg_cost) - ((s.total_price * st.admin_fee / 100) + (s.total_price * st.extra_promo_fee / 100) + st.handling_fee)) as total_net_profit FROM sales s JOIN inventory i ON s.product_id = i.id JOIN stores st ON s.store_id = st.id ${whereClause}`,
+			`SELECT 
+				SUM(s.total_price) as total_revenue, 
+				SUM(s.qty * i.avg_cost) as total_cogs, -- Tambahkan ini untuk Modal Produk
+				SUM(s.total_price - (s.qty * i.avg_cost) - ((s.total_price * st.admin_fee / 100) + (s.total_price * st.extra_promo_fee / 100) + st.handling_fee)) as total_net_profit 
+			FROM sales s 
+			JOIN inventory i ON s.product_id = i.id 
+			JOIN stores st ON s.store_id = st.id 
+			${whereClause}`,
 			params,
 		);
 
 		const revenue = stats[0].total_revenue || 0;
+		const totalCogs = stats[0].total_cogs || 0; // Ambil nilai modal produk
 		// VARIABEL INI YANG PENTING: Profit Sales dikurangi Iklan
 		const netProfit = (stats[0].total_net_profit || 0) - totalAds;
 		// ============================================================
@@ -114,6 +122,7 @@ router.get("/", async (req, res) => {
 			topProducts: topProducts,
 			stats: {
 				totalRevenue: revenue,
+				totalCost: totalCogs, // <--- Masukkan ke dalam response stats
 				totalNetProfit: netProfit,
 				avgMargin: revenue > 0 ? (netProfit / revenue) * 100 : 0,
 			},

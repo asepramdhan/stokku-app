@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, Wallet, Receipt, Search, X, Info, Filter, Calendar, Pencil } from "lucide-react";
+import { TrendingUp, Wallet, Receipt, Search, X, Info, Filter, Calendar, Pencil, Banknote } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,7 +27,7 @@ export default function Margin() {
     [filterStore, setFilterStore] = useState(localStorage.getItem("mg_store") || "All"),
     [page, setPage] = useState(Number(localStorage.getItem("mg_page")) || 1),
     [pagination, setPagination] = useState<any>({ totalPages: 1, totalData: 0 }),
-    [globalStats, setGlobalStats] = useState({ totalRevenue: 0, totalNetProfit: 0, avgMargin: 0 }),
+    [globalStats, setGlobalStats] = useState({ totalRevenue: 0, totalNetProfit: 0, avgMargin: 0, totalCost: 0 }),
     [topProducts, setTopProducts] = useState<any[]>([]),
     [isLoading, setIsLoading] = useState(true),
     [isAdOpen, setIsAdOpen] = useState(false),
@@ -197,7 +197,7 @@ export default function Margin() {
                 variant="outline"
                 className="w-full md:w-auto gap-2 border-dashed border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-700"
               >
-                <TrendingUp size={16} /> Input Biaya Iklan
+                <TrendingUp size={16} /> Input Biaya Iklan / Lainnya
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md dark:bg-slate-800 dark:border-slate-700">
@@ -218,10 +218,6 @@ export default function Margin() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase text-slate-500">Nominal (Rp)</label>
-                    <Input type="number" value={newAd.amount} onChange={(e) => setNewAd({ ...newAd, amount: e.target.value })} placeholder="0" className="dark:bg-slate-700" />
-                  </div>
-                  <div className="space-y-1">
                     <label className="text-[10px] font-bold uppercase text-slate-500">Tanggal</label>
                     <Input
                       type="date"
@@ -229,6 +225,10 @@ export default function Margin() {
                       onChange={(e) => setNewAd({ ...newAd, date: e.target.value })}
                       className="w-full block text-left dark:bg-slate-700 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:dark:invert"
                     />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase text-slate-500">Nominal (Rp)</label>
+                    <Input type="number" value={newAd.amount} onChange={(e) => setNewAd({ ...newAd, amount: e.target.value })} placeholder="0" className="dark:bg-slate-700" />
                   </div>
                 </div>
                 <div className="space-y-1">
@@ -258,29 +258,75 @@ export default function Margin() {
       </div>
 
       {/* STATS CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="border-l-4 border-l-blue-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-full dark:bg-slate-700"><Receipt size={20} /></div>
+            <div className="p-2 bg-blue-100 text-blue-600 rounded-full dark:bg-slate-700">
+              <Receipt size={20} />
+            </div>
             <div>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Omset (Bruto)</p>
-              <h3 className="text-xl font-bold">Rp {Number(globalStats.totalRevenue).toLocaleString()}</h3>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className={`border-l-4 shadow-sm transition-all duration-300 dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0 ${globalStats.totalNetProfit < 0 ? 'border-l-red-500 dark:border-l-red-600' : 'border-l-green-500 dark:border-l-green-600'}`}>
-          <CardContent className="flex items-center gap-4 pt-6">
-            <div className={`p-2 rounded-full transition-colors ${globalStats.totalNetProfit < 0 ? 'bg-red-100 text-red-600 dark:bg-slate-700' : 'bg-green-100 text-green-600 dark:bg-slate-700'}`}>
-              <Wallet size={20} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Profit Bersih (Netto)</p>
-              <h3 className={`text-xl font-bold ${globalStats.totalNetProfit < 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-                Rp {Number(globalStats.totalNetProfit).toLocaleString()}
+              <h3 className="text-xl font-bold">
+                {Number(globalStats.totalRevenue).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}
               </h3>
             </div>
           </CardContent>
         </Card>
+
+        {/* FIXED: Modal Produk */}
+        <Card className="border-l-4 border-l-orange-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
+          <CardContent className="flex items-center gap-4 pt-6">
+            <div className="p-2 bg-orange-100 text-orange-600 rounded-full dark:bg-slate-700">
+              <Banknote size={20} /> {/* Menggunakan Receipt karena ReceiptCent sering tidak tersedia di versi standar */}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Modal Produk</p>
+              <h3 className="text-xl font-bold">
+                {Number(globalStats.totalCost || 0).toLocaleString('id-ID', {
+                  style: 'currency',
+                  currency: 'IDR',
+                  maximumFractionDigits: 0
+                })}
+              </h3>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        {/* Card Total Biaya Iklan (Sesuai yang sudah jalan di kode Anda) */}
+        <Card className="border-l-4 border-l-slate-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
+          <CardContent className="flex items-center gap-4 pt-6">
+            <div className="p-2 bg-slate-100 text-slate-600 rounded-full dark:bg-slate-700"><Receipt size={20} /></div>
+            <div>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Biaya Iklan / Lainnya</p>
+              <h3 className="text-xl font-bold">
+                {Number(totalAllAds).toLocaleString('id-ID', {
+                  style: 'currency',
+                  currency: 'IDR',
+                  maximumFractionDigits: 0
+                })}
+              </h3>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Card Profit Bersih */}
+        <Card className={`border-l-4 shadow-sm transition-all duration-300 dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0 ${globalStats.totalNetProfit < 0 ? 'border-l-red-500' : 'border-l-green-500'}`}>
+          <CardContent className="flex items-center gap-4 pt-6">
+            <div className={`p-2 rounded-full ${globalStats.totalNetProfit < 0 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'} dark:bg-slate-700`}>
+              <Wallet size={20} />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Profit Bersih (Netto)</p>
+              <h3 className={`text-xl font-bold ${globalStats.totalNetProfit < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                {Number(globalStats.totalNetProfit).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}
+              </h3>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Card Persentase */}
         <Card className="border-l-4 border-l-purple-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
           <CardContent className="flex items-center gap-4 pt-6">
             <div className="p-2 bg-purple-100 text-purple-600 rounded-full dark:bg-slate-700"><TrendingUp size={20} /></div>
