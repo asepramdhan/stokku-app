@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, Wallet, Receipt, Search, X, Info, Filter, Calendar, Pencil, Banknote } from "lucide-react";
+import { TrendingUp, Wallet, Receipt, Search, X, Info, Filter, Calendar, Pencil, Banknote, TrendingDown } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
@@ -258,7 +258,7 @@ export default function Margin() {
       </div>
 
       {/* STATS CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="border-l-4 border-l-blue-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
           <CardContent className="flex items-center gap-4 pt-6">
             <div className="p-2 bg-blue-100 text-blue-600 rounded-full dark:bg-slate-700">
@@ -268,44 +268,6 @@ export default function Margin() {
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Omset (Bruto)</p>
               <h3 className="text-xl font-bold">
                 {Number(globalStats.totalRevenue).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}
-              </h3>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* FIXED: Modal Produk */}
-        <Card className="border-l-4 border-l-orange-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
-          <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-orange-100 text-orange-600 rounded-full dark:bg-slate-700">
-              <Banknote size={20} /> {/* Menggunakan Receipt karena ReceiptCent sering tidak tersedia di versi standar */}
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Modal Produk</p>
-              <h3 className="text-xl font-bold">
-                {Number(globalStats.totalCost || 0).toLocaleString('id-ID', {
-                  style: 'currency',
-                  currency: 'IDR',
-                  maximumFractionDigits: 0
-                })}
-              </h3>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-        {/* Card Total Biaya Iklan (Sesuai yang sudah jalan di kode Anda) */}
-        <Card className="border-l-4 border-l-slate-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
-          <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-slate-100 text-slate-600 rounded-full dark:bg-slate-700"><Receipt size={20} /></div>
-            <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Biaya Iklan / Lainnya</p>
-              <h3 className="text-xl font-bold">
-                {Number(totalAllAds).toLocaleString('id-ID', {
-                  style: 'currency',
-                  currency: 'IDR',
-                  maximumFractionDigits: 0
-                })}
               </h3>
             </div>
           </CardContent>
@@ -329,10 +291,59 @@ export default function Margin() {
         {/* Card Persentase */}
         <Card className="border-l-4 border-l-purple-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="p-2 bg-purple-100 text-purple-600 rounded-full dark:bg-slate-700"><TrendingUp size={20} /></div>
+            <div className={`p-2 bg-purple-100 rounded-full dark:bg-slate-700 ${globalStats.avgMargin < 0 ? 'text-red-600' : 'text-purple-600'}`}>
+              {globalStats.avgMargin < 0 ? <TrendingDown size={20} /> : <TrendingUp size={20} />}
+            </div>
             <div>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Persentase Margin</p>
-              <h3 className="text-xl font-bold">{globalStats.avgMargin.toFixed(1)}%</h3>
+              <h3 className={`text-xl font-bold ${globalStats.avgMargin < 0 ? 'text-red-600' : 'text-green-600'}`}>{globalStats.avgMargin.toFixed(1)}%</h3>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        {/* FIXED: Modal Produk */}
+        <Card className="border-l-4 border-l-orange-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
+          <CardContent className="flex items-center gap-4 pt-6">
+            <div className="p-2 bg-orange-100 text-orange-600 rounded-full dark:bg-slate-700"><Banknote size={20} /></div>
+            <div>
+              {/* Teks label berubah sesuai filter toko yang dipilih */}
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                {filterStore === "All" ? "Total Modal (Semua Toko)" : `Tagihan Produsen: ${filterStore}`}
+              </p>
+              <h3 className="text-xl font-bold text-orange-700 dark:text-orange-400">
+                {Number(globalStats.totalCost || 0).toLocaleString('id-ID', {
+                  style: 'currency',
+                  currency: 'IDR',
+                  maximumFractionDigits: 0
+                })}
+              </h3>
+              {/* Tambahan info kecil untuk mengingatkan range waktu */}
+              <p className="text-[10px] text-slate-400 italic">
+                Periode: {range === 'week' ? 'Minggu Ini' : range === 'month' ? 'Bulan Ini' : 'Sesuai Filter'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Card Total Biaya Iklan (Sesuai yang sudah jalan di kode Anda) */}
+        <Card className="border-l-4 border-l-slate-500 shadow-sm dark:bg-slate-800 dark:border-t-0 dark:border-r-0 dark:border-b-0">
+          <CardContent className="flex items-center gap-4 pt-6">
+            <div className="p-2 bg-slate-100 text-slate-600 rounded-full dark:bg-slate-700"><Receipt size={20} /></div>
+            <div>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Biaya Iklan / Lainnya</p>
+              <h3 className="text-xl font-bold">
+                {Number(totalAllAds).toLocaleString('id-ID', {
+                  style: 'currency',
+                  currency: 'IDR',
+                  maximumFractionDigits: 0
+                })}
+              </h3>
+              {/* Tambahan info kecil untuk mengingatkan range waktu */}
+              <p className="text-[10px] text-slate-400 italic">
+                Periode: {range === 'week' ? 'Minggu Ini' : range === 'month' ? 'Bulan Ini' : 'Sesuai Filter'}
+              </p>
             </div>
           </CardContent>
         </Card>
